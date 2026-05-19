@@ -6,7 +6,24 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const STORAGE_KEY = "petroagent-like-count";
+const RATE_LIMIT_KEY = "petroagent-like-activity";
 const INITIAL_COUNT = 128;
+const RATE_LIMIT_WINDOW_MS = 10_000;
+const MAX_LIKES_PER_WINDOW = 5;
+
+function getRecentLikeActivity(now: number) {
+  try {
+    const activity = JSON.parse(
+      window.localStorage.getItem(RATE_LIMIT_KEY) ?? "[]",
+    ) as number[];
+
+    return activity.filter(
+      (timestamp) => now - timestamp < RATE_LIMIT_WINDOW_MS,
+    );
+  } catch {
+    return [];
+  }
+}
 
 export function LikeButton() {
   const [count, setCount] = useState(INITIAL_COUNT);
@@ -22,6 +39,14 @@ export function LikeButton() {
   }, []);
 
   function handleClick() {
+    const now = Date.now();
+    const recentActivity = getRecentLikeActivity(now);
+
+    if (recentActivity.length >= MAX_LIKES_PER_WINDOW) {
+      setMessage("Pausa rapidinha: o apoio ja foi registrado por aqui.");
+      return;
+    }
+
     const nextCount = count + 1;
     setCount(nextCount);
     setIsPopping(true);
@@ -34,6 +59,10 @@ export function LikeButton() {
       ][nextCount % 4],
     );
     window.localStorage.setItem(STORAGE_KEY, String(nextCount));
+    window.localStorage.setItem(
+      RATE_LIMIT_KEY,
+      JSON.stringify([...recentActivity, now]),
+    );
     window.setTimeout(() => setIsPopping(false), 420);
   }
 
