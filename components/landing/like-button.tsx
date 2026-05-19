@@ -1,12 +1,13 @@
 "use client";
 
 import { Heart } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
 const STORAGE_KEY = "petroagent-like-count";
 const RATE_LIMIT_KEY = "petroagent-like-activity";
+const API_ENDPOINT = "/api/project-likes";
 const INITIAL_COUNT = 128;
 const RATE_LIMIT_WINDOW_MS = 10_000;
 const MAX_LIKES_PER_WINDOW = 5;
@@ -25,20 +26,63 @@ function getRecentLikeActivity(now: number) {
   }
 }
 
+async function fetchGlobalLikeCount() {
+  try {
+    const response = await fetch(API_ENDPOINT, {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = (await response.json()) as { count: number | null };
+    return data.count;
+  } catch {
+    return null;
+  }
+}
+
+async function registerGlobalLike() {
+  try {
+    const response = await fetch(API_ENDPOINT, {
+      method: "POST",
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = (await response.json()) as { count: number | null };
+    return data.count;
+  } catch {
+    return null;
+  }
+}
+
 export function LikeButton() {
   const [count, setCount] = useState(INITIAL_COUNT);
   const [isPopping, setIsPopping] = useState(false);
   const [message, setMessage] = useState("Mostre que voce esta acompanhando");
+  const hasInteracted = useRef(false);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
       setCount(Number(window.localStorage.getItem(STORAGE_KEY) ?? INITIAL_COUNT));
     });
 
+    void fetchGlobalLikeCount().then((globalCount) => {
+      if (typeof globalCount === "number" && !hasInteracted.current) {
+        setCount(globalCount);
+        window.localStorage.setItem(STORAGE_KEY, String(globalCount));
+      }
+    });
+
     return () => window.cancelAnimationFrame(frame);
   }, []);
 
-  function handleClick() {
+  async function handleClick() {
+    hasInteracted.current = true;
     const now = Date.now();
     const recentActivity = getRecentLikeActivity(now);
 
@@ -64,6 +108,13 @@ export function LikeButton() {
       JSON.stringify([...recentActivity, now]),
     );
     window.setTimeout(() => setIsPopping(false), 420);
+
+    const globalCount = await registerGlobalLike();
+
+    if (typeof globalCount === "number") {
+      setCount(globalCount);
+      window.localStorage.setItem(STORAGE_KEY, String(globalCount));
+    }
   }
 
   return (

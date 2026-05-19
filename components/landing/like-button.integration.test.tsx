@@ -16,6 +16,10 @@ describe("LikeButton", () => {
         store.set(key, value);
       }),
     });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => Response.json({ count: null, source: "local-fallback" })),
+    );
   });
 
   afterEach(() => {
@@ -37,6 +41,31 @@ describe("LikeButton", () => {
     expect(window.localStorage.getItem("petroagent-like-count")).toBe("129");
     expect(window.localStorage.getItem("petroagent-like-activity")).toBeTruthy();
     expect(screen.getByText(/valeu|curioso|radar|obrigado/i)).toBeInTheDocument();
+  });
+
+  it("exibe contador global quando a API de likes esta disponivel", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(Response.json({ count: 144, source: "supabase" }))
+      .mockResolvedValueOnce(Response.json({ count: 145, source: "supabase" }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<LikeButton />);
+
+    expect(await screen.findByText("144")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /gostei do projeto/i }));
+
+    expect(await screen.findByText("145")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/project-likes",
+      expect.objectContaining({ cache: "no-store" }),
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/project-likes",
+      expect.objectContaining({ method: "POST" }),
+    );
   });
 
   it("limita excesso de apoios em uma janela curta sem coletar dados pessoais", async () => {

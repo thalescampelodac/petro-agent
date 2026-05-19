@@ -116,6 +116,20 @@ O projeto esta preparado para deploy padrao de Next.js na Vercel. Configure as
 mesmas variaveis de ambiente do `.env.example` no projeto Vercel antes do build
 de producao.
 
+## Banco de dados
+
+As tabelas do PetroAgent devem ficar no schema `petroagent`, nao soltas no
+schema `public`. A primeira migration esta em
+`database/migrations/001_create_petroagent_schema_and_project_likes.sql` e cria:
+
+- schema `petroagent`
+- tabela `petroagent.project_likes`
+- RLS para insert/select publico do contador de apoio
+- grants minimos para `anon` e `authenticated`
+
+Para usar a tabela via Supabase Data API, adicione `petroagent` em Project
+Settings > Data API > Exposed schemas no projeto Supabase existente.
+
 ## Relacao com o GitHub Project
 
 O quadro oficial de gestao e o GitHub Project numero 3 do usuario
