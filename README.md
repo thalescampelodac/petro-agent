@@ -51,8 +51,8 @@ Stack inicial:
 ### MVP 1 - Portal publico inteligente
 
 1. Fase 0: fundacao tecnica, Next.js, Tailwind, shadcn/ui, Supabase e Vercel.
-2. Fase 1: landing page publica com hero, como funciona, monitoramento,
-   ultima analise e footer legal.
+2. Fase 1: landing page publica com hero, monitoramento, resumo inteligente
+   mockado, como funciona, roadmap, criador e aviso legal.
 3. Fase 2: interacao publica sem cadastro com botao de apoio e contador.
 4. Fase 3: painel `/petrobras` com dados PETR4, resumo, sentimento e timeline.
 5. Fase 4: banco de conhecimento com fontes, eventos, relatorios e snapshots.
@@ -84,6 +84,12 @@ npm run dev
 npm run lint
 npm run build
 ```
+
+## Status da landing
+
+A home atual e uma landing page estatica e responsiva para validar UX,
+branding e percepcao de produto. Ela usa dados mockados/simulados e ainda nao
+executa backend complexo, coleta real ou IA em producao.
 
 As variaveis esperadas para Supabase sao:
 
