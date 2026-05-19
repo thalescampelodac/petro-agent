@@ -82,8 +82,19 @@ Comandos principais:
 ```bash
 npm run dev
 npm run lint
+npm test
+npm run test:unit
+npm run test:integration
+npm run test:context
 npm run build
 ```
+
+Camadas de teste:
+
+- Unitarios: validam funcoes isoladas e utilitarios puros.
+- Integracao: validam componentes interativos e comportamento de UI.
+- Contexto: validam narrativa, limites de produto e mensagens essenciais da
+  experiencia publica.
 
 ## Status da landing
 
