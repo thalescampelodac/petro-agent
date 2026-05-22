@@ -60,4 +60,26 @@ describe("/api/project-likes", () => {
     });
     expect(response.status).toBe(503);
   });
+
+  it("serializa erro seguro retornado pelo Supabase", async () => {
+    vi.mocked(registerProjectLike).mockRejectedValue({
+      code: "PGRST106",
+      message: "The schema must be one of the following: public",
+      status: 406,
+    });
+
+    const response = await POST();
+
+    await expect(response.json()).resolves.toEqual({
+      count: null,
+      detail: {
+        code: "PGRST106",
+        message: "The schema must be one of the following: public",
+        status: "406",
+      },
+      reason: "supabase_unavailable",
+      source: "local-fallback",
+    });
+    expect(response.status).toBe(503);
+  });
 });
