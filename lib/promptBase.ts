@@ -10,9 +10,9 @@ Output JSON schema:
 }
 
 Rules:
-- Keep `summary` to 1-2 sentences.
-- `highlights` should be 3-6 concise bullets.
-- Include numeric `key_facts` when present and attach source URLs when available.
+- Keep 'summary' to 1-2 sentences.
+- 'highlights' should be 3-6 concise bullets.
+- Include numeric 'key_facts' when present and attach source URLs when available.
 - Do not invent facts; when uncertain, mark as "needs verification".
 - Output strictly parseable JSON using the schema above.
 `;
