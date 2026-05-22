@@ -21,6 +21,9 @@ describe("Home", () => {
     expect(screen.getByRole("heading", { name: /roadmap do projeto/i })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /um projeto aberto/i })).toBeInTheDocument();
     expect(
+      screen.getByRole("link", { name: /ver painel petrobras/i }),
+    ).toHaveAttribute("href", "/petrobras");
+    expect(
       screen.getByRole("button", { name: /gostei do projeto/i }),
     ).toHaveTextContent("Gostei do projeto");
     expect(screen.getByText("Mostre que você está acompanhando")).toBeInTheDocument();
