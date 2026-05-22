@@ -107,9 +107,12 @@ As variaveis esperadas para Supabase sao:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `PETROAGENT_COLLECTOR_TOKEN`
 
-`OPENAI_API_KEY` esta documentada apenas para uso futuro no servidor. Nao exponha
-chaves privadas com prefixo `NEXT_PUBLIC_`.
+`SUPABASE_SERVICE_ROLE_KEY`, `PETROAGENT_COLLECTOR_TOKEN` e `OPENAI_API_KEY`
+sao variaveis somente de servidor. Nao exponha chaves privadas com prefixo
+`NEXT_PUBLIC_`.
 
 ## Deploy na Vercel
 
@@ -159,6 +162,14 @@ A migration de memória de mercado cria:
 - tabela `petroagent.market_snapshots`
 - RLS com leitura pública nas tabelas do painel e `sources` restrita ao backend
 - escrita reservada ao backend com `service_role`
+
+O endpoint `POST /api/sources` registra fontes manualmente em
+`petroagent.sources`. Ele exige `Authorization: Bearer <PETROAGENT_COLLECTOR_TOKEN>`
+ou o header `x-petroagent-collector-token`.
+
+O painel `/petrobras` tenta ler primeiro os dados persistidos em
+`agent_reports`, `market_events` e `market_snapshots`. Se não houver dados ou se
+o Supabase estiver indisponível, usa fallback demonstrativo.
 
 Para usar a tabela via Supabase Data API, adicione `petroagent` em Project
 Settings > Data API > Exposed schemas no projeto Supabase existente.

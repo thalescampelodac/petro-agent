@@ -60,25 +60,42 @@ async function registerGlobalLike() {
   }
 }
 
+function getStoredLikeCount() {
+  try {
+    if (typeof window === "undefined" || !window.localStorage?.getItem) {
+      return null;
+    }
+
+    const cachedCount = window.localStorage.getItem(STORAGE_KEY);
+
+    return cachedCount ? Number(cachedCount) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function LikeButton() {
-  const [count, setCount] = useState(INITIAL_COUNT);
+  const [count, setCount] = useState<number | null>(() => {
+    return getStoredLikeCount();
+  });
   const [isPopping, setIsPopping] = useState(false);
   const [message, setMessage] = useState("Mostre que você está acompanhando");
   const hasInteracted = useRef(false);
 
   useEffect(() => {
-    const frame = window.requestAnimationFrame(() => {
-      setCount(Number(window.localStorage.getItem(STORAGE_KEY) ?? INITIAL_COUNT));
-    });
+    const cachedCount = getStoredLikeCount();
 
     void fetchGlobalLikeCount().then((globalCount) => {
       if (typeof globalCount === "number" && !hasInteracted.current) {
         setCount(globalCount);
         window.localStorage.setItem(STORAGE_KEY, String(globalCount));
+        return;
+      }
+
+      if (cachedCount === null && !hasInteracted.current) {
+        setCount(INITIAL_COUNT);
       }
     });
-
-    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   async function handleClick() {
@@ -91,7 +108,9 @@ export function LikeButton() {
       return;
     }
 
-    const nextCount = count + 1;
+    const currentCount =
+      count ?? getStoredLikeCount() ?? INITIAL_COUNT;
+    const nextCount = currentCount + 1;
     setCount(nextCount);
     setIsPopping(true);
     setMessage(
@@ -138,7 +157,7 @@ export function LikeButton() {
           Gostei do projeto
         </span>
         <span className="rounded bg-emerald-950/10 px-2 py-1 font-mono text-xs">
-          {count.toLocaleString("pt-BR")}
+          {typeof count === "number" ? count.toLocaleString("pt-BR") : "..."}
         </span>
       </button>
       <p

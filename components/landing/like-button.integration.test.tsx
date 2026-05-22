@@ -33,7 +33,7 @@ describe("LikeButton", () => {
     render(<LikeButton />);
 
     const button = screen.getByRole("button", { name: /gostei do projeto/i });
-    expect(screen.getByText("128")).toBeInTheDocument();
+    expect(await screen.findByText("128")).toBeInTheDocument();
 
     await user.click(button);
 
@@ -66,6 +66,34 @@ describe("LikeButton", () => {
       "/api/project-likes",
       expect.objectContaining({ method: "POST" }),
     );
+  });
+
+  it("mantém o contador local enquanto busca o total global", async () => {
+    vi.mocked(window.localStorage.getItem).mockImplementation((key: string) => {
+      if (key === "petroagent-like-count") {
+        return "138";
+      }
+
+      return null;
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        () =>
+          new Promise((resolve) => {
+            window.setTimeout(
+              () => resolve(Response.json({ count: 140, source: "supabase" })),
+              10,
+            );
+          }),
+      ),
+    );
+
+    render(<LikeButton />);
+
+    expect(screen.getByText("138")).toBeInTheDocument();
+    expect(screen.queryByText("128")).not.toBeInTheDocument();
+    expect(await screen.findByText("140")).toBeInTheDocument();
   });
 
   it("limita excesso de apoios em uma janela curta sem coletar dados pessoais", async () => {

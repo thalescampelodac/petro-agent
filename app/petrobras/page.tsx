@@ -11,12 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  getLatestPetrobrasReport,
-  getPetrobrasBasicData,
-  getPetrobrasPanelMetrics,
-  getPetrobrasMonitoredSignals,
-  getPetrobrasSentiment,
-  getPetrobrasTimelineEvents,
+  getPetrobrasDashboardData,
 } from "@/lib/petrobras";
 import {
   BasicDataCard,
@@ -33,13 +28,15 @@ export const metadata = {
     "Painel público demonstrativo do PetroAgent para acompanhamento informativo de Petrobras/PETR4.",
 };
 
-export default function PetrobrasPage() {
-  const basicData = getPetrobrasBasicData();
-  const report = getLatestPetrobrasReport();
-  const sentiment = getPetrobrasSentiment(report);
-  const panelMetrics = getPetrobrasPanelMetrics(basicData);
-  const monitoredSignals = getPetrobrasMonitoredSignals();
-  const timelineEvents = getPetrobrasTimelineEvents();
+export default async function PetrobrasPage() {
+  const {
+    basicData,
+    monitoredSignals,
+    panelMetrics,
+    report,
+    sentiment,
+    timelineEvents,
+  } = await getPetrobrasDashboardData();
 
   return (
     <main className="dark min-h-screen bg-[#070b10] text-foreground">
