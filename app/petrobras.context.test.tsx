@@ -10,14 +10,15 @@ describe("PetrobrasPage", () => {
     expect(
       screen.getByRole("heading", { name: /painel petrobras petr4/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/radar petrobras\/petr4/i)).toBeInTheDocument();
-    expect(screen.getByText(/mvp 1/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /voltar para home/i })).toHaveAttribute(
+      "href",
+      "/",
+    );
+    expect(screen.getByText(/dados básicos petr4/i)).toBeInTheDocument();
+    expect(screen.getByText(/resumo inteligente/i)).toBeInTheDocument();
     expect(screen.getByText(/fallback mockado/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/conteúdo simulado/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/estrutura visual preparada/i)).toBeInTheDocument();
-    expect(screen.getByText("Linha do tempo")).toBeInTheDocument();
-    expect(screen.getAllByText(/não constitui recomendação/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/mock/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/linha do tempo/i)).toBeInTheDocument();
+    expect(screen.getByText(/aviso informativo/i)).toBeInTheDocument();
   });
 
   it("declara metadados públicos da rota", () => {

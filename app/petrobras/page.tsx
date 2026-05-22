@@ -1,19 +1,5 @@
-import {
-  Activity,
-  ArrowLeft,
-  BadgeDollarSign,
-  BarChart3,
-  CalendarClock,
-  DatabaseZap,
-  FileText,
-  Newspaper,
-  Radar,
-  ShieldAlert,
-  Sparkles,
-  TrendingUp,
-} from "lucide-react";
+import { ArrowLeft, BarChart3, Radar, ShieldAlert } from "lucide-react";
 import Link from "next/link";
-import type { ComponentType } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -24,82 +10,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-
-const panelMetrics = [
-  {
-    label: "Ativo monitorado",
-    value: "PETR4",
-    detail: "Petrobras PN",
-    icon: TrendingUp,
-  },
-  {
-    label: "Origem dos dados",
-    value: "Mock",
-    detail: "Fallback demonstrativo",
-    icon: DatabaseZap,
-  },
-  {
-    label: "Status do radar",
-    value: "Preparado",
-    detail: "Aguardando dados reais",
-    icon: Radar,
-  },
-  {
-    label: "Última atualização",
-    value: "19/05",
-    detail: "Conteúdo simulado",
-    icon: CalendarClock,
-  },
-];
-
-const monitoredSignals = [
-  {
-    title: "Dividendos",
-    description: "Agenda de proventos, comunicados e contexto histórico.",
-    status: "Em observação",
-    icon: BadgeDollarSign,
-  },
-  {
-    title: "Fatos relevantes",
-    description: "Eventos corporativos publicados por canais oficiais.",
-    status: "Sem alerta crítico",
-    icon: FileText,
-  },
-  {
-    title: "Notícias públicas",
-    description: "Leitura contextual de notícias setoriais e institucionais.",
-    status: "Aguardando fonte",
-    icon: Newspaper,
-  },
-  {
-    title: "Sentimento",
-    description: "Classificação textual cautelosa, sem recomendação.",
-    status: "Neutro",
-    icon: Activity,
-  },
-];
-
-const timelineEvents = [
-  {
-    date: "19/05/2026",
-    title: "Radar inicial preparado",
-    type: "Sistema",
-    source: "Mock interno",
-  },
-  {
-    date: "18/05/2026",
-    title: "Monitoramento de dividendos em destaque",
-    type: "Dividendos",
-    source: "Fallback",
-  },
-  {
-    date: "17/05/2026",
-    title: "Sem fato relevante crítico no painel demonstrativo",
-    type: "RI",
-    source: "Mock interno",
-  },
-];
+import {
+  getLatestPetrobrasReport,
+  getPetrobrasBasicData,
+  getPetrobrasPanelMetrics,
+  getPetrobrasMonitoredSignals,
+  getPetrobrasTimelineEvents,
+} from "@/lib/petrobras";
+import {
+  BasicDataCard,
+  MetricCard,
+  SignalCard,
+  SummaryCard,
+} from "@/app/petrobras/components";
 
 export const metadata = {
   title: "Painel Petrobras | PetroAgent",
@@ -108,6 +31,12 @@ export const metadata = {
 };
 
 export default function PetrobrasPage() {
+  const basicData = getPetrobrasBasicData();
+  const report = getLatestPetrobrasReport();
+  const panelMetrics = getPetrobrasPanelMetrics(basicData);
+  const monitoredSignals = getPetrobrasMonitoredSignals();
+  const timelineEvents = getPetrobrasTimelineEvents();
+
   return (
     <main className="dark min-h-screen bg-[#070b10] text-foreground">
       <section className="border-b border-white/10 bg-[radial-gradient(circle_at_80%_0%,rgba(16,185,129,0.18),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.045),transparent)]">
@@ -189,51 +118,9 @@ export default function PetrobrasPage() {
             ))}
           </div>
 
-          <Card className="overflow-hidden border-white/10 bg-white/[0.035] shadow-none">
-            <CardHeader className="border-b border-white/10">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <CardTitle className="text-white">Resumo inteligente</CardTitle>
-                  <CardDescription className="mt-1 text-slate-400">
-                    Conteúdo simulado para validar a experiência do painel.
-                  </CardDescription>
-                </div>
-                <Badge variant="outline" className="w-fit border-white/15">
-                  Fallback mockado
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-5 p-5">
-              <div className="rounded-lg border border-emerald-300/15 bg-emerald-300/[0.055] p-4">
-                <div className="flex items-center gap-2 text-sm font-medium text-emerald-100">
-                  <Sparkles className="size-4" />
-                  Leitura do agente
-                </div>
-                <p className="mt-3 max-w-3xl text-base leading-8 text-slate-200">
-                  PETR4 permanece no radar por combinação de discussões sobre
-                  dividendos, dinâmica do setor de energia e comunicados
-                  corporativos. A leitura atual é neutra e orientada a
-                  acompanhamento, sem sugestão de operação.
-                </p>
-              </div>
+          <BasicDataCard data={basicData} />
 
-              <div className="grid gap-3 md:grid-cols-3">
-                {[
-                  ["Sentimento", "Neutro"],
-                  ["Nível de atenção", "Moderado"],
-                  ["Confiança do dado", "Mock"],
-                ].map(([label, value]) => (
-                  <div
-                    className="rounded-lg border border-white/10 bg-black/20 p-4"
-                    key={label}
-                  >
-                    <p className="text-xs text-slate-500">{label}</p>
-                    <p className="mt-2 font-mono text-lg text-white">{value}</p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <SummaryCard report={report} />
 
           <Card className="border-white/10 bg-white/[0.035] shadow-none">
             <CardHeader>
@@ -308,73 +195,5 @@ export default function PetrobrasPage() {
         </aside>
       </section>
     </main>
-  );
-}
-
-function MetricCard({
-  label,
-  value,
-  detail,
-  icon: Icon,
-}: {
-  label: string;
-  value: string;
-  detail: string;
-  icon: ComponentType<{ className?: string }>;
-}) {
-  return (
-    <Card className="border-white/10 bg-white/[0.035] shadow-none">
-      <CardHeader className="space-y-4 p-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-emerald-300/12">
-            <Icon className="size-4 text-emerald-200" />
-          </div>
-          <span className="text-xs text-slate-500">{label}</span>
-        </div>
-        <div>
-          <CardTitle className="font-mono text-2xl text-white">{value}</CardTitle>
-          <CardDescription className="mt-1 text-slate-400">
-            {detail}
-          </CardDescription>
-        </div>
-      </CardHeader>
-    </Card>
-  );
-}
-
-function SignalCard({
-  title,
-  description,
-  status,
-  icon: Icon,
-}: {
-  title: string;
-  description: string;
-  status: string;
-  icon: ComponentType<{ className?: string }>;
-}) {
-  return (
-    <div className="rounded-lg border border-white/10 bg-black/20 p-4">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-start gap-3">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.06]">
-            <Icon className="size-4 text-emerald-200" />
-          </div>
-          <div>
-            <h2 className="text-sm font-semibold text-white">{title}</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-400">{description}</p>
-          </div>
-        </div>
-        <Badge
-          className={cn(
-            "shrink-0 border-white/10 bg-white/[0.04] text-xs text-slate-200",
-            status === "Neutro" && "border-sky-300/20 bg-sky-300/10 text-sky-100",
-          )}
-          variant="outline"
-        >
-          {status}
-        </Badge>
-      </div>
-    </div>
   );
 }
