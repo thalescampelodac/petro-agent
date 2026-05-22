@@ -85,3 +85,36 @@ Para `market_events`, `agent_reports` e `market_snapshots`, `anon` e
 público. A tabela `sources` fica restrita ao backend. Escritas ficam reservadas
 ao backend futuro com `service_role`, usado pelas fases de coleta e geração de
 relatórios.
+
+## Coletor manual
+
+O endpoint `POST /api/sources` permite registrar fontes públicas manualmente sem
+criar um painel administrativo completo.
+
+Campos aceitos:
+
+- `sourceType`: tipo da fonte.
+- `title`: título opcional.
+- `url`: URL opcional.
+- `publishedAt`: data de publicação opcional.
+- `rawContent`: conteúdo bruto obrigatório.
+
+Autenticação:
+
+- `Authorization: Bearer <PETROAGENT_COLLECTOR_TOKEN>`
+- ou `x-petroagent-collector-token: <PETROAGENT_COLLECTOR_TOKEN>`
+
+O endpoint usa `SUPABASE_SERVICE_ROLE_KEY` somente no servidor para inserir na
+tabela `petroagent.sources`.
+
+## Cache do painel
+
+O painel Petrobras consulta primeiro dados persistidos nas tabelas:
+
+- `petroagent.agent_reports`
+- `petroagent.market_events`
+- `petroagent.market_snapshots`
+
+As consultas possuem cache simples em memória por 60 segundos. Se não houver
+dados ou se o Supabase estiver indisponível, o painel mantém fallback
+demonstrativo e transparente.

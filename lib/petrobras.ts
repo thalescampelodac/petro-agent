@@ -10,6 +10,8 @@ import {
   TrendingUp,
 } from "lucide-react";
 
+import { getCachedPetrobrasData } from "@/services/petrobras-cache";
+
 export type PetrobrasBasicData = {
   ticker: string;
   company: string;
@@ -55,6 +57,15 @@ export type PetrobrasSentiment = {
   confidence: "Fallback" | "Baixa" | "Media" | "Alta";
   basis: string;
   source: string;
+};
+
+export type PetrobrasDashboardData = {
+  basicData: PetrobrasBasicData;
+  monitoredSignals: PetrobrasSignal[];
+  panelMetrics: PetrobrasPanelMetric[];
+  report: PetrobrasReport | null;
+  sentiment: PetrobrasSentiment;
+  timelineEvents: PetrobrasTimelineEvent[];
 };
 
 const BASIC_DATA: PetrobrasBasicData = {
@@ -167,6 +178,36 @@ export function getPetrobrasTimelineEvents(): PetrobrasTimelineEvent[] {
   ]);
 }
 
+export async function getPetrobrasDashboardData(): Promise<PetrobrasDashboardData> {
+  const cachedData = await getCachedPetrobrasData();
+  const basicData = cachedData.snapshot
+    ? mapMarketSnapshotToBasicData(cachedData.snapshot)
+    : getPetrobrasBasicData();
+  const report = cachedData.report
+    ? mapAgentReportToPetrobrasReport(cachedData.report)
+    : getLatestPetrobrasReport();
+  const timelineEvents =
+    cachedData.events.length > 0
+      ? sortPetrobrasTimelineEvents(
+          cachedData.events.map((event) => ({
+            date: formatDate(event.event_date ?? event.created_at),
+            source: event.source_id ? `Fonte #${event.source_id}` : "Banco de dados",
+            title: event.title,
+            type: event.event_type,
+          })),
+        )
+      : getPetrobrasTimelineEvents();
+
+  return {
+    basicData,
+    monitoredSignals: getPetrobrasMonitoredSignals(),
+    panelMetrics: getPetrobrasPanelMetrics(basicData),
+    report,
+    sentiment: getPetrobrasSentiment(report),
+    timelineEvents,
+  };
+}
+
 export function getPetrobrasSentiment(
   report: PetrobrasReport | null,
 ): PetrobrasSentiment {
@@ -192,4 +233,66 @@ function parseBrazilianDate(date: string) {
   const [day, month, year] = date.split("/").map(Number);
 
   return new Date(year, month - 1, day).getTime();
+}
+
+function mapAgentReportToPetrobrasReport(report: {
+  created_at: string;
+  model_used: string | null;
+  summary: string;
+  title: string;
+}): PetrobrasReport {
+  return {
+    generatedAt: formatDateTime(report.created_at),
+    source: report.model_used ? `Banco de dados · ${report.model_used}` : "Banco de dados",
+    status: "Saved",
+    summary: report.summary,
+  };
+}
+
+function mapMarketSnapshotToBasicData(snapshot: {
+  price: number | null;
+  snapshot_time: string | null;
+  source: string | null;
+  ticker: string;
+  variation: number | null;
+  volume: number | null;
+}): PetrobrasBasicData {
+  const variation = snapshot.variation ?? 0;
+
+  return {
+    change: `${variation > 0 ? "+" : ""}${variation.toLocaleString("pt-BR")}%`,
+    company: "Petrobras PN",
+    lastPrice:
+      typeof snapshot.price === "number"
+        ? snapshot.price.toLocaleString("pt-BR", {
+            currency: "BRL",
+            style: "currency",
+          })
+        : "Preço indisponível",
+    note: "Dado persistido em cache no banco",
+    origin: snapshot.source ?? "Banco de dados",
+    source: "Cache",
+    ticker: snapshot.ticker,
+    updatedAt: snapshot.snapshot_time
+      ? formatDateTime(snapshot.snapshot_time)
+      : "Horário indisponível",
+  };
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(new Date(value));
 }

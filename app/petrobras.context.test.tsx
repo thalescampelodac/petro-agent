@@ -1,11 +1,20 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("@/services/petrobras-cache", () => ({
+  getCachedPetrobrasData: vi.fn(async () => ({
+    events: [],
+    report: null,
+    snapshot: null,
+    source: "fallback",
+  })),
+}));
 
 import PetrobrasPage, { metadata } from "@/app/petrobras/page";
 
 describe("PetrobrasPage", () => {
-  it("apresenta o painel Petrobras com dados demonstrativos e aviso informativo", () => {
-    render(<PetrobrasPage />);
+  it("apresenta o painel Petrobras com dados demonstrativos e aviso informativo", async () => {
+    render(await PetrobrasPage());
 
     expect(
       screen.getByRole("heading", { name: /painel petrobras petr4/i }),
