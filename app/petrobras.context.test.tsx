@@ -17,7 +17,13 @@ describe("PetrobrasPage", () => {
     expect(screen.getByText(/dados básicos petr4/i)).toBeInTheDocument();
     expect(screen.getByText(/resumo inteligente/i)).toBeInTheDocument();
     expect(screen.getByText(/fallback mockado/i)).toBeInTheDocument();
+    expect(screen.getByText(/indicador de sentimento/i)).toBeInTheDocument();
+    expect(screen.getByRole("meter", { name: /sentimento neutro/i })).toHaveAttribute(
+      "aria-valuenow",
+      "52",
+    );
     expect(screen.getByText(/linha do tempo/i)).toBeInTheDocument();
+    expect(screen.getByText(/fonte: fallback/i)).toBeInTheDocument();
     expect(screen.getByText(/aviso informativo/i)).toBeInTheDocument();
   });
 

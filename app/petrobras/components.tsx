@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 
-import { Sparkles } from "lucide-react";
+import { Activity, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -10,7 +10,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import type { PetrobrasBasicData, PetrobrasReport } from "@/lib/petrobras";
+import type {
+  PetrobrasBasicData,
+  PetrobrasReport,
+  PetrobrasSentiment,
+  PetrobrasTimelineEvent,
+} from "@/lib/petrobras";
 
 export function MetricCard({
   label,
@@ -142,6 +147,111 @@ export function SummaryCard({
             </div>
           ))}
         </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function SentimentIndicator({
+  sentiment,
+}: {
+  sentiment: PetrobrasSentiment;
+}) {
+  const scoreLabel = `${sentiment.score}/100`;
+
+  return (
+    <Card className="overflow-hidden border-white/10 bg-white/[0.035] shadow-none">
+      <CardHeader className="border-b border-white/10">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle className="text-white">Indicador de sentimento</CardTitle>
+            <CardDescription className="mt-1 text-slate-400">
+              Leitura informativa derivada do resumo disponível.
+            </CardDescription>
+          </div>
+          <Badge className="w-fit border-sky-300/20 bg-sky-300/10 text-sky-100">
+            {sentiment.label}
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-5 p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-sm font-medium text-sky-100">
+              <Activity className="size-4" />
+              Escore demonstrativo
+            </div>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+              {sentiment.basis}
+            </p>
+          </div>
+          <div className="font-mono text-3xl font-semibold text-white">
+            {scoreLabel}
+          </div>
+        </div>
+
+        <div
+          aria-label={`Sentimento ${sentiment.label} com escore ${scoreLabel}`}
+          className="h-3 overflow-hidden rounded-full bg-white/10"
+          role="meter"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={sentiment.score}
+        >
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-sky-300 to-emerald-200"
+            style={{ width: `${sentiment.score}%` }}
+          />
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-lg border border-white/10 bg-black/20 p-4">
+            <p className="text-xs text-slate-500">Confiabilidade</p>
+            <p className="mt-2 font-mono text-lg text-white">
+              {sentiment.confidence}
+            </p>
+          </div>
+          <div className="rounded-lg border border-white/10 bg-black/20 p-4">
+            <p className="text-xs text-slate-500">Fonte</p>
+            <p className="mt-2 text-lg text-white">{sentiment.source}</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function TimelineCard({
+  events,
+}: {
+  events: PetrobrasTimelineEvent[];
+}) {
+  return (
+    <Card className="border-white/10 bg-white/[0.035] shadow-none">
+      <CardHeader>
+        <CardTitle className="text-white">Linha do tempo</CardTitle>
+        <CardDescription className="text-slate-400">
+          Eventos ordenados por data, com tipo e fonte disponíveis.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {events.map((event) => (
+          <article
+            className="border-l border-emerald-300/25 pl-4"
+            key={`${event.date}-${event.title}`}
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              <time className="font-mono text-xs text-slate-500">{event.date}</time>
+              <Badge variant="outline" className="border-white/15 text-xs">
+                {event.type}
+              </Badge>
+            </div>
+            <h2 className="mt-2 text-sm font-medium leading-6 text-white">
+              {event.title}
+            </h2>
+            <p className="mt-1 text-xs text-slate-500">Fonte: {event.source}</p>
+          </article>
+        ))}
       </CardContent>
     </Card>
   );

@@ -15,13 +15,16 @@ import {
   getPetrobrasBasicData,
   getPetrobrasPanelMetrics,
   getPetrobrasMonitoredSignals,
+  getPetrobrasSentiment,
   getPetrobrasTimelineEvents,
 } from "@/lib/petrobras";
 import {
   BasicDataCard,
   MetricCard,
+  SentimentIndicator,
   SignalCard,
   SummaryCard,
+  TimelineCard,
 } from "@/app/petrobras/components";
 
 export const metadata = {
@@ -33,6 +36,7 @@ export const metadata = {
 export default function PetrobrasPage() {
   const basicData = getPetrobrasBasicData();
   const report = getLatestPetrobrasReport();
+  const sentiment = getPetrobrasSentiment(report);
   const panelMetrics = getPetrobrasPanelMetrics(basicData);
   const monitoredSignals = getPetrobrasMonitoredSignals();
   const timelineEvents = getPetrobrasTimelineEvents();
@@ -122,6 +126,8 @@ export default function PetrobrasPage() {
 
           <SummaryCard report={report} />
 
+          <SentimentIndicator sentiment={sentiment} />
+
           <Card className="border-white/10 bg-white/[0.035] shadow-none">
             <CardHeader>
               <CardTitle className="text-white">Sinais monitorados</CardTitle>
@@ -161,37 +167,7 @@ export default function PetrobrasPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-white/10 bg-white/[0.035] shadow-none">
-            <CardHeader>
-              <CardTitle className="text-white">Linha do tempo</CardTitle>
-              <CardDescription className="text-slate-400">
-                Eventos demonstrativos ordenados por data.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {timelineEvents.map((event) => (
-                <div
-                  className="border-l border-emerald-300/25 pl-4"
-                  key={`${event.date}-${event.title}`}
-                >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-xs text-slate-500">
-                      {event.date}
-                    </span>
-                    <Badge variant="outline" className="border-white/15 text-xs">
-                      {event.type}
-                    </Badge>
-                  </div>
-                  <p className="mt-2 text-sm font-medium leading-6 text-white">
-                    {event.title}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-500">
-                    Fonte: {event.source}
-                  </p>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+          <TimelineCard events={timelineEvents} />
         </aside>
       </section>
     </main>
