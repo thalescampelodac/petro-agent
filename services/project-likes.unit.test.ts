@@ -35,8 +35,8 @@ describe("project likes service", () => {
   it("consulta e grava curtidas no schema petroagent", async () => {
     process.env = {
       ...originalEnv,
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "publishable-key",
-      NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: " publishable-key\n",
+      NEXT_PUBLIC_SUPABASE_URL: " https://example.supabase.co\n",
     };
     const select = vi.fn().mockResolvedValue({ count: 7, error: null });
     const insert = vi.fn().mockResolvedValue({ error: null });
@@ -63,6 +63,11 @@ describe("project likes service", () => {
 
     expect(schema).toHaveBeenCalledWith("petroagent");
     expect(from).toHaveBeenCalledWith("project_likes");
+    expect(createClient).toHaveBeenCalledWith(
+      "https://example.supabase.co",
+      "publishable-key",
+      expect.any(Object),
+    );
     expect(insert).toHaveBeenCalledWith({ source: "web" });
     expect(select).toHaveBeenCalledWith("id", { count: "exact", head: true });
   });
