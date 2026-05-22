@@ -164,9 +164,9 @@ export default function Home() {
                       "h-11 bg-emerald-300 px-5 text-emerald-950 hover:bg-emerald-200",
                     size: "lg",
                   })}
-                  href="#resumo"
+                  href="/petrobras"
                 >
-                  Ver resumo do agente
+                  Ver painel Petrobras
                   <ArrowRight className="size-4" />
                 </a>
                 <a
