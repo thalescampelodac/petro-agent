@@ -33,7 +33,7 @@ import { cn } from "@/lib/utils";
 const monitorItems = [
   {
     title: "PETR4",
-    description: "Indicadores basicos, contexto do ativo e status do dado.",
+    description: "Indicadores básicos, contexto do ativo e status do dado.",
     icon: TrendingUp,
     accent: "text-emerald-300",
   },
@@ -45,25 +45,25 @@ const monitorItems = [
   },
   {
     title: "Fatos relevantes",
-    description: "Comunicados publicos e registros importantes de RI.",
+    description: "Comunicados públicos e registros importantes de RI.",
     icon: RadioTower,
     accent: "text-sky-300",
   },
   {
-    title: "Noticias",
-    description: "Sinais publicos que ajudam a compor o radar informativo.",
+    title: "Notícias",
+    description: "Sinais públicos que ajudam a compor o radar informativo.",
     icon: Newspaper,
     accent: "text-cyan-200",
   },
   {
     title: "Sentimento do mercado",
-    description: "Leitura textual e cautelosa, sem recomendacao financeira.",
+    description: "Leitura textual e cautelosa, sem recomendação financeira.",
     icon: Brain,
     accent: "text-fuchsia-200",
   },
   {
     title: "Radar inteligente",
-    description: "Resumo organizado do que o agente observou no periodo.",
+    description: "Resumo organizado do que o agente observou no período.",
     icon: Radar,
     accent: "text-lime-200",
   },
@@ -72,7 +72,7 @@ const monitorItems = [
 const workflow = [
   {
     title: "Coleta",
-    description: "Fontes publicas e registros internos entram no radar.",
+    description: "Fontes públicas e registros internos entram no radar.",
     icon: ScanSearch,
   },
   {
@@ -82,7 +82,7 @@ const workflow = [
   },
   {
     title: "IA",
-    description: "Resumos sao gerados de forma pontual, com cache e limites.",
+    description: "Resumos são gerados de forma pontual, com cache e limites.",
     icon: Bot,
   },
   {
@@ -95,17 +95,17 @@ const workflow = [
 const roadmap = [
   {
     title: "MVP 1",
-    status: "Em construcao",
+    status: "Em construção",
     description:
-      "Landing page, painel Petrobras, curtidas publicas, banco de conhecimento e primeiros resumos mockados.",
-    items: ["Portal publico", "Painel PETR4", "Interacao sem cadastro"],
+      "Landing page, painel Petrobras, curtidas públicas, banco de conhecimento e primeiros resumos mockados.",
+    items: ["Portal público", "Painel PETR4", "Interação sem cadastro"],
   },
   {
     title: "MVP 2",
     status: "Planejado",
     description:
-      "Camada MCP para agentes consultarem relatorios, eventos, snapshots e memoria do PetroAgent.",
-    items: ["Tools MCP", "Memoria consultavel", "Arquitetura multiagente"],
+      "Camada MCP para agentes consultarem relatórios, eventos, snapshots e memória do PetroAgent.",
+    items: ["Tools MCP", "Memória consultável", "Arquitetura multiagente"],
   },
 ];
 
@@ -114,9 +114,18 @@ export default function Home() {
     <main className="dark min-h-screen overflow-hidden bg-[#070b10] text-foreground">
       <section className="relative border-b border-white/10">
         <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(16,185,129,0.18),transparent_32%),radial-gradient(circle_at_78%_18%,rgba(59,130,246,0.18),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.04),transparent)]" />
+        <a
+          className="absolute left-1/2 top-9 z-20 -translate-x-1/2 text-sm text-emerald-100/75 transition hover:text-emerald-100"
+          href="#criador"
+        >
+          Criador
+        </a>
+        <div className="absolute right-6 top-6 z-20 sm:right-8 sm:top-8">
+          <LikeButton />
+        </div>
         <div className="relative mx-auto grid min-h-[92vh] w-full max-w-7xl gap-10 px-6 py-8 sm:py-10 lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:px-8">
           <div className="flex flex-col gap-8">
-            <nav className="flex items-center justify-between gap-4">
+            <nav className="pr-44 sm:pr-72">
               <div className="flex items-center gap-3">
                 <div className="flex size-10 items-center justify-center rounded-lg border border-emerald-300/30 bg-emerald-300/15">
                   <Radar className="size-5 text-emerald-200" />
@@ -125,12 +134,6 @@ export default function Home() {
                   PetroAgent
                 </span>
               </div>
-              <a
-                className="text-sm text-emerald-100/75 transition hover:text-emerald-100"
-                href="#criador"
-              >
-                Criador
-              </a>
             </nav>
 
             <div className="space-y-6">
@@ -145,12 +148,12 @@ export default function Home() {
 
               <div className="space-y-5">
                 <h1 className="max-w-4xl text-5xl font-semibold leading-[1.02] text-white sm:text-6xl lg:text-7xl">
-                  Um agente inteligente acompanhando Petrobras para voce.
+                  Um agente inteligente acompanhando Petrobras para você.
                 </h1>
                 <p className="max-w-2xl text-lg leading-8 text-slate-300">
-                  PetroAgent transforma sinais publicos sobre PETR4 em um radar
-                  claro, visual e acessivel para acompanhar fatos, dividendos,
-                  noticias e contexto de mercado.
+                  PetroAgent transforma sinais públicos sobre PETR4 em um radar
+                  claro, visual e acessível para acompanhar fatos, dividendos,
+                  notícias e contexto de mercado.
                 </p>
               </div>
 
@@ -183,7 +186,7 @@ export default function Home() {
             <div className="grid max-w-2xl grid-cols-3 gap-3">
               {[
                 ["6", "sinais monitorados"],
-                ["0", "recomendacoes financeiras"],
+                ["0", "recomendações financeiras"],
                 ["24h", "radar preparado"],
               ].map(([value, label]) => (
                 <div
@@ -205,7 +208,7 @@ export default function Home() {
         <SectionHeader
           eyebrow="Monitoramento"
           title="O que o agente monitora"
-          description="Uma visao visual dos sinais que vao compor o painel publico do PetroAgent."
+          description="Uma visão visual dos sinais que vão compor o painel público do PetroAgent."
         />
         <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {monitorItems.map((item) => {
@@ -239,14 +242,14 @@ export default function Home() {
           <SectionHeader
             eyebrow="Resumo mockado"
             title="Resumo inteligente do agente"
-            description="Conteudo simulado para validar experiencia, tom e estrutura antes de conectar dados reais."
+            description="Conteúdo simulado para validar experiência, tom e estrutura antes de conectar dados reais."
           />
 
           <Card className="border-emerald-300/20 bg-[#0c151b] shadow-2xl shadow-emerald-950/30">
             <CardHeader className="gap-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <Badge className="bg-emerald-300/15 text-emerald-100">
-                  Simulacao
+                  Simulação
                 </Badge>
                 <span className="font-mono text-xs text-slate-500">
                   Atualizado: 19/05/2026
@@ -254,13 +257,13 @@ export default function Home() {
               </div>
               <div>
                 <CardTitle className="text-2xl text-white">
-                  O agente observou uma sessao de atencao moderada
+                  O agente observou uma sessão de atenção moderada
                 </CardTitle>
                 <CardDescription className="mt-3 text-base leading-7 text-slate-300">
-                  PETR4 segue no radar por combinacao de noticias setoriais,
+                  PETR4 segue no radar por combinação de notícias setoriais,
                   expectativa sobre dividendos e comunicados corporativos. A
-                  leitura e informativa: vale acompanhar os proximos eventos e
-                  diferenciar fato publicado de interpretacao de mercado.
+                  leitura é informativa: vale acompanhar os próximos eventos e
+                  diferenciar fato publicado de interpretação de mercado.
                 </CardDescription>
               </div>
             </CardHeader>
@@ -282,9 +285,9 @@ export default function Home() {
 
       <section className="mx-auto w-full max-w-7xl px-6 py-20 lg:px-8">
         <SectionHeader
-          eyebrow="Metodo"
+          eyebrow="Método"
           title="Como funciona"
-          description="O MVP comeca simples, com dados mockados e arquitetura preparada para evoluir."
+          description="O MVP começa simples, com dados mockados e arquitetura preparada para evoluir."
         />
         <div className="mt-10 grid gap-4 md:grid-cols-4">
           {workflow.map((step, index) => {
@@ -316,16 +319,13 @@ export default function Home() {
       </section>
 
       <section className="border-y border-white/10 bg-[#091017] px-6 py-20 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
-          <div className="space-y-5">
-            <SectionHeader
-              eyebrow="Comunidade"
-              title="Gostou do PetroAgent?"
-              description="Sem login, sem email e sem complicacao. Um clique divertido para mostrar apoio ao projeto."
-            />
-            <LikeButton />
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2" id="roadmap">
+        <div className="mx-auto max-w-7xl" id="roadmap">
+          <SectionHeader
+            eyebrow="Roadmap"
+            title="Roadmap do projeto"
+            description="A evolução do PetroAgent está organizada em entregas pequenas, testáveis e rastreáveis."
+          />
+          <div className="mt-10 grid gap-4 sm:grid-cols-2">
             {roadmap.map((item) => (
               <Card
                 className="border-white/10 bg-white/[0.035] shadow-none"
@@ -361,8 +361,8 @@ export default function Home() {
         <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
           <SectionHeader
             eyebrow="Criador"
-            title="Um projeto aberto, experimental e em evolucao"
-            description="PetroAgent nasce como laboratorio publico para transformar acompanhamento de mercado em uma experiencia mais clara, visual e responsavel."
+            title="Um projeto aberto, experimental e em evolução"
+            description="PetroAgent nasce como laboratório público para transformar acompanhamento de mercado em uma experiência mais clara, visual e responsável."
           />
           <Card className="border-white/10 bg-white/[0.035] shadow-none">
             <CardHeader>
@@ -390,8 +390,8 @@ export default function Home() {
               <div className="rounded-lg border border-dashed border-emerald-300/25 bg-emerald-300/5 p-4 sm:col-span-2">
                 <p className="text-sm font-medium text-white">QRCode PIX futuro</p>
                 <p className="mt-1 text-sm leading-6 text-slate-400">
-                  Espaco reservado para apoio opcional, sem paywall e sem
-                  promessa de beneficio financeiro.
+                  Espaço reservado para apoio opcional, sem paywall e sem
+                  promessa de benefício financeiro.
                 </p>
               </div>
             </CardContent>
@@ -401,8 +401,8 @@ export default function Home() {
 
       <footer className="border-t border-white/10 px-6 py-8 text-sm text-slate-500 lg:px-8">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <p>PetroAgent e informativo e experimental.</p>
-          <p>Nao constitui recomendacao de compra, venda ou manutencao.</p>
+          <p>PetroAgent é informativo e experimental.</p>
+          <p>Não constitui recomendação de compra, venda ou manutenção.</p>
         </div>
       </footer>
     </main>
@@ -460,8 +460,8 @@ function HeroDashboard() {
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <Signal label="Dividendos" value="Em observacao" />
-            <Signal label="Fatos relevantes" value="Sem alerta critico" />
+            <Signal label="Dividendos" value="Em observação" />
+            <Signal label="Fatos relevantes" value="Sem alerta crítico" />
           </div>
         </CardContent>
       </Card>

@@ -11,7 +11,9 @@
     "test:watch": "vitest",
     "test:unit": "vitest run --config vitest.unit.config.ts",
     "test:integration": "vitest run --config vitest.integration.config.ts",
-    "test:context": "vitest run --config vitest.context.config.ts"
+    "test:context": "vitest run --config vitest.context.config.ts",
+    "verify:ci": "npm run lint && npm test && npm run build",
+    "verify:local": "npm run lint && npm test && npm run build"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
@@ -39,8 +41,10 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "jsdom": "^29.1.1",
+    "supabase": "^2.101.0",
     "tailwindcss": "^4",
     "typescript": "^5",
+    "vercel": "^54.2.0",
     "vitest": "^4.1.6"
   }
 }

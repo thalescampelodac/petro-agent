@@ -63,7 +63,7 @@ async function registerGlobalLike() {
 export function LikeButton() {
   const [count, setCount] = useState(INITIAL_COUNT);
   const [isPopping, setIsPopping] = useState(false);
-  const [message, setMessage] = useState("Mostre que voce esta acompanhando");
+  const [message, setMessage] = useState("Mostre que você está acompanhando");
   const hasInteracted = useRef(false);
 
   useEffect(() => {
@@ -87,7 +87,7 @@ export function LikeButton() {
     const recentActivity = getRecentLikeActivity(now);
 
     if (recentActivity.length >= MAX_LIKES_PER_WINDOW) {
-      setMessage("Pausa rapidinha: o apoio ja foi registrado por aqui.");
+      setMessage("Pausa rapidinha: o apoio já foi registrado por aqui.");
       return;
     }
 
@@ -118,11 +118,11 @@ export function LikeButton() {
   }
 
   return (
-    <div className="rounded-lg border border-emerald-300/20 bg-white/[0.04] p-3 shadow-2xl shadow-emerald-950/30 backdrop-blur">
+    <div className="flex max-w-[13rem] flex-col items-end gap-2 text-right sm:max-w-none">
       <button
         aria-label="Gostei do projeto"
         className={cn(
-          "group flex w-full items-center justify-between gap-3 rounded-md border border-emerald-300/25 bg-emerald-300 px-4 py-3 text-sm font-semibold text-emerald-950 transition duration-200 hover:-translate-y-0.5 hover:bg-emerald-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200",
+          "group flex items-center justify-between gap-3 rounded-md border border-emerald-300/25 bg-emerald-300 px-3 py-2 text-xs font-semibold text-emerald-950 shadow-lg shadow-emerald-950/20 transition duration-200 hover:-translate-y-0.5 hover:bg-emerald-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 sm:px-4 sm:text-sm",
           isPopping && "scale-[1.03]",
         )}
         type="button"
@@ -131,7 +131,7 @@ export function LikeButton() {
         <span className="flex items-center gap-2">
           <Heart
             className={cn(
-              "size-4 fill-emerald-950 transition-transform duration-300 group-hover:scale-110",
+              "size-3.5 fill-emerald-950 transition-transform duration-300 group-hover:scale-110 sm:size-4",
               isPopping && "rotate-[-10deg] scale-125",
             )}
           />
@@ -141,7 +141,10 @@ export function LikeButton() {
           {count.toLocaleString("pt-BR")}
         </span>
       </button>
-      <p aria-live="polite" className="mt-2 text-xs text-emerald-100/70">
+      <p
+        aria-live="polite"
+        className="max-w-[12rem] text-xs leading-5 text-emerald-100/80 sm:max-w-none"
+      >
         {message}
       </p>
     </div>

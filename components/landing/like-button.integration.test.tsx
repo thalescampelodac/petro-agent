@@ -43,7 +43,7 @@ describe("LikeButton", () => {
     expect(screen.getByText(/valeu|curioso|radar|obrigado/i)).toBeInTheDocument();
   });
 
-  it("exibe contador global quando a API de likes esta disponivel", async () => {
+  it("exibe contador global quando a API de likes está disponível", async () => {
     const user = userEvent.setup();
     const fetchMock = vi
       .fn()

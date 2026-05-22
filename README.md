@@ -7,6 +7,7 @@ automatizadas com linguagem clara, sem atuar como corretora, casa de analise ou
 recomendacao de investimento.
 
 GitHub Project oficial: <https://github.com/users/thalescampelodac/projects/3>
+Link do app: <https://petro-agent.vercel.app/>
 
 ## Visao do produto
 
@@ -115,6 +116,29 @@ chaves privadas com prefixo `NEXT_PUBLIC_`.
 O projeto esta preparado para deploy padrao de Next.js na Vercel. Configure as
 mesmas variaveis de ambiente do `.env.example` no projeto Vercel antes do build
 de producao.
+
+## CI/CD
+
+O projeto usa GitHub Actions como esteira oficial de validacao e deploy:
+
+- `.github/workflows/preview.yml`: roda em pull requests para `main`, executa
+  `npm run verify:ci` e publica um deploy preview na Vercel.
+- `.github/workflows/production.yml`: roda em push na `main`, executa
+  `npm run verify:ci` e publica producao na Vercel com `--prod`.
+
+Secrets esperados no GitHub:
+
+- `VERCEL_TOKEN`
+- `VERCEL_ORG_ID`
+- `VERCEL_PROJECT_ID`
+
+Para preencher `VERCEL_ORG_ID` e `VERCEL_PROJECT_ID`, vincule o projeto Vercel
+localmente e consulte `.vercel/project.json`. O token deve ser criado nas
+configuracoes da conta Vercel.
+
+Se o deploy automatico da integracao GitHub/Vercel estiver ligado, desative-o
+ou alinhe a configuracao para evitar deploy duplicado. A esteira oficial deste
+repositorio deve ser o GitHub Actions.
 
 ## Banco de dados
 
