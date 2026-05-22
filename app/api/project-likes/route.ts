@@ -5,7 +5,10 @@ import {
 
 function getSafeErrorReason(error: unknown) {
   if (error instanceof Error) {
-    return error.message;
+    return {
+      message: error.message,
+      name: error.name,
+    };
   }
 
   if (error && typeof error === "object") {
@@ -19,6 +22,18 @@ function getSafeErrorReason(error: unknown) {
 
       return acc;
     }, {});
+
+    const constructorName = error.constructor?.name;
+
+    if (constructorName && constructorName !== "Object") {
+      details.name = constructorName;
+    }
+
+    const stringValue = String(error);
+
+    if (stringValue !== "[object Object]") {
+      details.value = stringValue;
+    }
 
     if (Object.keys(details).length > 0) {
       return details;

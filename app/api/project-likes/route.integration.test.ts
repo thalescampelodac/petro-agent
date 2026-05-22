@@ -54,7 +54,10 @@ describe("/api/project-likes", () => {
 
     await expect(response.json()).resolves.toEqual({
       count: null,
-      detail: "unavailable",
+      detail: {
+        message: "unavailable",
+        name: "Error",
+      },
       reason: "supabase_unavailable",
       source: "local-fallback",
     });
