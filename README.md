@@ -143,13 +143,22 @@ repositorio deve ser o GitHub Actions.
 ## Banco de dados
 
 As tabelas do PetroAgent devem ficar no schema `petroagent`, nao soltas no
-schema `public`. A primeira migration esta em
-`database/migrations/001_create_petroagent_schema_and_project_likes.sql` e cria:
+schema `public`. As migrations versionadas ficam em `supabase/migrations`.
+A primeira migration cria:
 
 - schema `petroagent`
 - tabela `petroagent.project_likes`
 - RLS para insert/select publico do contador de apoio
 - grants minimos para `anon` e `authenticated`
+
+A migration de memória de mercado cria:
+
+- tabela `petroagent.sources`
+- tabela `petroagent.market_events`
+- tabela `petroagent.agent_reports`
+- tabela `petroagent.market_snapshots`
+- RLS com leitura pública nas tabelas do painel e `sources` restrita ao backend
+- escrita reservada ao backend com `service_role`
 
 Para usar a tabela via Supabase Data API, adicione `petroagent` em Project
 Settings > Data API > Exposed schemas no projeto Supabase existente.
