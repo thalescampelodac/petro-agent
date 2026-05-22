@@ -49,6 +49,14 @@ export type PetrobrasTimelineEvent = {
   source: string;
 };
 
+export type PetrobrasSentiment = {
+  label: "Neutro" | "Positivo" | "Negativo";
+  score: number;
+  confidence: "Fallback" | "Baixa" | "Media" | "Alta";
+  basis: string;
+  source: string;
+};
+
 const BASIC_DATA: PetrobrasBasicData = {
   ticker: "PETR4",
   company: "Petrobras PN",
@@ -137,7 +145,7 @@ export function getPetrobrasMonitoredSignals(): PetrobrasSignal[] {
 }
 
 export function getPetrobrasTimelineEvents(): PetrobrasTimelineEvent[] {
-  return [
+  return sortPetrobrasTimelineEvents([
     {
       date: "19/05/2026",
       title: "Radar inicial preparado",
@@ -156,5 +164,32 @@ export function getPetrobrasTimelineEvents(): PetrobrasTimelineEvent[] {
       type: "RI",
       source: "Mock interno",
     },
-  ];
+  ]);
+}
+
+export function getPetrobrasSentiment(
+  report: PetrobrasReport | null,
+): PetrobrasSentiment {
+  return {
+    label: "Neutro",
+    score: 52,
+    confidence: report?.status === "Saved" ? "Baixa" : "Fallback",
+    basis:
+      "Leitura demonstrativa baseada no resumo disponível, sem recomendação de operação.",
+    source: report?.source ?? "Fallback demonstrativo",
+  };
+}
+
+function sortPetrobrasTimelineEvents(
+  events: PetrobrasTimelineEvent[],
+): PetrobrasTimelineEvent[] {
+  return [...events].sort(
+    (current, next) => parseBrazilianDate(next.date) - parseBrazilianDate(current.date),
+  );
+}
+
+function parseBrazilianDate(date: string) {
+  const [day, month, year] = date.split("/").map(Number);
+
+  return new Date(year, month - 1, day).getTime();
 }
