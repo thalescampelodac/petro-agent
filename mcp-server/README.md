@@ -55,12 +55,21 @@ O servidor MCP usa variáveis já previstas pelo projeto principal:
 Essas variáveis devem ficar no ambiente do servidor MCP. A service role nunca
 deve ser exposta no client.
 
+## Tools
+
+As tools ficam registradas em `src/tools/index.ts`.
+
+### `get_latest_report`
+
+Consulta `petroagent.agent_reports` e retorna o relatório mais recente em
+conteúdo textual e `structuredContent`. Quando não houver relatório salvo,
+retorna `found: false` sem quebrar a chamada.
+
 ## Próximas tools
 
-As próximas issues da Fase 8 devem registrar tools em `src/tools/index.ts` ou
-em arquivos dedicados dentro de `src/tools/`:
+As próximas issues da Fase 8 devem registrar novas tools em arquivos dedicados
+dentro de `src/tools/`:
 
-- `get_latest_report`
 - `list_market_events`
 - `get_market_snapshot`
 - `search_agent_memory`
