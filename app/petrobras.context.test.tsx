@@ -33,7 +33,7 @@ describe("PetrobrasPage", () => {
     );
     expect(screen.getByText(/linha do tempo/i)).toBeInTheDocument();
     expect(screen.getByText(/fonte: fallback/i)).toBeInTheDocument();
-    expect(screen.getByText(/aviso informativo/i)).toBeInTheDocument();
+    expect(screen.getByText(/sem recomendação financeira/i)).toBeInTheDocument();
   });
 
   it("declara metadados públicos da rota", () => {
