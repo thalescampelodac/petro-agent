@@ -110,8 +110,9 @@ const roadmap = [
   },
 ];
 
-const pixQrCodeUrl = process.env.NEXT_PUBLIC_PIX_QRCODE_IMAGE_URL?.trim();
-const pixKey = process.env.NEXT_PUBLIC_PIX_KEY?.trim();
+const asaasPixQrCodeImage = process.env.NEXT_PUBLIC_ASAAS_PIX_QRCODE_IMAGE?.trim();
+const asaasPixCopyPaste = process.env.NEXT_PUBLIC_ASAAS_PIX_COPY_PASTE?.trim();
+const asaasPaymentUrl = process.env.NEXT_PUBLIC_ASAAS_PAYMENT_URL?.trim();
 
 export default function Home() {
   return (
@@ -408,18 +409,20 @@ export default function Home() {
 }
 
 function PixSupport() {
-  const hasPixSupport = Boolean(pixQrCodeUrl || pixKey);
+  const hasAsaasPixCharge = Boolean(
+    asaasPixQrCodeImage || asaasPixCopyPaste || asaasPaymentUrl,
+  );
 
   return (
     <div className="rounded-lg border border-dashed border-emerald-300/25 bg-emerald-300/5 p-4 sm:col-span-2">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-black/20">
-          {pixQrCodeUrl ? (
+          {asaasPixQrCodeImage ? (
             <img
-              alt="QRCode PIX para apoiar o PetroAgent"
+              alt="QRCode da cobrança PIX Asaas para apoiar o PetroAgent"
               className="size-full object-cover"
               loading="lazy"
-              src={pixQrCodeUrl}
+              src={asaasPixQrCodeImage}
             />
           ) : (
             <QrCode className="size-10 text-emerald-200/70" aria-hidden="true" />
@@ -427,24 +430,34 @@ function PixSupport() {
         </div>
 
         <div className="min-w-0">
-          <p className="text-sm font-medium text-white">Apoio opcional via PIX</p>
-          {hasPixSupport ? (
+          <p className="text-sm font-medium text-white">Apoio opcional via Asaas PIX</p>
+          {hasAsaasPixCharge ? (
             <div className="mt-1 space-y-2">
               <p className="text-sm leading-6 text-slate-400">
                 Quem quiser acompanhar e apoiar a evolução do PetroAgent pode
-                usar o QRCode ou a chave configurada pelo criador.
+                usar a cobrança PIX gerada pelo Asaas.
               </p>
-              {pixKey ? (
+              {asaasPixCopyPaste ? (
                 <p className="break-all rounded-md border border-white/10 bg-black/20 px-3 py-2 font-mono text-xs text-emerald-100">
-                  {pixKey}
+                  {asaasPixCopyPaste}
                 </p>
+              ) : null}
+              {asaasPaymentUrl ? (
+                <a
+                  className="inline-flex text-sm font-medium text-emerald-100 transition hover:text-white"
+                  href={asaasPaymentUrl}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  Abrir cobrança Asaas
+                </a>
               ) : null}
             </div>
           ) : (
             <p className="mt-1 text-sm leading-6 text-slate-400">
               Espaço reservado para apoio opcional, sem paywall e sem promessa
-              de benefício financeiro. O QRCode será exibido quando estiver
-              configurado.
+              de benefício financeiro. A cobrança PIX dinâmica do Asaas será
+              exibida quando estiver configurada.
             </p>
           )}
         </div>
