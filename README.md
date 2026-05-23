@@ -107,12 +107,30 @@ As variaveis esperadas para Supabase sao:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `NEXT_PUBLIC_ASAAS_PIX_QRCODE_IMAGE`
+- `NEXT_PUBLIC_ASAAS_PIX_COPY_PASTE`
+- `NEXT_PUBLIC_ASAAS_PAYMENT_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `PETROAGENT_COLLECTOR_TOKEN`
+- `ASAAS_API_KEY`
+- `ASAAS_API_BASE_URL`
+- `ASAAS_PIX_CUSTOMER_ID`
+- `ASAAS_PIX_SUPPORT_VALUE`
 
-`SUPABASE_SERVICE_ROLE_KEY`, `PETROAGENT_COLLECTOR_TOKEN` e `OPENAI_API_KEY`
-sao variaveis somente de servidor. Nao exponha chaves privadas com prefixo
-`NEXT_PUBLIC_`.
+`NEXT_PUBLIC_ASAAS_PIX_QRCODE_IMAGE`, `NEXT_PUBLIC_ASAAS_PIX_COPY_PASTE` e
+`NEXT_PUBLIC_ASAAS_PAYMENT_URL` são opcionais e alimentam a área pública de
+apoio via cobrança PIX do Asaas na landing. Se não forem preenchidas, a
+interface exibe um fallback sem QRCode.
+
+`ASAAS_API_KEY`, `ASAAS_API_BASE_URL`, `ASAAS_PIX_CUSTOMER_ID` e
+`ASAAS_PIX_SUPPORT_VALUE` deixam o projeto preparado para uma próxima etapa de
+integração server-side com cobranças PIX dinâmicas do Asaas. A criação de
+cobrança deve usar `billingType: PIX` e a recuperação do QRCode deve ficar em
+endpoint protegido no servidor, nunca no client.
+
+`SUPABASE_SERVICE_ROLE_KEY`, `PETROAGENT_COLLECTOR_TOKEN`, `ASAAS_API_KEY` e
+`OPENAI_API_KEY` são variáveis somente de servidor. Não exponha chaves privadas
+com prefixo `NEXT_PUBLIC_`.
 
 ## Deploy na Vercel
 

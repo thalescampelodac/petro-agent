@@ -27,6 +27,10 @@ describe("Home", () => {
       screen.getByRole("button", { name: /gostei do projeto/i }),
     ).toHaveTextContent("Gostei do projeto");
     expect(screen.getByText("Mostre que você está acompanhando")).toBeInTheDocument();
+    expect(screen.getByText("Apoio opcional via Asaas PIX")).toBeInTheDocument();
+    expect(
+      screen.getByText(/a cobrança PIX dinâmica do Asaas será exibida/i),
+    ).toBeInTheDocument();
     expect(screen.getAllByText(/não constitui recomendação/i).length).toBeGreaterThan(0);
   });
 });
