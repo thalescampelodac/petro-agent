@@ -146,7 +146,8 @@ repositorio deve ser o GitHub Actions.
 ## Banco de dados
 
 As tabelas do PetroAgent devem ficar no schema `petroagent`, nao soltas no
-schema `public`. As migrations versionadas ficam em `supabase/migrations`.
+schema `public`. As migrations versionadas ficam em `supabase/migrations` e devem
+ser aplicadas pelo Supabase CLI no projeto conectado, não em `database/migrations`.
 A primeira migration cria:
 
 - schema `petroagent`
