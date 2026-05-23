@@ -35,7 +35,8 @@ Aviso legal base:
 - `agents/`: regras e configuracoes do PetroAgent.
 - `database/`: migrations SQL, notas de schema e RLS.
 - `prompts/`: prompts versionados do agente.
-- `mcp/`: preparacao da camada MCP futura, sem bloquear o MVP 1.
+- `mcp/`: notas da camada MCP futura, sem bloquear o MVP 1.
+- `mcp-server/`: servidor MCP inicial do MVP 2, isolado do build do frontend.
 
 Stack inicial:
 
@@ -66,6 +67,19 @@ Stack inicial:
 1. Fase 8: servidor MCP futuro e tools estruturadas.
 2. Fase 9: ferramentas inteligentes como busca semantica e comparacao temporal.
 3. Fase 10: arquitetura multiagente para outras empresas ou ativos.
+
+## MCP Server
+
+O servidor MCP inicial fica em `mcp-server/` e possui dependências, `tsconfig` e
+scripts próprios. Ele não é executado pelo build do Next.js.
+
+```bash
+cd mcp-server
+npm install
+npm run dev
+```
+
+As tools serão adicionadas em issues futuras da Fase 8.
 
 ## Execucao local
 
