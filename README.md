@@ -107,11 +107,17 @@ As variaveis esperadas para Supabase sao:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `NEXT_PUBLIC_PIX_QRCODE_IMAGE_URL`
+- `NEXT_PUBLIC_PIX_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `PETROAGENT_COLLECTOR_TOKEN`
 
-`SUPABASE_SERVICE_ROLE_KEY`, `PETROAGENT_COLLECTOR_TOKEN` e `OPENAI_API_KEY`
-sao variaveis somente de servidor. Nao exponha chaves privadas com prefixo
+`NEXT_PUBLIC_PIX_QRCODE_IMAGE_URL` e `NEXT_PUBLIC_PIX_KEY` são opcionais e
+alimentam a área pública de apoio via PIX na landing. Se não forem preenchidas,
+a interface exibe um fallback sem QRCode.
+
+`SUPABASE_SERVICE_ROLE_KEY`, `PETROAGENT_COLLECTOR_TOKEN` e `OPENAI_API_KEY` são
+variáveis somente de servidor. Não exponha chaves privadas com prefixo
 `NEXT_PUBLIC_`.
 
 ## Deploy na Vercel
