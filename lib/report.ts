@@ -1,6 +1,5 @@
 import generateFallbackSummary from './fallback';
 import { formatPromptWithContext, PROMPT_BASE } from './promptBase';
-import fetchPetrobrasRI from './collectors/petrobras';
 
 type ReportInput = {
   text?: string;
@@ -16,12 +15,23 @@ async function fetchUrls(urls: string[]) {
         const t = await res.text();
         results.push(t.slice(0, 10000));
       }
-    } catch (e) {
+    } catch {
       // ignore fetch errors, continue
     }
   }
   return results.join('\n\n');
 }
+
+type GeminiRequestBody = {
+  instances: Array<{ content: string }>;
+  temperature: number;
+};
+
+type OpenAIRequestBody = {
+  max_tokens: number;
+  messages: Array<{ content: string; role: 'system' | 'user' }>;
+  model: string;
+};
 
 async function callAI(prompt: string) {
   // Prefer Gemini when configured, otherwise fall back to OpenAI if available
@@ -31,7 +41,7 @@ async function callAI(prompt: string) {
   if (geminiKey) {
     const model = process.env.GEMINI_MODEL || 'gemini-1.0';
     const url = `https://generativelanguage.googleapis.com/v1beta2/models/${model}:generate?key=${geminiKey}`;
-    const body = { instances: [{ content: prompt }], temperature: 0.2 } as any;
+    const body: GeminiRequestBody = { instances: [{ content: prompt }], temperature: 0.2 };
     const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     if (!res.ok) throw new Error(`Gemini call failed: ${res.status}`);
     const data = await res.json();
@@ -45,14 +55,14 @@ async function callAI(prompt: string) {
   }
 
   if (openaiKey) {
-    const body = {
+    const body: OpenAIRequestBody = {
       model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
       messages: [
         { role: 'system', content: PROMPT_BASE },
         { role: 'user', content: prompt },
       ],
       max_tokens: 800,
-    } as any;
+    };
 
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -84,7 +94,7 @@ export async function generateReport(input: ReportInput) {
     const prompt = formatPromptWithContext(sourceText || '');
     const aiResult = await callAI(prompt);
     return { engine: 'ai', result: aiResult };
-  } catch (e) {
+  } catch {
     const fallback = generateFallbackSummary(sourceText || '');
     return { engine: 'fallback', result: fallback };
   }

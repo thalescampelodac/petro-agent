@@ -146,7 +146,8 @@ repositorio deve ser o GitHub Actions.
 ## Banco de dados
 
 As tabelas do PetroAgent devem ficar no schema `petroagent`, nao soltas no
-schema `public`. As migrations versionadas ficam em `supabase/migrations`.
+schema `public`. As migrations versionadas ficam em `supabase/migrations` e devem
+ser aplicadas pelo Supabase CLI no projeto conectado, não em `database/migrations`.
 A primeira migration cria:
 
 - schema `petroagent`
@@ -171,14 +172,25 @@ O painel `/petrobras` tenta ler primeiro os dados persistidos em
 `agent_reports`, `market_events` e `market_snapshots`. Se não houver dados ou se
 o Supabase estiver indisponível, usa fallback demonstrativo.
 
+O endpoint `POST /api/reports` gera relatórios e tenta persistir o resultado em
+`petroagent.agent_reports`. O endpoint `GET /api/reports` lista relatórios
+persistidos com paginação simples.
+
 Para usar a tabela via Supabase Data API, adicione `petroagent` em Project
 Settings > Data API > Exposed schemas no projeto Supabase existente.
 
 ## Relacao com o GitHub Project
 
 O quadro oficial de gestao e o GitHub Project numero 3 do usuario
-`thalescampelodac`. As issues devem seguir as fases do `AGENTES.md` e usar
-criterios de aceite claros. A organizacao recomendada e:
+`thalescampelodac`. O fluxo de trabalho deve ser:
+
+1. Criar um issue/card no GitHub antes de iniciar implementacao.
+2. Documentar o escopo e criterios de aceite no issue.
+3. Criar branch ligada ao issue: `issue-<numero>-descrição-curta`.
+4. Referenciar o issue no titulo e no corpo do PR.
+
+As issues devem seguir as fases do `AGENTES.md` e usar criterios de aceite
+claros. A organizacao recomendada e:
 
 - MVP por label (`mvp-1`, `mvp-2`)
 - fase por label (`fase-0`, `fase-1`, ...)

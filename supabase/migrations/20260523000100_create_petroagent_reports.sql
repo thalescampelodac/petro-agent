@@ -1,0 +1,8 @@
+-- Deprecated no-op migration.
+--
+-- This version was briefly applied remotely with a separate
+-- `petroagent.reports` table. The table was removed because PetroAgent already
+-- has `petroagent.agent_reports` for generated report persistence.
+--
+-- Keep this file so local migration history matches the remote Supabase
+-- migration history without recreating the wrong table.
