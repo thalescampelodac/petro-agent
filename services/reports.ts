@@ -53,8 +53,7 @@ export async function listReports(limit = 20, offset = 0) {
     .from(REPORTS_TABLE)
     .select('*')
     .order('created_at', { ascending: false })
-    .limit(limit)
-    .offset(offset);
+    .range(offset, offset + limit - 1);
 
   if (error) throw error;
 
