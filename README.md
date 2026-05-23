@@ -81,6 +81,11 @@ npm run dev
 
 As tools serão adicionadas em issues futuras da Fase 8.
 
+Tool disponível:
+
+- `get_latest_report`: consulta `petroagent.agent_reports` e retorna o relatório
+  mais recente em formato textual e estruturado.
+
 ## Execucao local
 
 Crie `.env.local` a partir de `.env.example` e preencha as variaveis quando
