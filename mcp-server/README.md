@@ -65,11 +65,20 @@ Consulta `petroagent.agent_reports` e retorna o relatório mais recente em
 conteúdo textual e `structuredContent`. Quando não houver relatório salvo,
 retorna `found: false` sem quebrar a chamada.
 
+### `list_market_events`
+
+Consulta `petroagent.market_events` e retorna eventos ordenados por
+`event_date` em ordem decrescente. Aceita filtros simples:
+
+- `limit`: quantidade máxima de eventos, de 1 a 50.
+- `event_type`: tipo do evento.
+- `date_from`: data inicial em ISO 8601.
+- `date_to`: data final em ISO 8601.
+
 ## Próximas tools
 
 As próximas issues da Fase 8 devem registrar novas tools em arquivos dedicados
 dentro de `src/tools/`:
 
-- `list_market_events`
 - `get_market_snapshot`
 - `search_agent_memory`
