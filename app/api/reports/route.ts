@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     const out = await generateReport({ text, urls });
 
     try {
-      await saveReport(out.engine, out.result as Record<string, unknown>, body.urls?.[0] ?? null);
+      await saveReport(out.engine, out.result as Record<string, unknown>);
     } catch {
       // swallow persistence errors to avoid breaking response
     }

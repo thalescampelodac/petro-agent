@@ -2,8 +2,8 @@
 
 ## 1. Identidade do projeto
 
-**Nome do projeto:** PetroAgent  
-**Descrição curta:** portal público de um agente inteligente especializado no acompanhamento da Petrobras/PETR4.  
+**Nome do projeto:** PetroAgent
+**Descrição curta:** portal público de um agente inteligente especializado no acompanhamento da Petrobras/PETR4.
 **Objetivo:** criar uma plataforma web gratuita, simples e evolutiva que reúna dados públicos, registros internos, análises automatizadas e interações sociais leves em torno da ação da Petrobras.
 
 O PetroAgent não é corretora, casa de análise, recomendação de investimento ou promessa de rentabilidade. Ele é um **radar informativo inteligente** para comunicação, acompanhamento e interpretação de dados públicos sobre Petrobras/PETR4.
@@ -24,6 +24,7 @@ Sempre que trabalhar neste projeto:
 8. Sempre crie critérios de aceite claros para cada issue.
 9. Sempre que possível, use componentes reutilizáveis.
 10. Evite overengineering.
+11. Sempre crie uma issue ou card antes de começar a implementação; nada deve avançar sem documentação clara do escopo.
 
 ---
 
@@ -89,7 +90,7 @@ Criar a base técnica do projeto.
 
 #### Issue 0.1 — Criar projeto Next.js
 
-**Descrição:**  
+**Descrição:**
 Inicializar o projeto `petroagent` usando Next.js, TypeScript e estrutura moderna de app router.
 
 **Critérios de aceite:**
@@ -109,7 +110,7 @@ npx create-next-app@latest petroagent --typescript --tailwind --eslint --app
 
 #### Issue 0.2 — Configurar Tailwind e shadcn/ui
 
-**Descrição:**  
+**Descrição:**
 Configurar a base visual do projeto com Tailwind CSS e shadcn/ui.
 
 **Critérios de aceite:**
@@ -123,7 +124,7 @@ Configurar a base visual do projeto com Tailwind CSS e shadcn/ui.
 
 #### Issue 0.3 — Configurar Supabase
 
-**Descrição:**  
+**Descrição:**
 Adicionar integração inicial com Supabase.
 
 **Critérios de aceite:**
@@ -137,7 +138,7 @@ Adicionar integração inicial com Supabase.
 
 #### Issue 0.4 — Configurar deploy na Vercel
 
-**Descrição:**  
+**Descrição:**
 Preparar o projeto para deploy gratuito na Vercel.
 
 **Critérios de aceite:**
@@ -150,7 +151,7 @@ Preparar o projeto para deploy gratuito na Vercel.
 
 #### Issue 0.5 — Criar identidade visual inicial
 
-**Descrição:**  
+**Descrição:**
 Criar identidade visual inicial do PetroAgent.
 
 **Critérios de aceite:**
@@ -172,7 +173,7 @@ Apresentar o PetroAgent ao público.
 
 #### Issue 1.1 — Criar hero principal
 
-**Descrição:**  
+**Descrição:**
 Criar seção inicial com nome, proposta e CTA visual.
 
 **Texto sugerido:**
@@ -190,7 +191,7 @@ Criar seção inicial com nome, proposta e CTA visual.
 
 #### Issue 1.2 — Criar seção “Como funciona”
 
-**Descrição:**  
+**Descrição:**
 Explicar de forma simples como o agente coleta, registra, interpreta e apresenta informações.
 
 **Critérios de aceite:**
@@ -203,7 +204,7 @@ Explicar de forma simples como o agente coleta, registra, interpreta e apresenta
 
 #### Issue 1.3 — Criar seção “O que o agente monitora”
 
-**Descrição:**  
+**Descrição:**
 Listar os principais tipos de informação acompanhados.
 
 **Itens sugeridos:**
@@ -225,7 +226,7 @@ Listar os principais tipos de informação acompanhados.
 
 #### Issue 1.4 — Criar seção “Última análise do agente”
 
-**Descrição:**  
+**Descrição:**
 Exibir um card com a análise mais recente salva no banco ou fallback estático.
 
 **Critérios de aceite:**
@@ -238,7 +239,7 @@ Exibir um card com a análise mais recente salva no banco ou fallback estático.
 
 #### Issue 1.5 — Criar footer institucional
 
-**Descrição:**  
+**Descrição:**
 Criar rodapé com links, aviso legal e contato básico.
 
 **Critérios de aceite:**
@@ -267,7 +268,7 @@ Criar engajamento sem login, sem email e sem custo.
 
 #### Issue 2.1 — Criar botão “Gostei do projeto ❤️”
 
-**Descrição:**  
+**Descrição:**
 Criar botão público de interação onde qualquer visitante pode clicar para demonstrar apoio.
 
 **Critérios de aceite:**
@@ -281,7 +282,7 @@ Criar botão público de interação onde qualquer visitante pode clicar para de
 
 #### Issue 2.2 — Criar contador global de curtidas
 
-**Descrição:**  
+**Descrição:**
 Persistir e exibir o número total de cliques no botão de apoio.
 
 **Critérios de aceite:**
@@ -304,7 +305,7 @@ create table public.project_likes (
 
 #### Issue 2.3 — Criar microinterações do botão
 
-**Descrição:**  
+**Descrição:**
 Adicionar animações simpáticas ao botão de gostei.
 
 **Critérios de aceite:**
@@ -324,7 +325,7 @@ Adicionar animações simpáticas ao botão de gostei.
 
 #### Issue 2.4 — Criar proteção simples anti-abuso
 
-**Descrição:**  
+**Descrição:**
 Adicionar proteção mínima para evitar abuso excessivo, sem impedir a brincadeira.
 
 **Critérios de aceite:**
@@ -345,7 +346,7 @@ Criar o painel público principal do agente.
 
 #### Issue 3.1 — Criar página `/petrobras`
 
-**Descrição:**  
+**Descrição:**
 Criar página dedicada ao painel do PetroAgent para Petrobras/PETR4.
 
 **Critérios de aceite:**
@@ -358,7 +359,7 @@ Criar página dedicada ao painel do PetroAgent para Petrobras/PETR4.
 
 #### Issue 3.2 — Criar card de dados básicos PETR4
 
-**Descrição:**  
+**Descrição:**
 Exibir dados básicos da ação PETR4.
 
 **Campos sugeridos:**
@@ -380,7 +381,7 @@ Exibir dados básicos da ação PETR4.
 
 #### Issue 3.3 — Criar seção “Resumo inteligente”
 
-**Descrição:**  
+**Descrição:**
 Exibir resumo mais recente gerado pelo agente.
 
 **Critérios de aceite:**
@@ -393,7 +394,7 @@ Exibir resumo mais recente gerado pelo agente.
 
 #### Issue 3.4 — Criar indicador de sentimento
 
-**Descrição:**  
+**Descrição:**
 Exibir sentimento textual do agente.
 
 **Estados sugeridos:**
@@ -413,7 +414,7 @@ Exibir sentimento textual do agente.
 
 #### Issue 3.5 — Criar timeline de eventos
 
-**Descrição:**  
+**Descrição:**
 Exibir últimos eventos relevantes acompanhados pelo agente.
 
 **Critérios de aceite:**
@@ -517,7 +518,7 @@ Criar rotinas de alimentação do agente.
 
 #### Issue 5.1 — Criar coletor manual de fontes
 
-**Descrição:**  
+**Descrição:**
 Criar script ou endpoint administrativo simples para registrar manualmente fontes públicas.
 
 **Critérios de aceite:**
@@ -530,7 +531,7 @@ Criar script ou endpoint administrativo simples para registrar manualmente fonte
 
 #### Issue 5.2 — Criar coletor de RI Petrobras
 
-**Descrição:**  
+**Descrição:**
 Criar rotina para buscar publicações públicas de RI da Petrobras quando tecnicamente possível.
 
 **Critérios de aceite:**
@@ -544,7 +545,7 @@ Criar rotina para buscar publicações públicas de RI da Petrobras quando tecni
 
 #### Issue 5.3 — Criar rotina de cache
 
-**Descrição:**  
+**Descrição:**
 Evitar chamadas repetidas a fontes externas.
 
 **Critérios de aceite:**
@@ -565,7 +566,7 @@ Transformar dados coletados em interpretação simples.
 
 #### Issue 6.1 — Criar prompt-base do PetroAgent
 
-**Descrição:**  
+**Descrição:**
 Criar prompt do agente com regras de segurança, tom e limites.
 
 **Prompt-base sugerido:**
@@ -588,7 +589,7 @@ Regras:
 
 #### Issue 6.2 — Criar pipeline de geração de relatório
 
-**Descrição:**  
+**Descrição:**
 Criar função que recebe fontes não processadas, gera relatório e salva em `agent_reports`.
 
 **Critérios de aceite:**
@@ -604,7 +605,7 @@ Criar função que recebe fontes não processadas, gera relatório e salva em `a
 
 #### Issue 6.3 — Criar fallback sem IA
 
-**Descrição:**  
+**Descrição:**
 Criar fallback quando a IA estiver indisponível ou sem chave configurada.
 
 **Critérios de aceite:**
@@ -612,6 +613,22 @@ Criar fallback quando a IA estiver indisponível ou sem chave configurada.
 - Sistema continua funcionando.
 - Exibe mensagem transparente.
 - Não quebra o painel público.
+
+---
+
+#### Issue 6.4 — Persistir relatórios gerados
+
+**Descrição:**
+Persistir relatórios gerados pelo agente na tabela `petroagent.agent_reports`
+para histórico, auditoria e exibição pública.
+
+**Critérios de aceite:**
+
+- Serviço `services/reports.ts` com `saveReport()` e `listReports()`.
+- Endpoint `POST /api/reports` grava relatório gerado.
+- Endpoint `GET /api/reports` lista relatórios paginados.
+- Testes automatizados cobrindo persistência e API.
+- Documentação atualizada em `README.md` e `AGENTES.md`.
 
 ---
 
@@ -625,7 +642,7 @@ Humanizar o projeto e permitir contato/doação.
 
 #### Issue 7.1 — Criar seção “Apoie o projeto”
 
-**Descrição:**  
+**Descrição:**
 Criar seção explicando que o projeto é experimental, gratuito e pode ser apoiado.
 
 **Critérios de aceite:**
@@ -638,7 +655,7 @@ Criar seção explicando que o projeto é experimental, gratuito e pode ser apoi
 
 #### Issue 7.2 — Adicionar QRCode PIX
 
-**Descrição:**  
+**Descrição:**
 Adicionar área para QRCode de doação PIX.
 
 **Critérios de aceite:**
@@ -651,7 +668,7 @@ Adicionar área para QRCode de doação PIX.
 
 #### Issue 7.3 — Criar seção “Entre em contato com o criador”
 
-**Descrição:**  
+**Descrição:**
 Criar bloco com dados de contato do criador.
 
 **Campos sugeridos:**
@@ -672,7 +689,7 @@ Criar bloco com dados de contato do criador.
 
 #### Issue 7.4 — Criar roadmap público
 
-**Descrição:**  
+**Descrição:**
 Exibir roadmap resumido do projeto.
 
 **Critérios de aceite:**
@@ -701,7 +718,7 @@ O MCP não deve bloquear o MVP 1. Ele é uma evolução arquitetural.
 
 #### Issue 8.1 — Criar estrutura do MCP Server
 
-**Descrição:**  
+**Descrição:**
 Criar diretório e estrutura inicial para servidor MCP.
 
 **Estrutura sugerida:**
@@ -726,10 +743,10 @@ mcp-server/
 
 #### Issue 8.2 — Criar tool `get_latest_report`
 
-**Descrição:**  
+**Descrição:**
 Ferramenta MCP para recuperar o relatório mais recente do PetroAgent.
 
-**Entrada:** nenhuma ou ticker opcional.  
+**Entrada:** nenhuma ou ticker opcional.
 **Saída:** último relatório salvo.
 
 **Critérios de aceite:**
@@ -742,7 +759,7 @@ Ferramenta MCP para recuperar o relatório mais recente do PetroAgent.
 
 #### Issue 8.3 — Criar tool `list_market_events`
 
-**Descrição:**  
+**Descrição:**
 Ferramenta MCP para listar eventos recentes da Petrobras/PETR4.
 
 **Entrada sugerida:**
@@ -762,7 +779,7 @@ Ferramenta MCP para listar eventos recentes da Petrobras/PETR4.
 
 #### Issue 8.4 — Criar tool `get_market_snapshot`
 
-**Descrição:**  
+**Descrição:**
 Ferramenta MCP para recuperar último snapshot de mercado salvo.
 
 **Critérios de aceite:**
@@ -775,7 +792,7 @@ Ferramenta MCP para recuperar último snapshot de mercado salvo.
 
 #### Issue 8.5 — Criar tool `search_agent_memory`
 
-**Descrição:**  
+**Descrição:**
 Ferramenta MCP para buscar fontes, eventos e relatórios por termo.
 
 **Critérios de aceite:**
@@ -796,7 +813,7 @@ Adicionar capacidades mais avançadas ao agente.
 
 #### Issue 9.1 — Criar busca semântica futura
 
-**Descrição:**  
+**Descrição:**
 Planejar e implementar busca semântica usando embeddings quando houver necessidade real.
 
 **Critérios de aceite:**
@@ -809,7 +826,7 @@ Planejar e implementar busca semântica usando embeddings quando houver necessid
 
 #### Issue 9.2 — Criar comparação temporal
 
-**Descrição:**  
+**Descrição:**
 Permitir comparar relatório atual com relatórios anteriores.
 
 **Critérios de aceite:**
@@ -822,7 +839,7 @@ Permitir comparar relatório atual com relatórios anteriores.
 
 #### Issue 9.3 — Criar sumarização contextual
 
-**Descrição:**  
+**Descrição:**
 Permitir que o agente gere respostas com base em múltiplas fontes salvas.
 
 **Critérios de aceite:**
@@ -851,7 +868,7 @@ Preparar o PetroAgent para expansão futura.
 
 #### Issue 10.1 — Criar abstração de empresa monitorada
 
-**Descrição:**  
+**Descrição:**
 Generalizar o modelo para suportar outras empresas no futuro.
 
 **Critérios de aceite:**
@@ -864,7 +881,7 @@ Generalizar o modelo para suportar outras empresas no futuro.
 
 #### Issue 10.2 — Criar arquitetura modular de agentes
 
-**Descrição:**  
+**Descrição:**
 Separar regras específicas por empresa/agente.
 
 **Critérios de aceite:**
