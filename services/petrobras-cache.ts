@@ -16,6 +16,7 @@ export type CachedPetrobrasEvent = {
   created_at: string;
   event_date: string | null;
   event_type: string;
+  relevance_score: number | null;
   source_id: number | null;
   summary: string | null;
   title: string;
@@ -89,7 +90,9 @@ export async function getCachedPetrobrasData(): Promise<CachedPetrobrasData> {
     client
       .schema(PETROAGENT_SCHEMA)
       .from("market_events")
-      .select("created_at, event_date, event_type, source_id, summary, title")
+      .select(
+        "created_at, event_date, event_type, relevance_score, source_id, summary, title",
+      )
       .order("event_date", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false })
       .limit(5),

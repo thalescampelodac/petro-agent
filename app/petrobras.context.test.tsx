@@ -34,7 +34,9 @@ describe("PetrobrasPage", () => {
       "aria-valuenow",
       "52",
     );
-    expect(screen.getByText(/linha do tempo/i)).toBeInTheDocument();
+    expect(screen.getByText(/eventos recentes/i)).toBeInTheDocument();
+    expect(screen.getByText(/radar inicial preparado/i)).toBeInTheDocument();
+    expect(screen.getByText(/62\/100/i)).toBeInTheDocument();
     expect(screen.getByText(/fonte: fallback/i)).toBeInTheDocument();
     expect(screen.getByText(/sem recomendação financeira/i)).toBeInTheDocument();
   });

@@ -55,6 +55,9 @@ export type PetrobrasSignal = {
 
 export type PetrobrasTimelineEvent = {
   date: string;
+  relevanceLabel: string;
+  relevanceScore: number | null;
+  summary: string | null;
   title: string;
   type: string;
   source: string;
@@ -169,18 +172,30 @@ export function getPetrobrasTimelineEvents(): PetrobrasTimelineEvent[] {
   return sortPetrobrasTimelineEvents([
     {
       date: "19/05/2026",
+      relevanceLabel: "Demonstração",
+      relevanceScore: null,
+      summary:
+        "Estrutura inicial do radar preparada para receber eventos persistidos sobre Petrobras/PETR4.",
       title: "Radar inicial preparado",
       type: "Sistema",
       source: "Mock interno",
     },
     {
       date: "18/05/2026",
+      relevanceLabel: "Média",
+      relevanceScore: 62,
+      summary:
+        "Acompanhamento demonstrativo de proventos e comunicados relacionados ao ativo.",
       title: "Monitoramento de dividendos em destaque",
       type: "Dividendos",
       source: "Fallback",
     },
     {
       date: "17/05/2026",
+      relevanceLabel: "Baixa",
+      relevanceScore: 28,
+      summary:
+        "Estado de exemplo para sinalizar ausência de alerta crítico no painel público.",
       title: "Sem fato relevante crítico no painel demonstrativo",
       type: "RI",
       source: "Mock interno",
@@ -202,7 +217,10 @@ export async function getPetrobrasDashboardData(): Promise<PetrobrasDashboardDat
       ? sortPetrobrasTimelineEvents(
           cachedData.events.map((event) => ({
             date: formatDate(event.event_date ?? event.created_at),
+            relevanceLabel: getRelevanceLabel(event.relevance_score),
+            relevanceScore: event.relevance_score,
             source: event.source_id ? `Fonte #${event.source_id}` : "Banco de dados",
+            summary: event.summary,
             title: event.title,
             type: event.event_type,
           })),
@@ -245,6 +263,22 @@ function parseBrazilianDate(date: string) {
   const [day, month, year] = date.split("/").map(Number);
 
   return new Date(year, month - 1, day).getTime();
+}
+
+function getRelevanceLabel(score: number | null) {
+  if (typeof score !== "number") {
+    return "Não classificada";
+  }
+
+  if (score >= 75) {
+    return "Alta";
+  }
+
+  if (score >= 45) {
+    return "Média";
+  }
+
+  return "Baixa";
 }
 
 function mapAgentReportToPetrobrasReport(report: {

@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 
-import { Activity, Sparkles } from "lucide-react";
+import { Activity, Clock3, Gauge, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -281,31 +281,62 @@ export function TimelineCard({
   events: PetrobrasTimelineEvent[];
 }) {
   return (
-    <Card className="border-white/10 bg-white/[0.035] shadow-none">
-      <CardHeader>
-        <CardTitle className="text-white">Linha do tempo</CardTitle>
-        <CardDescription className="text-slate-400">
-          Eventos ordenados por data, com tipo e fonte disponíveis.
-        </CardDescription>
+    <Card className="overflow-hidden border-white/10 bg-white/[0.035] shadow-none">
+      <CardHeader className="border-b border-white/10">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <CardTitle className="text-white">Eventos recentes</CardTitle>
+            <CardDescription className="mt-1 text-slate-400">
+              Timeline ordenada por data com tipo, contexto e relevância.
+            </CardDescription>
+          </div>
+          <Badge className="w-fit border-sky-300/20 bg-sky-300/10 text-sky-100">
+            {events.length > 0 ? `${events.length} sinais` : "Sem eventos"}
+          </Badge>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 p-5">
         {events.length > 0 ? (
           events.map((event) => (
             <article
-              className="relative rounded-lg border border-white/10 bg-black/20 p-4"
+              className="group relative overflow-hidden rounded-lg border border-white/10 bg-black/20 p-4 transition hover:border-sky-300/25"
               key={`${event.date}-${event.title}`}
             >
-              <div className="absolute bottom-4 left-0 top-4 w-px bg-emerald-300/35" />
-              <div className="flex flex-wrap items-center gap-2">
-                <time className="font-mono text-xs text-slate-500">{event.date}</time>
-                <Badge variant="outline" className="border-white/15 text-xs">
-                  {event.type}
-                </Badge>
+              <div className="absolute bottom-4 left-0 top-4 w-px bg-gradient-to-b from-sky-300/20 via-emerald-300/70 to-sky-300/20" />
+              <div className="flex flex-col gap-4 pl-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge className="border-emerald-300/20 bg-emerald-300/10 text-xs text-emerald-100">
+                    {event.type}
+                  </Badge>
+                  <span className="flex items-center gap-1 font-mono text-xs text-slate-500">
+                    <Clock3 className="size-3" />
+                    <time>{event.date}</time>
+                  </span>
+                </div>
+
+                <div>
+                  <h2 className="text-sm font-semibold leading-6 text-white">
+                    {event.title}
+                  </h2>
+                  <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-400">
+                    {event.summary ??
+                      "Evento registrado sem resumo textual estruturado. O painel mantém o item visível para preservar rastreabilidade."}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-xs text-slate-500">Fonte: {event.source}</p>
+                  <div className="flex items-center gap-2 rounded bg-white/[0.06] px-2 py-1 text-xs text-slate-300">
+                    <Gauge className="size-3 text-sky-200" />
+                    <span>{event.relevanceLabel}</span>
+                    {typeof event.relevanceScore === "number" ? (
+                      <span className="font-mono text-slate-500">
+                        {event.relevanceScore}/100
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
               </div>
-              <h2 className="mt-2 text-sm font-medium leading-6 text-white">
-                {event.title}
-              </h2>
-              <p className="mt-1 text-xs text-slate-500">Fonte: {event.source}</p>
             </article>
           ))
         ) : (
