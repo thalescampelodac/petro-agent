@@ -91,7 +91,7 @@ describe("LikeButton", () => {
 
     render(<LikeButton />);
 
-    expect(screen.getByText("138")).toBeInTheDocument();
+    expect(await screen.findByText("138")).toBeInTheDocument();
     expect(screen.queryByText("128")).not.toBeInTheDocument();
     expect(await screen.findByText("140")).toBeInTheDocument();
   });
