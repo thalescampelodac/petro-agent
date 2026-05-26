@@ -33,6 +33,7 @@ export type CachedMarketSnapshot = {
 export type CachedPetrobrasData = {
   events: CachedPetrobrasEvent[];
   report: CachedPetrobrasReport | null;
+  reports: CachedPetrobrasReport[];
   snapshot: CachedMarketSnapshot | null;
   source: "supabase" | "fallback";
 };
@@ -72,19 +73,19 @@ export async function getCachedPetrobrasData(): Promise<CachedPetrobrasData> {
     return {
       events: [],
       report: null,
+      reports: [],
       snapshot: null,
       source: "fallback",
     };
   }
 
-  const [reportResult, eventsResult, snapshotResult] = await Promise.all([
+  const [reportsResult, eventsResult, snapshotResult] = await Promise.all([
     client
       .schema(PETROAGENT_SCHEMA)
       .from("agent_reports")
       .select("created_at, model_used, sentiment, source_count, summary, title")
       .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
+      .limit(3),
     client
       .schema(PETROAGENT_SCHEMA)
       .from("market_events")
@@ -103,18 +104,22 @@ export async function getCachedPetrobrasData(): Promise<CachedPetrobrasData> {
       .maybeSingle(),
   ]);
 
-  if (reportResult.error || eventsResult.error || snapshotResult.error) {
+  if (reportsResult.error || eventsResult.error || snapshotResult.error) {
     return {
       events: [],
       report: null,
+      reports: [],
       snapshot: null,
       source: "fallback",
     };
   }
 
+  const reports = (reportsResult.data ?? []) as CachedPetrobrasReport[];
+
   const value: CachedPetrobrasData = {
     events: (eventsResult.data ?? []) as CachedPetrobrasEvent[],
-    report: (reportResult.data ?? null) as CachedPetrobrasReport | null,
+    report: reports[0] ?? null,
+    reports,
     snapshot: (snapshotResult.data ?? null) as CachedMarketSnapshot | null,
     source: "supabase",
   };

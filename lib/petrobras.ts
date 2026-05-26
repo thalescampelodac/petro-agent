@@ -30,6 +30,15 @@ export type PetrobrasReport = {
   status: "Saved" | "Fallback";
 };
 
+export type PetrobrasRecentReport = {
+  generatedAt: string;
+  modelUsed: string;
+  sentiment: string;
+  sourceCount: string;
+  summary: string;
+  title: string;
+};
+
 export type PetrobrasPanelMetric = {
   label: string;
   value: string;
@@ -64,6 +73,7 @@ export type PetrobrasDashboardData = {
   monitoredSignals: PetrobrasSignal[];
   panelMetrics: PetrobrasPanelMetric[];
   report: PetrobrasReport | null;
+  recentReports: PetrobrasRecentReport[];
   sentiment: PetrobrasSentiment;
   timelineEvents: PetrobrasTimelineEvent[];
 };
@@ -186,6 +196,7 @@ export async function getPetrobrasDashboardData(): Promise<PetrobrasDashboardDat
   const report = cachedData.report
     ? mapAgentReportToPetrobrasReport(cachedData.report)
     : getLatestPetrobrasReport();
+  const recentReports = cachedData.reports.map(mapAgentReportToRecentReport);
   const timelineEvents =
     cachedData.events.length > 0
       ? sortPetrobrasTimelineEvents(
@@ -203,6 +214,7 @@ export async function getPetrobrasDashboardData(): Promise<PetrobrasDashboardDat
     monitoredSignals: getPetrobrasMonitoredSignals(),
     panelMetrics: getPetrobrasPanelMetrics(basicData),
     report,
+    recentReports,
     sentiment: getPetrobrasSentiment(report),
     timelineEvents,
   };
@@ -246,6 +258,27 @@ function mapAgentReportToPetrobrasReport(report: {
     source: report.model_used ? `Banco de dados · ${report.model_used}` : "Banco de dados",
     status: "Saved",
     summary: report.summary,
+  };
+}
+
+function mapAgentReportToRecentReport(report: {
+  created_at: string;
+  model_used: string | null;
+  sentiment: string | null;
+  source_count: number | null;
+  summary: string;
+  title: string;
+}): PetrobrasRecentReport {
+  return {
+    generatedAt: formatDateTime(report.created_at),
+    modelUsed: report.model_used ?? "Modelo não informado",
+    sentiment: report.sentiment ?? "Sem sentimento",
+    sourceCount:
+      typeof report.source_count === "number"
+        ? `${report.source_count} fonte${report.source_count === 1 ? "" : "s"}`
+        : "Fontes não informadas",
+    summary: report.summary,
+    title: report.title,
   };
 }
 

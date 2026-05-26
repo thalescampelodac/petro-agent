@@ -5,6 +5,7 @@ vi.mock("@/services/petrobras-cache", () => ({
   getCachedPetrobrasData: vi.fn(async () => ({
     events: [],
     report: null,
+    reports: [],
     snapshot: null,
     source: "fallback",
   })),
@@ -26,6 +27,8 @@ describe("PetrobrasPage", () => {
     expect(screen.getByText(/dados básicos petr4/i)).toBeInTheDocument();
     expect(screen.getByText(/resumo inteligente/i)).toBeInTheDocument();
     expect(screen.getByText(/fallback mockado/i)).toBeInTheDocument();
+    expect(screen.getByText(/relatórios recentes/i)).toBeInTheDocument();
+    expect(screen.getByText(/nenhum relatório salvo ainda/i)).toBeInTheDocument();
     expect(screen.getByText(/indicador de sentimento/i)).toBeInTheDocument();
     expect(screen.getByRole("meter", { name: /sentimento neutro/i })).toHaveAttribute(
       "aria-valuenow",

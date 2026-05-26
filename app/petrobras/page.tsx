@@ -25,6 +25,7 @@ import {
 import {
   BasicDataCard,
   MetricCard,
+  RecentReportsCard,
   SentimentIndicator,
   SignalCard,
   SummaryCard,
@@ -42,6 +43,7 @@ export default async function PetrobrasPage() {
     basicData,
     monitoredSignals,
     panelMetrics,
+    recentReports,
     report,
     sentiment,
     timelineEvents,
@@ -137,6 +139,8 @@ export default async function PetrobrasPage() {
           <BasicDataCard data={basicData} />
 
           <SummaryCard report={report} />
+
+          <RecentReportsCard reports={recentReports} />
 
           <SentimentIndicator sentiment={sentiment} />
 
