@@ -47,7 +47,7 @@ const compareReportsInputSchema = {
     .describe("Quantidade máxima de relatórios para comparar. Padrão: 5."),
 };
 
-async function compareReports({
+export async function compareReports({
   date_from,
   date_to,
   limit = 5,

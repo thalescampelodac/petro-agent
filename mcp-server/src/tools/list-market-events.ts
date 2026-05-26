@@ -58,7 +58,7 @@ const listMarketEventsInputSchema = {
     .describe("Quantidade máxima de eventos. Padrão: 10; máximo: 50."),
 };
 
-async function listMarketEvents({
+export async function listMarketEvents({
   date_from,
   date_to,
   event_type,

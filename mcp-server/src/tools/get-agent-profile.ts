@@ -2,6 +2,13 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 import { agentProfiles, getDefaultAgentProfile } from "../agents/registry.js";
 
+export function getAgentProfile() {
+  return {
+    active_profile: getDefaultAgentProfile(),
+    available_profiles: agentProfiles,
+  };
+}
+
 export function registerGetAgentProfileTool(server: McpServer) {
   server.registerTool(
     "get_agent_profile",
@@ -17,10 +24,7 @@ export function registerGetAgentProfileTool(server: McpServer) {
       title: "Perfil modular do agente",
     },
     async () => {
-      const result = {
-        active_profile: getDefaultAgentProfile(),
-        available_profiles: agentProfiles,
-      };
+      const result = getAgentProfile();
 
       return {
         content: [

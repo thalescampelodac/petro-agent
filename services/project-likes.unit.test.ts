@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { createSupabaseFixtureClient } from "@/test/fixtures/supabase";
+
 const originalEnv = process.env;
 
 describe("project likes service", () => {
@@ -38,11 +40,14 @@ describe("project likes service", () => {
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: " publishable-key\n",
       NEXT_PUBLIC_SUPABASE_URL: " https://example.supabase.co\n",
     };
-    const select = vi.fn().mockResolvedValue({ count: 7, error: null });
-    const insert = vi.fn().mockResolvedValue({ error: null });
-    const from = vi.fn(() => ({ insert, select }));
-    const schema = vi.fn(() => ({ from }));
-    const createClient = vi.fn(() => ({ schema }));
+    const { calls, client, from, schema } = createSupabaseFixtureClient({
+      project_likes: [
+        { count: 7, data: null, error: null },
+        { data: null, error: null },
+        { count: 7, data: null, error: null },
+      ],
+    });
+    const createClient = vi.fn(() => client);
 
     vi.doMock("@supabase/supabase-js", () => ({
       createClient,
@@ -68,7 +73,15 @@ describe("project likes service", () => {
       "publishable-key",
       expect.any(Object),
     );
-    expect(insert).toHaveBeenCalledWith({ source: "web" });
-    expect(select).toHaveBeenCalledWith("id", { count: "exact", head: true });
+    expect(calls).toContainEqual({
+      args: [{ source: "web" }],
+      method: "insert",
+      table: "project_likes",
+    });
+    expect(calls).toContainEqual({
+      args: ["id", { count: "exact", head: true }],
+      method: "select",
+      table: "project_likes",
+    });
   });
 });
