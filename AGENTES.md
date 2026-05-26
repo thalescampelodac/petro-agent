@@ -1139,6 +1139,13 @@ Regras para esta etapa:
 - Se criar novas tabelas, usar migrations em `supabase/migrations` e sempre no schema `petroagent`.
 - Proteger qualquer endpoint operacional com variável de ambiente/token server-side.
 
+Decisão da #77:
+
+- O agente começa com `npm run agent:run`.
+- O executor lê contexto persistido e salva novo relatório em `petroagent.agent_reports`.
+- Sem chave de IA, usa fallback determinístico.
+- Não há cron, endpoint público ou automação nesta etapa.
+
 ---
 
 # Prioridade atual

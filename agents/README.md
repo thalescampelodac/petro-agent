@@ -18,3 +18,22 @@ O perfil modular inicial fica no servidor MCP em
 
 Novos agentes devem entrar como novos perfis no registry, com tickers, fontes e
 guardrails próprios, sem quebrar o comportamento atual de Petrobras/PETR4.
+
+## Executor manual
+
+O executor manual fica em `services/agent-executor.ts` e pode ser iniciado por:
+
+```bash
+npm run agent:run
+```
+
+Fluxo atual:
+
+1. Ler `sources`, `market_events`, `market_snapshots` e `agent_reports` no schema
+   `petroagent`.
+2. Montar um prompt/contexto operacional com guardrails explícitos.
+3. Gerar relatório via IA quando configurada ou fallback determinístico.
+4. Persistir o resultado em `petroagent.agent_reports`.
+
+Este executor não é cron, não é endpoint público e não deve ser disparado em
+acesso de usuário. Gatilho protegido e agendamento ficam para issues futuras.
