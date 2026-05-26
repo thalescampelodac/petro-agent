@@ -64,8 +64,9 @@ Stack inicial:
 
 ### MVP 2 - Infraestrutura MCP do agente
 
-1. Fase 8: servidor MCP futuro e tools estruturadas.
-2. Fase 9: ferramentas inteligentes como busca semantica e comparacao temporal.
+1. Fase 8: servidor MCP e tools estruturadas de leitura.
+2. Fase 9: ferramentas inteligentes como busca textual, comparacao temporal e
+   sumarizacao contextual com dados persistidos.
 3. Fase 10: arquitetura multiagente para outras empresas ou ativos.
 
 ## MCP Server
@@ -79,14 +80,24 @@ npm install
 npm run dev
 ```
 
-As tools serão adicionadas em issues futuras da Fase 8.
+Tools disponíveis:
 
-Tool disponível:
-
+- `get_agent_profile`: retorna o perfil modular ativo e a abstração inicial de
+  empresa/ativo monitorado.
 - `get_latest_report`: consulta `petroagent.agent_reports` e retorna o relatório
   mais recente em formato textual e estruturado.
 - `list_market_events`: consulta `petroagent.market_events` e retorna eventos
   ordenados por data, com filtros simples por tipo e período.
+- `get_market_snapshot`: consulta o último snapshot salvo por ticker em
+  `petroagent.market_snapshots`, sem API externa em tempo real.
+- `search_agent_memory`: busca texto em fontes, eventos e relatórios salvos.
+- `compare_reports`: compara relatórios por período e aponta mudanças básicas
+  de sentimento e quantidade de fontes.
+- `summarize_context`: sintetiza fontes e eventos persistidos sem chamada de IA.
+
+A busca semântica com embeddings permanece como evolução futura e só deve ser
+ativada quando houver volume e necessidade real. Até lá, a busca textual mantém
+custo zero e rastreabilidade.
 
 ## Execucao local
 
@@ -109,6 +120,7 @@ npm run test:unit
 npm run test:integration
 npm run test:context
 npm run build
+npm run verify:mcp
 ```
 
 Camadas de teste:
@@ -117,6 +129,8 @@ Camadas de teste:
 - Integracao: validam componentes interativos e comportamento de UI.
 - Contexto: validam narrativa, limites de produto e mensagens essenciais da
   experiencia publica.
+- MCP: instala dependencias do `mcp-server`, roda typecheck e build da camada
+  MCP isolada.
 
 ## Status da landing
 

@@ -10,6 +10,8 @@ projeto.
 mcp-server/
   src/
     server.ts
+    agents/
+      registry.ts
     db/
       supabase.ts
     tools/
@@ -59,6 +61,12 @@ deve ser exposta no client.
 
 As tools ficam registradas em `src/tools/index.ts`.
 
+### `get_agent_profile`
+
+Retorna o perfil modular ativo do PetroAgent, com a abstração inicial de
+empresa/ativo monitorado. Nesta etapa o perfil padrão é Petrobras/PETR4, mas a
+estrutura já permite adicionar outros agentes sem migração traumática.
+
 ### `get_latest_report`
 
 Consulta `petroagent.agent_reports` e retorna o relatório mais recente em
@@ -75,10 +83,39 @@ Consulta `petroagent.market_events` e retorna eventos ordenados por
 - `date_from`: data inicial em ISO 8601.
 - `date_to`: data final em ISO 8601.
 
-## Próximas tools
+### `get_market_snapshot`
 
-As próximas issues da Fase 8 devem registrar novas tools em arquivos dedicados
-dentro de `src/tools/`:
+Consulta `petroagent.market_snapshots` e retorna o último registro salvo por
+ticker. O ticker padrão é `PETR4`. A tool não consulta APIs externas em tempo
+real.
 
-- `get_market_snapshot`
-- `search_agent_memory`
+### `search_agent_memory`
+
+Busca textual simples em `petroagent.sources`, `petroagent.market_events` e
+`petroagent.agent_reports`. Retorna o tipo do item encontrado, título, trecho
+textual e link/fonte interna quando disponível.
+
+### `compare_reports`
+
+Recupera relatórios salvos por período e compara o relatório mais recente com o
+anterior. A comparação aponta mudança de sentimento e variação na quantidade de
+fontes usadas.
+
+### `summarize_context`
+
+Gera uma sumarização contextual simples usando somente fontes e eventos
+persistidos. Não chama IA externa; a saída é uma síntese determinística para
+evitar custo e dependência no MVP.
+
+## Busca semântica futura
+
+A busca semântica com embeddings fica planejada para quando houver necessidade
+real e volume suficiente de dados. Até lá, `search_agent_memory` cobre a busca
+textual inicial sem custo adicional.
+
+Quando a busca semântica for ativada, a recomendação é:
+
+- criar embeddings em rotina assíncrona, nunca durante acesso público;
+- manter cache e rastreabilidade do item original;
+- limitar escopo por agente/ativo;
+- preservar fallback textual quando embeddings não existirem.

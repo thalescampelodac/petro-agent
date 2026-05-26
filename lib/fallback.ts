@@ -2,7 +2,7 @@ export type FallbackSummary = {
   summary: string;
   highlights: string[];
   key_facts: { label: string; value: string }[];
-  recommendation?: string;
+  next_steps?: string;
   sources: string[];
 };
 
@@ -32,11 +32,11 @@ export function generateFallbackSummary(sourceText: string): FallbackSummary {
 
   const key_facts = numbers.map((n, i) => ({ label: `fact_${i+1}`, value: n }));
 
-  const recommendation = highlights.length === 0 ? 'Review source for actionable signals.' : undefined;
+  const next_steps = highlights.length === 0 ? 'Revisar a fonte original para identificar sinais informativos verificáveis.' : undefined;
 
   const sources: string[] = [];
 
-  return { summary, highlights, key_facts, recommendation, sources };
+  return { summary, highlights, key_facts, next_steps, sources };
 }
 
 export default generateFallbackSummary;
