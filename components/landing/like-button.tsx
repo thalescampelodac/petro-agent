@@ -75,15 +75,17 @@ function getStoredLikeCount() {
 }
 
 export function LikeButton() {
-  const [count, setCount] = useState<number | null>(() => {
-    return getStoredLikeCount();
-  });
+  const [count, setCount] = useState<number | null>(null);
   const [isPopping, setIsPopping] = useState(false);
   const [message, setMessage] = useState("Mostre que você está acompanhando");
   const hasInteracted = useRef(false);
 
   useEffect(() => {
     const cachedCount = getStoredLikeCount();
+
+    if (typeof cachedCount === "number" && !hasInteracted.current) {
+      setCount(cachedCount);
+    }
 
     void fetchGlobalLikeCount().then((globalCount) => {
       if (typeof globalCount === "number" && !hasInteracted.current) {
