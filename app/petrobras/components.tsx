@@ -219,7 +219,7 @@ export function RecentReportsCard({
               Últimos resumos salvos pelo agente, sem gerar IA no carregamento.
             </CardDescription>
           </div>
-          <Badge className="w-fit border-emerald-300/20 bg-emerald-300/10 text-emerald-100">
+          <Badge className="h-auto w-fit whitespace-normal border-emerald-300/20 bg-emerald-300/10 text-emerald-100">
             {reports.length > 0 ? "Banco de dados" : "Aguardando registros"}
           </Badge>
         </div>
@@ -245,7 +245,7 @@ export function RecentReportsCard({
                     {report.title}
                   </h2>
                 </div>
-                <div className="flex shrink-0 flex-wrap gap-2 text-xs text-slate-400 sm:justify-end">
+                <div className="flex min-w-0 shrink-0 flex-wrap gap-2 text-xs text-slate-400 sm:justify-end">
                   <span className="rounded bg-white/[0.06] px-2 py-1">
                     {report.modelUsed}
                   </span>
@@ -290,7 +290,7 @@ export function TimelineCard({
               Timeline ordenada por data com tipo, contexto e relevância.
             </CardDescription>
           </div>
-          <Badge className="w-fit border-sky-300/20 bg-sky-300/10 text-sky-100">
+          <Badge className="h-auto w-fit whitespace-normal border-sky-300/20 bg-sky-300/10 text-sky-100">
             {events.length > 0 ? `${events.length} sinais` : "Sem eventos"}
           </Badge>
         </div>
@@ -324,9 +324,9 @@ export function TimelineCard({
                   </p>
                 </div>
 
-                <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                   <p className="text-xs text-slate-500">Fonte: {event.source}</p>
-                  <div className="flex items-center gap-2 rounded bg-white/[0.06] px-2 py-1 text-xs text-slate-300">
+                  <div className="flex w-fit items-center gap-2 rounded bg-white/[0.06] px-2 py-1 text-xs text-slate-300">
                     <Gauge className="size-3 text-sky-200" />
                     <span>{event.relevanceLabel}</span>
                     {typeof event.relevanceScore === "number" ? (
@@ -366,7 +366,7 @@ export function SignalCard({
 }) {
   return (
     <div className="min-h-36 rounded-lg border border-white/10 bg-black/20 p-4 transition hover:border-emerald-300/25">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.06]">
             <Icon className="size-4 text-emerald-200" />
@@ -378,7 +378,7 @@ export function SignalCard({
         </div>
         <Badge
           className={cn(
-            "shrink-0 border-white/10 bg-white/[0.04] text-xs text-slate-200",
+            "h-auto w-fit shrink-0 whitespace-normal border-white/10 bg-white/[0.04] text-xs text-slate-200",
             status === "Neutro" &&
               "border-sky-300/20 bg-sky-300/10 text-sky-100",
           )}
@@ -407,7 +407,7 @@ function InfoCell({
       <p className="text-xs text-slate-500">{label}</p>
       <p
         className={cn(
-          "mt-2 text-lg text-white",
+          "mt-2 break-words text-lg text-white",
           mono && "font-mono",
           highlight && "text-emerald-100",
         )}

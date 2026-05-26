@@ -120,22 +120,22 @@ export default function Home() {
       <section className="relative border-b border-white/10">
         <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(16,185,129,0.18),transparent_32%),radial-gradient(circle_at_78%_18%,rgba(59,130,246,0.18),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.04),transparent)]" />
         <a
-          className="absolute left-1/2 top-9 z-20 -translate-x-1/2 text-sm text-emerald-100/75 transition hover:text-emerald-100"
+          className="absolute left-1/2 top-24 z-20 -translate-x-1/2 text-sm text-emerald-100/75 transition hover:text-emerald-100 sm:top-9"
           href="#criador"
         >
           Criador
         </a>
-        <div className="absolute right-6 top-6 z-20 sm:right-8 sm:top-8">
+        <div className="absolute right-4 top-4 z-20 sm:right-8 sm:top-8">
           <LikeButton />
         </div>
-        <div className="relative mx-auto grid min-h-[92vh] w-full max-w-7xl gap-10 px-6 py-8 sm:py-10 lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:px-8">
+        <div className="relative mx-auto grid min-h-[92vh] w-full max-w-7xl gap-10 px-5 pb-10 pt-32 sm:px-6 sm:py-10 lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:px-8">
           <div className="flex flex-col gap-8">
-            <nav className="pr-44 sm:pr-72">
+            <nav className="max-w-[9rem] sm:max-w-none sm:pr-72 lg:pr-0">
               <div className="flex items-center gap-3">
                 <div className="flex size-10 items-center justify-center rounded-lg border border-emerald-300/30 bg-emerald-300/15">
                   <Radar className="size-5 text-emerald-200" />
                 </div>
-                <span className="text-sm font-semibold tracking-wide text-white">
+                <span className="text-sm font-semibold text-white">
                   PetroAgent
                 </span>
               </div>
@@ -152,7 +152,7 @@ export default function Home() {
               </div>
 
               <div className="space-y-5">
-                <h1 className="max-w-4xl text-5xl font-semibold leading-[1.02] text-white sm:text-6xl lg:text-7xl">
+                <h1 className="max-w-4xl text-4xl font-semibold leading-[1.05] text-white sm:text-6xl lg:text-7xl">
                   Um agente inteligente acompanhando Petrobras para você.
                 </h1>
                 <p className="max-w-2xl text-lg leading-8 text-slate-300">
@@ -188,7 +188,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="grid max-w-2xl grid-cols-3 gap-3">
+            <div className="grid max-w-2xl gap-3 sm:grid-cols-3">
               {[
                 ["6", "sinais monitorados"],
                 ["0", "recomendações financeiras"],
@@ -209,7 +209,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-7xl px-6 py-20 lg:px-8">
+      <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-6 sm:py-20 lg:px-8">
         <SectionHeader
           eyebrow="Monitoramento"
           title="O que o agente monitora"
@@ -240,7 +240,7 @@ export default function Home() {
       </section>
 
       <section
-        className="border-y border-white/10 bg-white/[0.025] px-6 py-20 lg:px-8"
+        className="border-y border-white/10 bg-white/[0.025] px-5 py-16 sm:px-6 sm:py-20 lg:px-8"
         id="resumo"
       >
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
@@ -288,7 +288,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-7xl px-6 py-20 lg:px-8">
+      <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-6 sm:py-20 lg:px-8">
         <SectionHeader
           eyebrow="Método"
           title="Como funciona"
@@ -323,7 +323,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-y border-white/10 bg-[#091017] px-6 py-20 lg:px-8">
+      <section className="border-y border-white/10 bg-[#091017] px-5 py-16 sm:px-6 sm:py-20 lg:px-8">
         <div className="mx-auto max-w-7xl" id="roadmap">
           <SectionHeader
             eyebrow="Roadmap"
@@ -362,7 +362,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-7xl px-6 py-20 lg:px-8" id="criador">
+      <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-6 sm:py-20 lg:px-8" id="criador">
         <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
           <SectionHeader
             eyebrow="Criador"
@@ -398,7 +398,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="border-t border-white/10 px-6 py-8 text-sm text-slate-500 lg:px-8">
+      <footer className="border-t border-white/10 px-5 py-8 text-sm text-slate-500 sm:px-6 lg:px-8">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <p>PetroAgent é informativo e experimental.</p>
           <p>Não constitui recomendação de compra, venda ou manutenção.</p>
@@ -468,7 +468,7 @@ function PixSupport() {
 
 function HeroDashboard() {
   return (
-    <div className="relative min-h-[520px]">
+    <div className="relative min-h-[430px] sm:min-h-[520px]">
       <div className="absolute inset-x-4 top-4 h-56 rounded-[2rem] border border-emerald-300/20 bg-emerald-300/10 blur-3xl" />
       <Card className="relative overflow-hidden border-white/10 bg-[#0b1218]/90 shadow-2xl shadow-black/50 backdrop-blur">
         <CardHeader className="border-b border-white/10">
