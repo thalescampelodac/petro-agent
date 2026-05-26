@@ -120,6 +120,7 @@ npm run test:unit
 npm run test:integration
 npm run test:context
 npm run build
+npm run verify:mcp
 ```
 
 Camadas de teste:
@@ -128,6 +129,8 @@ Camadas de teste:
 - Integracao: validam componentes interativos e comportamento de UI.
 - Contexto: validam narrativa, limites de produto e mensagens essenciais da
   experiencia publica.
+- MCP: instala dependencias do `mcp-server`, roda typecheck e build da camada
+  MCP isolada.
 
 ## Status da landing
 
