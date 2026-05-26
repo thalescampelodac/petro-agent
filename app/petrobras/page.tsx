@@ -50,9 +50,9 @@ export default async function PetrobrasPage() {
   } = await getPetrobrasDashboardData();
 
   return (
-    <main className="dark min-h-screen bg-[#070b10] text-foreground">
+    <main className="dark min-h-screen overflow-hidden bg-[#070b10] text-foreground">
       <section className="border-b border-white/10 bg-[radial-gradient(circle_at_78%_8%,rgba(16,185,129,0.18),transparent_26%),radial-gradient(circle_at_18%_0%,rgba(14,165,233,0.12),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.045),transparent)]">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8 lg:px-8">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-5 py-7 sm:px-6 sm:py-8 lg:px-8">
           <nav className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <Link
               className={buttonVariants({
@@ -128,7 +128,7 @@ export default async function PetrobrasPage() {
         </div>
       </section>
 
-      <section className="mx-auto grid w-full max-w-7xl gap-6 px-6 py-8 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
+      <section className="mx-auto grid w-full max-w-7xl gap-6 px-5 py-6 sm:px-6 sm:py-8 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
         <div className="space-y-6">
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {panelMetrics.map((metric) => (
@@ -179,7 +179,7 @@ export default async function PetrobrasPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex h-48 items-end gap-2 rounded-lg border border-white/10 bg-black/20 p-4">
+              <div className="flex h-40 items-end gap-1.5 rounded-lg border border-white/10 bg-black/20 p-3 sm:h-48 sm:gap-2 sm:p-4">
                 {[48, 66, 54, 78, 61, 88, 72, 83, 69, 91].map((height, index) => (
                   <div
                     className="flex-1 rounded-t bg-gradient-to-t from-emerald-500/35 to-emerald-200"
