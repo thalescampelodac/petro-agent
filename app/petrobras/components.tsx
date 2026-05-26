@@ -29,7 +29,7 @@ export function MetricCard({
   icon: ComponentType<{ className?: string }>;
 }) {
   return (
-    <Card className="border-white/10 bg-white/[0.035] shadow-none">
+    <Card className="border-white/10 bg-white/[0.035] shadow-none transition hover:-translate-y-0.5 hover:border-emerald-300/25">
       <CardHeader className="space-y-4 p-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex size-9 items-center justify-center rounded-lg bg-emerald-300/12">
@@ -52,7 +52,7 @@ export function BasicDataCard({
   data: PetrobrasBasicData;
 }) {
   return (
-    <Card className="border-white/10 bg-white/[0.035] shadow-none">
+    <Card className="overflow-hidden border-white/10 bg-white/[0.035] shadow-none">
       <CardHeader className="border-b border-white/10">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -66,31 +66,13 @@ export function BasicDataCard({
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="grid gap-4 sm:grid-cols-2 p-5 text-slate-200">
-        <div>
-          <p className="text-xs text-slate-500">Ticker</p>
-          <p className="mt-2 font-mono text-lg text-white">{data.ticker}</p>
-        </div>
-        <div>
-          <p className="text-xs text-slate-500">Empresa</p>
-          <p className="mt-2 text-lg text-white">{data.company}</p>
-        </div>
-        <div>
-          <p className="text-xs text-slate-500">Último preço</p>
-          <p className="mt-2 font-mono text-lg text-white">{data.lastPrice}</p>
-        </div>
-        <div>
-          <p className="text-xs text-slate-500">Variação</p>
-          <p className="mt-2 font-mono text-lg text-white">{data.change}</p>
-        </div>
-        <div>
-          <p className="text-xs text-slate-500">Última atualização</p>
-          <p className="mt-2 text-lg text-white">{data.updatedAt}</p>
-        </div>
-        <div>
-          <p className="text-xs text-slate-500">Fonte</p>
-          <p className="mt-2 text-lg text-white">{data.origin}</p>
-        </div>
+      <CardContent className="grid gap-3 p-5 text-slate-200 sm:grid-cols-2">
+        <InfoCell label="Ticker" value={data.ticker} mono />
+        <InfoCell label="Empresa" value={data.company} />
+        <InfoCell label="Último preço" value={data.lastPrice} mono highlight />
+        <InfoCell label="Variação" value={data.change} mono highlight />
+        <InfoCell label="Última atualização" value={data.updatedAt} />
+        <InfoCell label="Fonte" value={data.origin} />
       </CardContent>
     </Card>
   );
@@ -121,7 +103,7 @@ export function SummaryCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-5 p-5">
-        <div className="rounded-lg border border-emerald-300/15 bg-emerald-300/[0.055] p-4">
+        <div className="rounded-lg border border-emerald-300/15 bg-gradient-to-br from-emerald-300/[0.08] to-sky-300/[0.035] p-4">
           <div className="flex items-center gap-2 text-sm font-medium text-emerald-100">
             <Sparkles className="size-4" />
             {hasReport ? "Resumo do agente" : "Resumo de fallback"}
@@ -235,23 +217,34 @@ export function TimelineCard({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {events.map((event) => (
-          <article
-            className="border-l border-emerald-300/25 pl-4"
-            key={`${event.date}-${event.title}`}
-          >
-            <div className="flex flex-wrap items-center gap-2">
-              <time className="font-mono text-xs text-slate-500">{event.date}</time>
-              <Badge variant="outline" className="border-white/15 text-xs">
-                {event.type}
-              </Badge>
-            </div>
-            <h2 className="mt-2 text-sm font-medium leading-6 text-white">
-              {event.title}
-            </h2>
-            <p className="mt-1 text-xs text-slate-500">Fonte: {event.source}</p>
-          </article>
-        ))}
+        {events.length > 0 ? (
+          events.map((event) => (
+            <article
+              className="relative rounded-lg border border-white/10 bg-black/20 p-4"
+              key={`${event.date}-${event.title}`}
+            >
+              <div className="absolute bottom-4 left-0 top-4 w-px bg-emerald-300/35" />
+              <div className="flex flex-wrap items-center gap-2">
+                <time className="font-mono text-xs text-slate-500">{event.date}</time>
+                <Badge variant="outline" className="border-white/15 text-xs">
+                  {event.type}
+                </Badge>
+              </div>
+              <h2 className="mt-2 text-sm font-medium leading-6 text-white">
+                {event.title}
+              </h2>
+              <p className="mt-1 text-xs text-slate-500">Fonte: {event.source}</p>
+            </article>
+          ))
+        ) : (
+          <div className="rounded-lg border border-dashed border-white/15 bg-black/20 p-5">
+            <p className="text-sm font-medium text-white">Nenhum evento recente</p>
+            <p className="mt-2 text-sm leading-6 text-slate-400">
+              O painel exibirá eventos salvos no banco quando o radar encontrar
+              fatos relevantes, notícias ou registros públicos.
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -269,7 +262,7 @@ export function SignalCard({
   icon: ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="rounded-lg border border-white/10 bg-black/20 p-4">
+    <div className="min-h-36 rounded-lg border border-white/10 bg-black/20 p-4 transition hover:border-emerald-300/25">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.06]">
@@ -291,6 +284,33 @@ export function SignalCard({
           {status}
         </Badge>
       </div>
+    </div>
+  );
+}
+
+function InfoCell({
+  highlight = false,
+  label,
+  mono = false,
+  value,
+}: {
+  highlight?: boolean;
+  label: string;
+  mono?: boolean;
+  value: string;
+}) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-black/20 p-4">
+      <p className="text-xs text-slate-500">{label}</p>
+      <p
+        className={cn(
+          "mt-2 text-lg text-white",
+          mono && "font-mono",
+          highlight && "text-emerald-100",
+        )}
+      >
+        {value}
+      </p>
     </div>
   );
 }
