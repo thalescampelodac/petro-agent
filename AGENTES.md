@@ -1077,17 +1077,73 @@ Preferir linguagem como:
 
 ---
 
+# Histórico operacional
+
+## Estado consolidado em 26/05/2026
+
+O PetroAgent já possui a fundação do MVP 1 e a fundação inicial do MVP 2:
+
+1. O portal público foi estruturado com landing page, identidade visual, painel `/petrobras`, botão de curtida, página/área do criador, roadmap e avisos de não recomendação financeira.
+2. O banco usa o projeto Supabase existente do `comprovou`, sempre isolando as tabelas do PetroAgent no schema `petroagent`.
+3. As tabelas principais do produto foram criadas em migrations versionadas, incluindo curtidas, fontes, eventos, snapshots e relatórios do agente.
+4. O fluxo de deploy usa Vercel com esteiras de preview e produção.
+5. O MCP Server foi iniciado no PR #70, com validação em CI via `verify:mcp` dentro de `verify:ci`.
+
+Tools MCP consolidadas até este ponto:
+
+- `get_agent_profile`
+- `get_market_snapshot`
+- `search_agent_memory`
+- `compare_reports`
+- `summarize_context`
+
+O MCP ainda é fundação técnica. Ele não deve ser tratado como agente autônomo em produção até existir cobertura mínima de testes, execução manual, logs e gatilho protegido.
+
+## Próxima leva de qualidade
+
+Antes de avançar na execução real do agente, a próxima sequência oficial de issues é:
+
+1. #71 — Cobrir tools MCP com testes unitários.
+2. #72 — Validar registro das tools MCP.
+3. #73 — Criar fixtures compartilhadas para Supabase.
+4. #75 — Documentar matriz de cobertura e CI.
+5. #74 — Adicionar smoke visual/e2e da home e painel.
+
+A ordem acima deve respeitar dependências e custo de manutenção. O smoke visual/e2e pode ficar depois da matriz de testes para evitar peso prematuro no CI.
+
+## Próxima leva do agente
+
+Depois da leva mínima de testes, o agente deve evoluir nesta ordem:
+
+1. #77 — Criar executor manual do PetroAgent.
+2. #78 — Registrar logs de execução.
+3. #79 — Criar gatilho manual protegido.
+4. #80 — Preparar agendamento futuro do radar.
+5. #81 — Documentar runbook operacional.
+
+Regras para esta etapa:
+
+- Começar com execução manual, nunca com automação cega.
+- Não acionar IA real em cada acesso público do usuário.
+- Não criar recomendação financeira, preço-alvo ou promessa de rentabilidade.
+- Persistir resultados em `petroagent.agent_reports`.
+- Se criar novas tabelas, usar migrations em `supabase/migrations` e sempre no schema `petroagent`.
+- Proteger qualquer endpoint operacional com variável de ambiente/token server-side.
+
+---
+
 # Prioridade atual
 
-A prioridade imediata é o **MVP 1**.
+A prioridade atual é concluir a base de qualidade e testes antes de colocar o agente para rodar de verdade.
 
-Não iniciar o MCP antes que o portal público tenha:
+Sequência recomendada:
 
-1. landing page funcional
-2. painel Petrobras funcional
-3. botão de interação pública
-4. estrutura básica de banco
-5. página de contato/apoio
+1. Finalizar #71, #72, #73, #75 e #74.
+2. Iniciar #77 apenas depois da cobertura mínima do MCP estar validada.
+3. Evoluir para #78 e #79 antes de qualquer agendamento.
+4. Deixar #80 para depois de validação manual em preview e produção.
+
+Cada issue deve ter branch própria, PR, preview validado e merge para `main` somente após aprovação.
 
 ---
 
