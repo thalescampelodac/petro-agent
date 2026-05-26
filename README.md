@@ -85,6 +85,8 @@ Tool disponível:
 
 - `get_latest_report`: consulta `petroagent.agent_reports` e retorna o relatório
   mais recente em formato textual e estruturado.
+- `list_market_events`: consulta `petroagent.market_events` e retorna eventos
+  ordenados por data, com filtros simples por tipo e período.
 
 ## Execucao local
 
