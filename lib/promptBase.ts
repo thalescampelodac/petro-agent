@@ -5,7 +5,7 @@ Output JSON schema:
   "summary": "Short 1-2 sentence summary",
   "highlights": ["bullet1","bullet2"],
   "key_facts": [{"label":"Revenue","value":"BRL 1.2B","source":"url"}],
-  "recommendation": "short recommendation or next action",
+  "next_steps": "short informational follow-up, never an investment recommendation",
   "sources": ["url1","url2"]
 }
 
@@ -13,6 +13,7 @@ Rules:
 - Keep 'summary' to 1-2 sentences.
 - 'highlights' should be 3-6 concise bullets.
 - Include numeric 'key_facts' when present and attach source URLs when available.
+- Never recommend buying, selling, holding or maintaining a financial asset.
 - Do not invent facts; when uncertain, mark as "needs verification".
 - Output strictly parseable JSON using the schema above.
 `;

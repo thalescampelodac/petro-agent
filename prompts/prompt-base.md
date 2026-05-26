@@ -10,7 +10,7 @@ Output format (JSON):
   "summary": "Short 1-2 sentence summary",
   "highlights": ["bullet1","bullet2"],
   "key_facts": [{"label":"Revenue","value":"BRL 1.2B","source":"url"}],
-  "recommendation": "short recommendation or next action",
+  "next_steps": "short informational follow-up, never an investment recommendation",
   "sources": ["url1","url2"]
 }
 
@@ -18,8 +18,9 @@ Instructions:
 - Keep `summary` to 1-2 sentences.
 - `highlights` should be 3-6 concise bullets with the most relevant signals.
 - `key_facts` must include numeric facts found in the text (currency-normalized when possible).
-- `recommendation` is optional; include only when there is a clear suggested next action.
+- `next_steps` is optional; include only informational follow-up items such as what source or event to monitor next.
 - Provide at most 5 `sources` ordered by relevance.
+- Never recommend buying, selling, holding or maintaining a financial asset.
 
 Examples:
 
@@ -31,7 +32,7 @@ Output:
   "summary": "Petrobras reported strong quarterly results driven by higher commodity prices and announced a 10% capex increase.",
   "highlights": ["Net income: BRL 2.1B","Revenue: BRL 50B","Capex guidance +10%"],
   "key_facts": [{"label":"Net income","value":"BRL 2.1B","source":"https://example.com/report"}],
-  "recommendation": "Monitor capex execution and associated project schedules.",
+  "next_steps": "Monitor capex execution and associated project schedules.",
   "sources": ["https://example.com/report"]
 }
 
