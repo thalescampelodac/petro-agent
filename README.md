@@ -119,8 +119,10 @@ npm test
 npm run test:unit
 npm run test:integration
 npm run test:context
+npm run test:smoke
 npm run build
 npm run verify:mcp
+npm run verify:ci
 ```
 
 Camadas de teste:
@@ -129,8 +131,23 @@ Camadas de teste:
 - Integracao: validam componentes interativos e comportamento de UI.
 - Contexto: validam narrativa, limites de produto e mensagens essenciais da
   experiencia publica.
-- MCP: instala dependencias do `mcp-server`, roda typecheck e build da camada
-  MCP isolada.
+- Smoke visual: valida carregamento minimo da home e do painel `/petrobras` em
+  larguras desktop e mobile via Vitest/jsdom, sem tornar o CI pesado.
+- MCP: instala dependencias do `mcp-server`, roda testes unitarios, typecheck e
+  build da camada MCP isolada.
+
+Matriz de validacao atual:
+
+- `npm run lint`: regras de qualidade do Next.js/TypeScript.
+- `npm run test:unit`: services, coletores e utilitarios isolados.
+- `npm run test:integration`: rotas e componentes com interacao.
+- `npm run test:context`: narrativa, avisos e limites do produto.
+- `npm run test:smoke`: smoke visual leve da home e do painel.
+- `npm run build`: build de producao do Next.js.
+- `npm run verify:mcp`: testes, typecheck e build do servidor MCP.
+- `npm run verify:local`: validacao local principal sem MCP, mais rapida para
+  iteracao visual.
+- `npm run verify:ci`: esteira completa usada em PRs e producao, incluindo MCP.
 
 ## Status da landing
 

@@ -24,7 +24,7 @@ type LatestReportResult =
       reason: "not_found";
     };
 
-async function getLatestReport(): Promise<LatestReportResult> {
+export async function getLatestReport(): Promise<LatestReportResult> {
   const client = createPetroAgentSupabaseClient();
 
   const { data, error } = await client

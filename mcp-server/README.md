@@ -41,9 +41,23 @@ Valide tipos:
 npm run typecheck
 ```
 
+Rode os testes das tools:
+
+```bash
+npm test
+```
+
 Gere build:
 
 ```bash
+npm run build
+```
+
+Checklist local do MCP:
+
+```bash
+npm test
+npm run typecheck
 npm run build
 ```
 
@@ -60,6 +74,11 @@ deve ser exposta no client.
 ## Tools
 
 As tools ficam registradas em `src/tools/index.ts`.
+
+Os testes unitários das tools cobrem retornos encontrados, retornos vazios,
+fallbacks determinísticos e o registro de todas as tools públicas esperadas.
+Eles usam fixtures de Supabase compartilhadas do projeto principal, sem conexão
+com banco real.
 
 ### `get_agent_profile`
 

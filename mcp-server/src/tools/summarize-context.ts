@@ -50,7 +50,7 @@ function createPattern(query?: string) {
   return normalized ? `%${normalized}%` : null;
 }
 
-async function summarizeContext({
+export async function summarizeContext({
   limit = 5,
   query,
 }: {

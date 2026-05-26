@@ -37,7 +37,9 @@ const getMarketSnapshotInputSchema = {
     .describe("Ticker monitorado. Padrão: PETR4."),
 };
 
-async function getMarketSnapshot(ticker?: string): Promise<MarketSnapshotResult> {
+export async function getMarketSnapshot(
+  ticker?: string,
+): Promise<MarketSnapshotResult> {
   const client = createPetroAgentSupabaseClient();
   const normalizedTicker = normalizeTicker(ticker);
 

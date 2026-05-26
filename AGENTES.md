@@ -1111,6 +1111,15 @@ Antes de avançar na execução real do agente, a próxima sequência oficial de
 
 A ordem acima deve respeitar dependências e custo de manutenção. O smoke visual/e2e pode ficar depois da matriz de testes para evitar peso prematuro no CI.
 
+Matriz de testes esperada após esta leva:
+
+- `test:unit`: serviços, coletores, utilitários e funções puras.
+- `test:integration`: rotas e componentes interativos.
+- `test:context`: narrativa, limites de produto e avisos essenciais.
+- `test:smoke`: smoke visual leve da home e do painel em desktop/mobile.
+- `verify:mcp`: testes, typecheck e build do servidor MCP.
+- `verify:ci`: validação completa para PRs e produção.
+
 ## Próxima leva do agente
 
 Depois da leva mínima de testes, o agente deve evoluir nesta ordem:

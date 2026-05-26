@@ -40,7 +40,7 @@ function toSearchPattern(query: string) {
   return `%${query.trim().replaceAll("%", "").replaceAll("_", "")}%`;
 }
 
-async function searchAgentMemory({
+export async function searchAgentMemory({
   limit = 10,
   query,
 }: {
