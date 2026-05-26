@@ -12,6 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import type {
   PetrobrasBasicData,
+  PetrobrasRecentReport,
   PetrobrasReport,
   PetrobrasSentiment,
   PetrobrasTimelineEvent,
@@ -198,6 +199,77 @@ export function SentimentIndicator({
             <p className="mt-2 text-lg text-white">{sentiment.source}</p>
           </div>
         </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function RecentReportsCard({
+  reports,
+}: {
+  reports: PetrobrasRecentReport[];
+}) {
+  return (
+    <Card className="overflow-hidden border-white/10 bg-white/[0.035] shadow-none">
+      <CardHeader className="border-b border-white/10">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle className="text-white">Relatórios recentes</CardTitle>
+            <CardDescription className="mt-1 text-slate-400">
+              Últimos resumos salvos pelo agente, sem gerar IA no carregamento.
+            </CardDescription>
+          </div>
+          <Badge className="w-fit border-emerald-300/20 bg-emerald-300/10 text-emerald-100">
+            {reports.length > 0 ? "Banco de dados" : "Aguardando registros"}
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-3 p-5">
+        {reports.length > 0 ? (
+          reports.map((report) => (
+            <article
+              className="rounded-lg border border-white/10 bg-black/20 p-4 transition hover:border-emerald-300/25"
+              key={`${report.generatedAt}-${report.title}`}
+            >
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="outline" className="border-white/15 text-xs">
+                      {report.sentiment}
+                    </Badge>
+                    <time className="font-mono text-xs text-slate-500">
+                      {report.generatedAt}
+                    </time>
+                  </div>
+                  <h2 className="mt-3 text-base font-semibold leading-6 text-white">
+                    {report.title}
+                  </h2>
+                </div>
+                <div className="flex shrink-0 flex-wrap gap-2 text-xs text-slate-400 sm:justify-end">
+                  <span className="rounded bg-white/[0.06] px-2 py-1">
+                    {report.modelUsed}
+                  </span>
+                  <span className="rounded bg-white/[0.06] px-2 py-1">
+                    {report.sourceCount}
+                  </span>
+                </div>
+              </div>
+              <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-300">
+                {report.summary}
+              </p>
+            </article>
+          ))
+        ) : (
+          <div className="rounded-lg border border-dashed border-white/15 bg-black/20 p-5">
+            <p className="text-sm font-medium text-white">
+              Nenhum relatório salvo ainda
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-400">
+              Quando o pipeline salvar relatórios em banco, eles aparecerão aqui
+              com resumo, sentimento, data e modelo utilizado.
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
