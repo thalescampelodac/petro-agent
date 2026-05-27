@@ -165,11 +165,59 @@ Requisitos:
 
 - `NEXT_PUBLIC_SUPABASE_URL` ou `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
+- `PETROAGENT_AGENT_RUN_TOKEN` para o gatilho HTTP manual
+- `CRON_SECRET` para o gatilho futuro via Vercel Cron
 - opcionalmente `OPENAI_API_KEY` para IA real
 
 Sem chave de IA, o executor usa fallback determinístico. O comando não agenda
 execuções, não cria endpoint público e não deve gerar recomendação financeira,
 preço-alvo ou promessa de rentabilidade.
+
+### Gatilho protegido
+
+O endpoint operacional fica em `/api/agent/run`:
+
+- `POST /api/agent/run`: execução manual protegida por
+  `PETROAGENT_AGENT_RUN_TOKEN`.
+- `GET /api/agent/run`: reservado para Vercel Cron futuro, protegido por
+  `CRON_SECRET`.
+
+Exemplo manual:
+
+```bash
+curl -X POST "$APP_URL/api/agent/run" \
+  -H "Authorization: Bearer $PETROAGENT_AGENT_RUN_TOKEN"
+```
+
+Cada execução grava um registro em `petroagent.agent_execution_logs` com
+`started`, `saved` ou `failed`, origem, engine, relatório gerado, quantidade de
+fontes e erro resumido quando existir. Essa tabela é operacional e fica restrita
+ao backend com `service_role`.
+
+### Agendamento futuro
+
+O agendamento ainda não está ativo. Quando a execução manual estiver validada em
+produção, a configuração sugerida para Vercel Cron é diária, respeitando o limite
+do plano Hobby:
+
+```json
+{
+  "crons": [
+    {
+      "path": "/api/agent/run",
+      "schedule": "0 11 * * *"
+    }
+  ]
+}
+```
+
+Antes de ativar:
+
+1. Configurar `CRON_SECRET` na Vercel.
+2. Confirmar que `GET /api/agent/run` retorna `401` sem token.
+3. Confirmar que a execução manual gera log e relatório.
+4. Ter plano de rollback removendo o bloco `crons` do `vercel.json` ou zerando
+   `CRON_SECRET`.
 
 ## Status da landing
 
@@ -186,6 +234,8 @@ As variaveis esperadas para Supabase sao:
 - `NEXT_PUBLIC_ASAAS_PAYMENT_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `PETROAGENT_COLLECTOR_TOKEN`
+- `PETROAGENT_AGENT_RUN_TOKEN`
+- `CRON_SECRET`
 - `ASAAS_API_KEY`
 - `ASAAS_API_BASE_URL`
 - `ASAAS_PIX_CUSTOMER_ID`
@@ -202,9 +252,10 @@ integração server-side com cobranças PIX dinâmicas do Asaas. A criação de
 cobrança deve usar `billingType: PIX` e a recuperação do QRCode deve ficar em
 endpoint protegido no servidor, nunca no client.
 
-`SUPABASE_SERVICE_ROLE_KEY`, `PETROAGENT_COLLECTOR_TOKEN`, `ASAAS_API_KEY` e
-`OPENAI_API_KEY` são variáveis somente de servidor. Não exponha chaves privadas
-com prefixo `NEXT_PUBLIC_`.
+`SUPABASE_SERVICE_ROLE_KEY`, `PETROAGENT_COLLECTOR_TOKEN`,
+`PETROAGENT_AGENT_RUN_TOKEN`, `CRON_SECRET`, `ASAAS_API_KEY` e `OPENAI_API_KEY`
+são variáveis somente de servidor. Não exponha chaves privadas com prefixo
+`NEXT_PUBLIC_`.
 
 ## Deploy na Vercel
 
@@ -255,6 +306,13 @@ A migration de memória de mercado cria:
 - tabela `petroagent.market_snapshots`
 - RLS com leitura pública nas tabelas do painel e `sources` restrita ao backend
 - escrita reservada ao backend com `service_role`
+
+A migration de operação do agente cria:
+
+- tabela `petroagent.agent_execution_logs`
+- status `started`, `saved` e `failed`
+- vínculo opcional com `petroagent.agent_reports`
+- RLS e grants somente para `service_role`
 
 O endpoint `POST /api/sources` registra fontes manualmente em
 `petroagent.sources`. Ele exige `Authorization: Bearer <PETROAGENT_COLLECTOR_TOKEN>`

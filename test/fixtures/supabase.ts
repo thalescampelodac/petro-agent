@@ -69,6 +69,10 @@ export function createSupabaseFixtureClient(results: FixtureMap) {
         onFulfilled?: (value: SupabaseFixtureResult) => unknown,
         onRejected?: (reason: unknown) => unknown,
       ) => Promise.resolve(takeResult(results, table)).then(onFulfilled, onRejected),
+      update: vi.fn((...args: unknown[]) => {
+        calls.push({ args, method: "update", table });
+        return query;
+      }),
     };
 
     return query;

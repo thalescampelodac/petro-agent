@@ -125,15 +125,21 @@ describe("manual PetroAgent executor", () => {
       },
     }));
     const persist = vi.fn(async () => ({ id: 123 }));
+    const logStart = vi.fn(async () => ({ id: 99 }));
+    const logFinish = vi.fn(async () => undefined);
 
     await expect(
       executeManualPetroAgent({
         client: client as never,
         generate,
+        logFinish,
+        logStart,
+        origin: "unit-test",
         persist,
       }),
     ).resolves.toEqual({
       engine: "fallback",
+      logId: 99,
       reportId: 123,
       sourceCount: 2,
       status: "saved",
@@ -149,12 +155,58 @@ describe("manual PetroAgent executor", () => {
         summary: "Resumo manual do agente.",
       }),
     );
+    expect(logStart).toHaveBeenCalledWith(client, { origin: "unit-test" });
+    expect(logFinish).toHaveBeenCalledWith(client, 99, {
+      engine: "fallback",
+      reportId: 123,
+      sourceCount: 2,
+      status: "saved",
+    });
   });
 
   it("não executa sem configuração server-side do Supabase", async () => {
     await expect(executeManualPetroAgent({ client: null })).resolves.toEqual({
       reason: "missing_supabase_admin_config",
       status: "disabled",
+    });
+  });
+
+  it("registra falha quando a geração do relatório quebra", async () => {
+    const { client } = createSupabaseFixtureClient({
+      agent_reports: {
+        data: context.previousReports,
+        error: null,
+      },
+      market_events: {
+        data: context.events,
+        error: null,
+      },
+      market_snapshots: {
+        data: context.snapshot,
+        error: null,
+      },
+      sources: {
+        data: context.sources,
+        error: null,
+      },
+    });
+    const generate = vi.fn(async () => {
+      throw new Error("ai_failed");
+    });
+    const logStart = vi.fn(async () => ({ id: 101 }));
+    const logFinish = vi.fn(async () => undefined);
+
+    await expect(
+      executeManualPetroAgent({
+        client: client as never,
+        generate,
+        logFinish,
+        logStart,
+      }),
+    ).rejects.toThrow("ai_failed");
+    expect(logFinish).toHaveBeenCalledWith(client, 101, {
+      errorMessage: "ai_failed",
+      status: "failed",
     });
   });
 });

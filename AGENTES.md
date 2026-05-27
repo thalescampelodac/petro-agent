@@ -1146,18 +1146,26 @@ Decisão da #77:
 - Sem chave de IA, usa fallback determinístico.
 - Não há cron, endpoint público ou automação nesta etapa.
 
+Decisões da leva #78-#81:
+
+- Toda execução do agente deve registrar log em `petroagent.agent_execution_logs`.
+- O gatilho manual protegido é `POST /api/agent/run` com `PETROAGENT_AGENT_RUN_TOKEN`.
+- O gatilho futuro de cron é `GET /api/agent/run` com `CRON_SECRET`.
+- O cron não fica ativo até validação manual em produção e aprovação explícita.
+- O runbook operacional fica documentado no README e em `agents/README.md`.
+
 ---
 
 # Prioridade atual
 
-A prioridade atual é concluir a base de qualidade e testes antes de colocar o agente para rodar de verdade.
+A prioridade atual é validar a operação manual do agente antes de ativar qualquer automação.
 
 Sequência recomendada:
 
-1. Finalizar #71, #72, #73, #75 e #74.
-2. Iniciar #77 apenas depois da cobertura mínima do MCP estar validada.
-3. Evoluir para #78 e #79 antes de qualquer agendamento.
-4. Deixar #80 para depois de validação manual em preview e produção.
+1. Validar manualmente `npm run agent:run` com secrets reais em ambiente controlado.
+2. Validar `POST /api/agent/run` em preview com token.
+3. Conferir registros em `petroagent.agent_execution_logs` e relatórios em `petroagent.agent_reports`.
+4. Só ativar cron depois de aprovação explícita.
 
 Cada issue deve ter branch própria, PR, preview validado e merge para `main` somente após aprovação.
 

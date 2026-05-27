@@ -19,6 +19,7 @@ async function main() {
     JSON.stringify(
       {
         engine: result.engine,
+        logId: result.logId,
         reportId: result.reportId,
         sourceCount: result.sourceCount,
         status: result.status,
