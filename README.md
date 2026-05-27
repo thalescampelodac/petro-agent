@@ -123,6 +123,7 @@ npm run test:smoke
 npm run build
 npm run verify:mcp
 npm run verify:ci
+npm run agent:run
 ```
 
 Camadas de teste:
@@ -148,6 +149,27 @@ Matriz de validacao atual:
 - `npm run verify:local`: validacao local principal sem MCP, mais rapida para
   iteracao visual.
 - `npm run verify:ci`: esteira completa usada em PRs e producao, incluindo MCP.
+
+## Execução manual do agente
+
+O agente do PetroAgent começa de forma manual. Ele lê fontes, eventos, snapshots
+e relatórios persistidos no schema `petroagent`, monta um contexto textual com
+guardrails de produto, usa IA apenas se houver provedor configurado e salva o
+resultado em `petroagent.agent_reports`.
+
+```bash
+npm run agent:run
+```
+
+Requisitos:
+
+- `NEXT_PUBLIC_SUPABASE_URL` ou `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- opcionalmente `OPENAI_API_KEY` para IA real
+
+Sem chave de IA, o executor usa fallback determinístico. O comando não agenda
+execuções, não cria endpoint público e não deve gerar recomendação financeira,
+preço-alvo ou promessa de rentabilidade.
 
 ## Status da landing
 

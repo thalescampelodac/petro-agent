@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "agent:run": "tsx agents/run-manual-agent.ts",
     "lint": "eslint",
     "test": "npm run test:unit && npm run test:integration && npm run test:context && npm run test:smoke",
     "test:watch": "vitest",
@@ -45,6 +46,7 @@
     "jsdom": "^29.1.1",
     "supabase": "^2.101.0",
     "tailwindcss": "^4",
+    "tsx": "^4.22.3",
     "typescript": "^5",
     "vercel": "^54.2.0",
     "vitest": "^4.1.6"
