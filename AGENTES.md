@@ -1396,6 +1396,17 @@ Decisão da #92:
   persistidos. Mocks só devem aparecer como estado demonstrativo claramente
   identificado ou estado vazio.
 
+Decisão da #93:
+
+- O adapter interno do MCP fica em `services/mcp/internal-adapter.ts`.
+- O adapter não importa diretamente `mcp-server/src`, mantendo o app Next.js e o
+  servidor MCP desacoplados.
+- O contrato interno usa `callTool(name, args)` com nomes oficiais das tools MCP
+  como `get_latest_report`, `list_market_events`, `get_market_snapshot`,
+  `search_agent_memory`, `compare_reports` e `summarize_context`.
+- O `agent-executor` deve migrar para esse adapter nas próximas issues, sem
+  manter queries diretas ao Supabase como caminho definitivo de contexto.
+
 ---
 
 # Prioridade atual
