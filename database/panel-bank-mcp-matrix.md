@@ -41,13 +41,13 @@ devem vir do banco ou de um estado vazio explícito.
 
 | Campo do painel | Tabela/coluna no `petroagent` | Tool MCP que grava/atualiza | Tool MCP que consulta | Origem esperada | Teste necessário |
 | --- | --- | --- | --- | --- | --- |
-| Ticker monitorado | `market_snapshots.ticker` e cadastro de ativo futuro | `upsert_market_snapshot` | `get_market_snapshot` | Fonte de mercado configurada para PETR4 | Unit MCP + contexto painel sem mock |
+| Ticker monitorado | `market_snapshots.ticker` e cadastro de ativo futuro | `upsert_market_snapshot` | `get_market_snapshot` | Prompt guiado `prompts/market-snapshot-petr4.md` após fechamento do pregão | Unit MCP + contexto painel sem mock |
 | Empresa/nome do ativo | Tabela futura `monitored_assets` ou campo equivalente | Tool futura `upsert_monitored_asset` | Tool futura `get_agent_profile` baseada em banco | Curadoria inicial do agente ou cadastro operacional guiado | Unit MCP + contexto painel |
-| Último preço | `market_snapshots.price` | `upsert_market_snapshot` | `get_market_snapshot` | Fonte externa de mercado escolhida e documentada | Unit MCP + integração cache |
-| Variação | `market_snapshots.variation` | `upsert_market_snapshot` | `get_market_snapshot` | Fonte externa de mercado escolhida e documentada | Unit MCP + integração cache |
-| Volume | `market_snapshots.volume` | `upsert_market_snapshot` | `get_market_snapshot` | Fonte externa de mercado escolhida e documentada | Unit MCP |
-| Fonte do snapshot | `market_snapshots.source` | `upsert_market_snapshot` | `get_market_snapshot` | Nome/URL da fonte usada pelo agente | Unit MCP |
-| Horário do snapshot | `market_snapshots.snapshot_time` | `upsert_market_snapshot` | `get_market_snapshot` | Timestamp original da fonte | Unit MCP + contexto painel |
+| Último preço | `market_snapshots.price` | `upsert_market_snapshot` | `get_market_snapshot` | Prompt guiado priorizando B3, Google Finance, Yahoo Finance, Investing ou InfoMoney | Unit MCP + integração cache |
+| Variação | `market_snapshots.variation` | `upsert_market_snapshot` | `get_market_snapshot` | Prompt guiado priorizando B3, Google Finance, Yahoo Finance, Investing ou InfoMoney | Unit MCP + integração cache |
+| Volume | `market_snapshots.volume` | `upsert_market_snapshot` | `get_market_snapshot` | Prompt guiado; volume deve ser quantidade negociada, não volume financeiro | Unit MCP |
+| Fonte do snapshot | `market_snapshots.source` | `upsert_market_snapshot` | `get_market_snapshot` | Nome e URL exata da fonte consultada pelo agente | Unit MCP |
+| Horário do snapshot | `market_snapshots.snapshot_time` | `upsert_market_snapshot` | `get_market_snapshot` | Timestamp informado pela fonte; se ausente, `null` | Unit MCP + contexto painel |
 | Status do radar | Derivado de `agent_execution_logs.status` e/ou último dado persistido | Tool futura de log/status ou log existente | Tool futura `get_agent_status` | Execução do agente | Unit service + contexto painel |
 | Resumo inteligente | `agent_reports.summary` | Tool futura `save_agent_report` ou `generate_informative_analysis` persistível | `get_latest_report` | Análise do agente sobre contexto salvo | Unit MCP + integração executor |
 | Data do relatório | `agent_reports.created_at` | Tool futura `save_agent_report` | `get_latest_report` | Geração do agente | Unit MCP |
@@ -68,7 +68,7 @@ Para a Fase 11, cada origem externa precisa ser decidida antes da implementaçã
 
 | Dado | Autonomia esperada do agente | Decisão pendente |
 | --- | --- | --- |
-| Preço, variação e volume PETR4 | Não confirmado | Definir fonte gratuita/viável de dados de mercado ou curadoria guiada |
+| Preço, variação e volume PETR4 | Guiada por prompt | Usar `prompts/market-snapshot-petr4.md` em cron fora do pregão; validar JSON antes de gravar |
 | Comunicados de RI/fatos relevantes | Parcial | Definir fonte pública inicial e formato de coleta |
 | Notícias públicas | Parcial | Definir fonte pública inicial e política de relevância |
 | Dividendos/proventos | Parcial | Definir fonte pública inicial |
@@ -83,12 +83,12 @@ Para a Fase 11, cada origem externa precisa ser decidida antes da implementaçã
 3. Exibir empresa/nome do ativo sem origem no banco (#105).
 4. Exibir escore de sentimento sem campo persistido (#106).
 5. Exibir pulso visual com array fixo (#107).
-6. Tratar o agente como autônomo para dados externos sem fonte/tool definida
-   (#104).
+6. Tratar o agente como autônomo para dados externos sem validação do JSON
+   retornado pelo prompt (#104).
 
 ## Sequência recomendada após esta matriz
 
-1. Definir fonte inicial para dados de mercado PETR4.
+1. Implementar validação e escrita MCP para o prompt de snapshot PETR4 (#95).
 2. Modelar metadados do ativo e sentimento estruturado (#105 e #106).
 3. Implementar tools MCP de escrita com origem rastreável (#95).
 4. Remover mocks do painel e trocar por estados vazios (#98).

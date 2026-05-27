@@ -15,6 +15,7 @@ describe("contrato painel-banco-MCP", () => {
     expect(matrix).toContain("Tool MCP que grava/atualiza");
     expect(matrix).toContain("Bloqueado por mock");
     expect(matrix).toContain("upsert_market_snapshot");
+    expect(matrix).toContain("prompts/market-snapshot-petr4.md");
     expect(matrix).toContain("register_market_event");
     expect(matrix).toContain("save_agent_report");
   });

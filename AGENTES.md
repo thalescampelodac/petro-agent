@@ -1047,9 +1047,11 @@ PETR4 antes de implementar escrita real em `market_snapshots`.
 
 **Critérios de aceite:**
 
-- Fonte inicial definida e documentada.
-- Limitações de atraso, licença, frequência e confiabilidade registradas.
+- Prompt guiado versionado em `prompts/market-snapshot-petr4.md`.
+- Execução prevista por cron fora do horário de pregão brasileiro.
+- Fontes priorizadas e limitações registradas.
 - Payload esperado para `upsert_market_snapshot` definido.
+- Regras de validação antes da escrita documentadas.
 - Matriz painel-banco-MCP atualizada.
 
 ---
