@@ -1,6 +1,11 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 import generateReport from "../lib/report";
+import {
+  finishAgentExecutionLog,
+  serializeAgentError,
+  startAgentExecutionLog,
+} from "./agent-execution-logs";
 import { saveReport } from "./reports";
 
 const PETROAGENT_SCHEMA = "petroagent";
@@ -51,6 +56,7 @@ export type ManualAgentContext = {
 export type ManualAgentExecutionResult =
   | {
       engine: string;
+      logId: number;
       reportId: number | null;
       sourceCount: number;
       status: "saved";
@@ -73,6 +79,9 @@ type AgentReportPayload = {
 type ManualAgentDependencies = {
   client?: SupabaseClient | null;
   generate?: typeof generateReport;
+  logFinish?: typeof finishAgentExecutionLog;
+  logStart?: typeof startAgentExecutionLog;
+  origin?: string;
   persist?: typeof saveReport;
 };
 
@@ -184,21 +193,43 @@ export async function executeManualPetroAgent(
   }
 
   const generate = dependencies.generate ?? generateReport;
+  const logFinish = dependencies.logFinish ?? finishAgentExecutionLog;
+  const logStart = dependencies.logStart ?? startAgentExecutionLog;
+  const origin = dependencies.origin ?? "manual-cli";
   const persist = dependencies.persist ?? saveReport;
-  const context = await readManualAgentContext(client);
-  const prompt = buildManualAgentPrompt(context);
-  const citations = getManualAgentCitations(context);
-  const output = await generate({ text: prompt });
-  const payload = normalizeReportPayload(output.result, citations);
-  const saved = await persist(output.engine, payload);
+  const started = await logStart(client, { origin });
 
-  return {
-    engine: output.engine,
-    reportId: saved.id,
-    sourceCount: citations.length,
-    status: "saved",
-    summary: payload.summary ?? "Relatório gerado sem resumo textual estruturado.",
-  };
+  try {
+    const context = await readManualAgentContext(client);
+    const prompt = buildManualAgentPrompt(context);
+    const citations = getManualAgentCitations(context);
+    const output = await generate({ text: prompt });
+    const payload = normalizeReportPayload(output.result, citations);
+    const saved = await persist(output.engine, payload);
+
+    await logFinish(client, started.id, {
+      engine: output.engine,
+      reportId: saved.id,
+      sourceCount: citations.length,
+      status: "saved",
+    });
+
+    return {
+      engine: output.engine,
+      logId: started.id,
+      reportId: saved.id,
+      sourceCount: citations.length,
+      status: "saved",
+      summary: payload.summary ?? "Relatório gerado sem resumo textual estruturado.",
+    };
+  } catch (error) {
+    await logFinish(client, started.id, {
+      errorMessage: serializeAgentError(error),
+      status: "failed",
+    });
+
+    throw error;
+  }
 }
 
 function normalizeReportPayload(
