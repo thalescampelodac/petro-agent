@@ -898,6 +898,214 @@ Separar regras específicas por empresa/agente.
 
 ---
 
+## Fase 11 — MCP operacional completo
+
+### Objetivo
+
+Transformar o MCP no contrato oficial de capacidades do PetroAgent. Todo agente
+que execute tarefas do produto, incluindo o próprio agente interno, deve usar as
+tools MCP para consultar contexto, registrar informações e produzir análises
+rastreáveis.
+
+### Diretriz
+
+O MCP não é apenas uma interface para agentes externos de terceiros. Ele é o
+contrato operacional do PetroAgent. O executor interno pode continuar existindo
+como orquestrador, mas deve consumir capacidades expostas por tools MCP ou por
+uma camada compartilhada cuja fonte de verdade seja o contrato MCP.
+
+O app Next.js não precisa consumir o MCP para exibir dados. A interface pública
+pode consultar diretamente o banco/cache server-side para renderizar o painel.
+O papel do MCP é alimentar, consultar, transformar e registrar dados usados por
+agentes e automações.
+
+### Tipos de capacidade MCP
+
+#### 1. Prompt e análise do agente
+
+Tools responsáveis por orientar ou executar análises informativas quando o
+agente precisa consultar contexto externo, consolidar evidências e gerar uma
+resposta clara, curta e segura.
+
+Regras:
+
+- Nunca recomendar compra, venda ou manutenção de ativos.
+- Citar fontes internas quando disponíveis.
+- Diferenciar fato observado, interpretação e hipótese.
+- Usar Gemini apenas server-side, em chamadas pontuais, com fallback
+  determinístico.
+- Registrar resultado persistente quando a análise virar informação de produto.
+
+#### 2. Consulta do agente ao banco
+
+Tools responsáveis por recuperar contexto persistido no schema `petroagent`,
+como relatórios, fontes, eventos, snapshots e memória operacional.
+
+Regras:
+
+- Não exigir que o agente conheça SQL, nomes de tabelas ou detalhes de schema.
+- Retornar dados estruturados e texto legível para composição de prompt.
+- Manter filtros simples por ticker, período, tipo e limite.
+- Evitar divergência entre consultas diretas do executor e consultas MCP.
+
+#### 3. Inserção e atualização no banco
+
+Tools responsáveis por registrar novas informações produzidas por coleta,
+análise ou curadoria do agente.
+
+Regras:
+
+- Toda escrita deve ocorrer no schema `petroagent`.
+- Escritas devem ser idempotentes sempre que fizer sentido, usando chaves
+  naturais como ticker, fonte, data do evento ou URL.
+- Não expor service role, secrets ou tokens ao frontend.
+- Registrar logs operacionais quando a ação fizer parte de uma execução do
+  agente.
+- Validar payloads de entrada antes de persistir.
+
+### Fluxo desejado
+
+```text
+Agente interno ou externo
+  -> tools MCP de consulta/coleta/escrita/análise
+  -> Supabase schema petroagent
+  -> executor/orquestrador quando houver geração persistente
+  -> Gemini quando necessário e aprovado pelo fluxo
+  -> Supabase schema petroagent
+  -> app Next.js lê o banco/cache e exibe no painel
+```
+
+### Issues sugeridas
+
+#### Issue 11.1 — #92 — Documentar MCP como contrato operacional
+
+**Descrição:**
+Atualizar a documentação do projeto para deixar explícito que MCP é o contrato
+oficial de capacidades do PetroAgent para agentes internos e externos.
+
+**Critérios de aceite:**
+
+- `AGENTES.md` documenta MCP como contrato operacional.
+- README resume o papel do MCP no MVP 2.
+- Fica claro que o app exibe dados lendo banco/cache, não chamando MCP.
+- Fica claro que o agente interno deve consumir tools MCP na evolução.
+
+---
+
+#### Issue 11.2 — #93 — Definir adapter MCP interno para o executor
+
+**Descrição:**
+Criar uma estratégia técnica para que o `agent-executor` consuma tools MCP sem
+duplicar queries Supabase em paralelo.
+
+**Critérios de aceite:**
+
+- Existe um adapter interno testável para chamar capacidades MCP.
+- O executor permanece como orquestrador, não como dono das consultas.
+- O design funciona em CLI local, rota protegida e futuro cron.
+- Não há vazamento de secrets para cliente.
+
+---
+
+#### Issue 11.3 — #94 — Refatorar leitura de contexto do agente via MCP
+
+**Descrição:**
+Migrar a leitura de contexto do agente para tools MCP de consulta.
+
+**Critérios de aceite:**
+
+- O agente busca relatório mais recente via `get_latest_report`.
+- O agente busca eventos via `list_market_events`.
+- O agente busca snapshot via `get_market_snapshot`.
+- O agente busca memória/fontes via `search_agent_memory` ou tool equivalente.
+- Testes cobrem o fluxo com dados encontrados e ausência de dados.
+
+---
+
+#### Issue 11.4 — #95 — Criar tools MCP de escrita para fontes, eventos e snapshots
+
+**Descrição:**
+Adicionar tools MCP para registrar e atualizar dados que alimentam o painel
+Petrobras.
+
+**Tools sugeridas:**
+
+- `register_source`
+- `register_market_event`
+- `upsert_market_snapshot`
+
+**Critérios de aceite:**
+
+- Tools validam payloads de entrada.
+- Escritas usam schema `petroagent`.
+- Operações idempotentes quando houver chave natural.
+- Testes cobrem sucesso, payload inválido e erro do Supabase.
+
+---
+
+#### Issue 11.5 — #96 — Criar tool MCP de análise informativa persistível
+
+**Descrição:**
+Criar uma capacidade MCP para gerar análise informativa, clara e curta com base
+no contexto disponível, respeitando guardrails financeiros.
+
+**Critérios de aceite:**
+
+- Tool aceita ticker, período e escopo de contexto.
+- Usa contexto persistido antes de qualquer chamada externa.
+- Chama Gemini apenas server-side quando configurado.
+- Usa fallback determinístico quando IA falhar ou estiver ausente.
+- Retorna payload estruturado compatível com `agent_reports`.
+- Não recomenda compra, venda ou manutenção de ativos.
+
+---
+
+#### Issue 11.6 — #97 — Refatorar persistência de relatórios via contrato MCP
+
+**Descrição:**
+Garantir que relatórios gerados por agentes sejam persistidos por uma capacidade
+MCP ou por camada compartilhada adotada pelo MCP como contrato oficial.
+
+**Critérios de aceite:**
+
+- Existe capacidade padronizada para salvar `agent_reports`.
+- `agent-executor` não chama persistência direta divergente do contrato MCP.
+- Logs de execução continuam funcionando.
+- Testes cobrem persistência e falha controlada.
+
+---
+
+#### Issue 11.7 — #98 — Remover mocks enganosos do painel Petrobras
+
+**Descrição:**
+Substituir dados fixos que parecem reais por estados vazios ou dados vindos do
+banco.
+
+**Critérios de aceite:**
+
+- Card de dados básicos PETR4 não exibe preço mockado como se fosse dado atual.
+- Sem snapshot persistido, painel mostra estado "aguardando coleta".
+- Com snapshot persistido, painel mostra dados do banco.
+- Testes/contexto cobrem ausência e presença de snapshot.
+
+---
+
+#### Issue 11.8 — #99 — Criar execução operacional MCP-first do agente
+
+**Descrição:**
+Validar um fluxo completo em que o agente consulta tools MCP, gera análise,
+persiste resultado e o painel reflete o dado salvo.
+
+**Critérios de aceite:**
+
+- Comando local executa fluxo MCP-first.
+- Execução protegida por rota continua funcionando.
+- Relatório e log são gravados.
+- Painel `/petrobras` reflete relatório/snapshot/eventos salvos.
+- Runbook documenta como testar localmente e em preview.
+
+---
+
 # Scripts operacionais para o Codex
 
 ## Script 1 — Criar o repositório base
@@ -1098,7 +1306,9 @@ O PetroAgent já possui a fundação do MVP 1 e a fundação inicial do MVP 2:
 Tools MCP consolidadas até este ponto:
 
 - `get_agent_profile`
+- `get_latest_report`
 - `get_market_snapshot`
+- `list_market_events`
 - `search_agent_memory`
 - `compare_reports`
 - `summarize_context`
@@ -1170,18 +1380,37 @@ Decisão da #86:
 - Fallback determinístico continua obrigatório para falta de chave, erro, limite excedido ou indisponibilidade do provedor.
 - Referências oficiais: `https://ai.google.dev/gemini-api/docs/pricing` e `https://ai.google.dev/gemini-api/docs/billing`.
 
+Decisão da #92:
+
+- O MCP passa a ser tratado como contrato operacional oficial do PetroAgent, não
+  apenas como interface para agentes externos de terceiros.
+- O próprio agente interno do PetroAgent deve consumir tools MCP para consultar
+  contexto, registrar dados e executar análises quando a fase MCP-first for
+  implementada.
+- O `agent-executor` continua como orquestrador de execução, logs, chamada de IA
+  e persistência operacional, mas não deve manter consultas Supabase paralelas
+  como fonte definitiva de regras.
+- O app Next.js pode ler banco/cache diretamente para exibir o painel; exibição
+  visual não precisa passar pelo MCP.
+- Dados exibidos como PETR4, eventos e resumos devem vir de registros
+  persistidos. Mocks só devem aparecer como estado demonstrativo claramente
+  identificado ou estado vazio.
+
 ---
 
 # Prioridade atual
 
-A prioridade atual é validar a operação manual do agente antes de ativar qualquer automação.
+A prioridade atual é transformar o MCP em contrato operacional completo antes de
+ativar automação recorrente.
 
 Sequência recomendada:
 
-1. Validar manualmente `npm run agent:run` com secrets reais em ambiente controlado.
-2. Validar `POST /api/agent/run` em preview com token.
-3. Conferir registros em `petroagent.agent_execution_logs` e relatórios em `petroagent.agent_reports`.
-4. Só ativar cron depois de aprovação explícita.
+1. Concluir a documentação do contrato MCP operacional.
+2. Criar adapter interno para o executor consumir tools MCP.
+3. Migrar leituras de contexto do agente para tools MCP.
+4. Criar tools MCP de escrita para fontes, eventos, snapshots e relatórios.
+5. Remover mocks enganosos do painel Petrobras.
+6. Validar execução MCP-first localmente, em preview e só então considerar cron.
 
 Cada issue deve ter branch própria, PR, preview validado e merge para `main` somente após aprovação.
 
