@@ -9,6 +9,9 @@ export type ReportRow = {
   title: string;
   summary: string;
   sentiment: string | null;
+  sentiment_basis: string | null;
+  sentiment_confidence: string | null;
+  sentiment_score: number | null;
   attention_points: string[] | null;
   source_count: number;
   model_used: string | null;
@@ -20,6 +23,11 @@ type ReportPayload = {
   key_facts?: unknown;
   sources?: unknown;
   sentiment?: unknown;
+  sentiment_analysis?: unknown;
+  sentiment_basis?: unknown;
+  sentiment_confidence?: unknown;
+  sentiment_score?: unknown;
+  structured_sentiment?: unknown;
 };
 
 let supabaseAdmin: SupabaseClient | null = null;
@@ -69,6 +77,45 @@ function getSourceCount(value: unknown) {
   return Array.isArray(value) ? value.length : 0;
 }
 
+function getRecord(value: unknown): Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function getNumberInRange(value: unknown, min: number, max: number) {
+  const numberValue =
+    typeof value === 'number'
+      ? value
+      : typeof value === 'string'
+        ? Number(value.replace(',', '.'))
+        : Number.NaN;
+
+  if (!Number.isFinite(numberValue) || numberValue < min || numberValue > max) {
+    return null;
+  }
+
+  return Math.round(numberValue);
+}
+
+function normalizeConfidence(value: unknown) {
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const normalized = value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .trim()
+    .toLowerCase();
+
+  if (['baixa', 'media', 'alta'].includes(normalized)) {
+    return normalized;
+  }
+
+  return null;
+}
+
 function mapPayloadToAgentReport(engine: string, payload: ReportPayload) {
   const summary =
     typeof payload.summary === 'string'
@@ -78,11 +125,34 @@ function mapPayloadToAgentReport(engine: string, payload: ReportPayload) {
   const keyFacts = Array.isArray(payload.key_facts)
     ? payload.key_facts.map((fact) => JSON.stringify(fact))
     : [];
+  const structuredSentiment = getRecord(
+    payload.structured_sentiment ?? payload.sentiment_analysis,
+  );
+  const sentiment =
+    typeof payload.sentiment === 'string'
+      ? payload.sentiment
+      : typeof structuredSentiment.label === 'string'
+        ? structuredSentiment.label
+        : null;
 
   return {
     attention_points: [...highlights, ...keyFacts],
     model_used: engine,
-    sentiment: typeof payload.sentiment === 'string' ? payload.sentiment : null,
+    sentiment,
+    sentiment_basis:
+      typeof payload.sentiment_basis === 'string'
+        ? payload.sentiment_basis
+        : typeof structuredSentiment.basis === 'string'
+          ? structuredSentiment.basis
+          : null,
+    sentiment_confidence: normalizeConfidence(
+      payload.sentiment_confidence ?? structuredSentiment.confidence,
+    ),
+    sentiment_score: getNumberInRange(
+      payload.sentiment_score ?? structuredSentiment.score,
+      0,
+      100,
+    ),
     source_count: getSourceCount(payload.sources),
     summary,
     title: 'Relatório PetroAgent',

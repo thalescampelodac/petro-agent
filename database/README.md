@@ -59,6 +59,10 @@ Relatórios gerados pelo agente a partir de fontes e eventos.
 - `title`: título do relatório.
 - `summary`: resumo consolidado.
 - `sentiment`: sentimento textual informativo.
+- `sentiment_score`: escore estruturado do sentimento, de 0 a 100.
+- `sentiment_confidence`: confiabilidade estruturada (`baixa`, `media` ou
+  `alta`).
+- `sentiment_basis`: base textual curta para justificar o sentimento.
 - `attention_points`: pontos de atenção em texto.
 - `source_count`: quantidade de fontes usadas.
 - `model_used`: modelo usado quando houver geração por IA.

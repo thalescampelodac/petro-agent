@@ -26,6 +26,10 @@ export type PetrobrasBasicData = {
 export type PetrobrasReport = {
   summary: string;
   generatedAt: string;
+  sentimentBasis: string | null;
+  sentimentConfidence: PetrobrasSentimentConfidence | null;
+  sentimentLabel: PetrobrasSentimentLabel | null;
+  sentimentScore: number | null;
   source: string;
   status: "Saved" | "Fallback";
 };
@@ -64,12 +68,15 @@ export type PetrobrasTimelineEvent = {
 };
 
 export type PetrobrasSentiment = {
-  label: "Neutro" | "Positivo" | "Negativo";
+  label: PetrobrasSentimentLabel | "Sem dado";
   score: number;
-  confidence: "Fallback" | "Baixa" | "Media" | "Alta";
+  confidence: PetrobrasSentimentConfidence | "Sem dado";
   basis: string;
   source: string;
 };
+
+type PetrobrasSentimentLabel = "Neutro" | "Positivo" | "Negativo";
+type PetrobrasSentimentConfidence = "Baixa" | "Média" | "Alta";
 
 export type PetrobrasDashboardData = {
   basicData: PetrobrasBasicData;
@@ -96,6 +103,10 @@ const LATEST_REPORT: PetrobrasReport = {
   summary:
     "O PetroAgent continua monitorando PETR4 com foco em dividendos, fatos relevantes e sentimento setorial. O painel atual exibe o último contexto disponível em modo demonstrativo, sem indicação de operação.",
   generatedAt: "19/05/2026 14:35",
+  sentimentBasis: null,
+  sentimentConfidence: null,
+  sentimentLabel: null,
+  sentimentScore: null,
   source: "Fallback demonstrativo",
   status: "Fallback",
 };
@@ -241,13 +252,30 @@ export async function getPetrobrasDashboardData(): Promise<PetrobrasDashboardDat
 export function getPetrobrasSentiment(
   report: PetrobrasReport | null,
 ): PetrobrasSentiment {
+  if (
+    !report ||
+    report.status !== "Saved" ||
+    report.sentimentScore === null ||
+    report.sentimentLabel === null
+  ) {
+    return {
+      basis:
+        "Aguardando análise estruturada do agente salva no banco de dados.",
+      confidence: "Sem dado",
+      label: "Sem dado",
+      score: 0,
+      source: "Banco de dados",
+    };
+  }
+
   return {
-    label: "Neutro",
-    score: 52,
-    confidence: report?.status === "Saved" ? "Baixa" : "Fallback",
     basis:
-      "Leitura demonstrativa baseada no resumo disponível, sem recomendação de operação.",
-    source: report?.source ?? "Fallback demonstrativo",
+      report.sentimentBasis ??
+      "Análise estruturada salva pelo agente sem base textual detalhada.",
+    confidence: report.sentimentConfidence ?? "Sem dado",
+    label: report.sentimentLabel,
+    score: report.sentimentScore,
+    source: report.source,
   };
 }
 
@@ -284,15 +312,85 @@ function getRelevanceLabel(score: number | null) {
 function mapAgentReportToPetrobrasReport(report: {
   created_at: string;
   model_used: string | null;
+  sentiment: string | null;
+  sentiment_basis: string | null;
+  sentiment_confidence: string | null;
+  sentiment_score: number | null;
   summary: string;
   title: string;
 }): PetrobrasReport {
   return {
     generatedAt: formatDateTime(report.created_at),
+    sentimentBasis: report.sentiment_basis,
+    sentimentConfidence: normalizeSentimentConfidence(report.sentiment_confidence),
+    sentimentLabel: normalizeSentimentLabel(report.sentiment),
+    sentimentScore: normalizeSentimentScore(report.sentiment_score),
     source: report.model_used ? `Banco de dados · ${report.model_used}` : "Banco de dados",
     status: "Saved",
     summary: report.summary,
   };
+}
+
+function normalizeSentimentLabel(value: string | null): PetrobrasSentimentLabel | null {
+  if (!value) {
+    return null;
+  }
+
+  const normalized = value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .trim()
+    .toLowerCase();
+
+  if (normalized === "positivo") {
+    return "Positivo";
+  }
+
+  if (normalized === "negativo") {
+    return "Negativo";
+  }
+
+  if (normalized === "neutro") {
+    return "Neutro";
+  }
+
+  return null;
+}
+
+function normalizeSentimentConfidence(
+  value: string | null,
+): PetrobrasSentimentConfidence | null {
+  if (!value) {
+    return null;
+  }
+
+  const normalized = value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .trim()
+    .toLowerCase();
+
+  if (normalized === "baixa") {
+    return "Baixa";
+  }
+
+  if (normalized === "media") {
+    return "Média";
+  }
+
+  if (normalized === "alta") {
+    return "Alta";
+  }
+
+  return null;
+}
+
+function normalizeSentimentScore(value: number | null) {
+  if (typeof value !== "number" || value < 0 || value > 100) {
+    return null;
+  }
+
+  return Math.round(value);
 }
 
 function mapAgentReportToRecentReport(report: {

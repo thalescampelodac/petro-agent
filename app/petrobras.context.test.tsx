@@ -30,9 +30,9 @@ describe("PetrobrasPage", () => {
     expect(screen.getByText(/relatórios recentes/i)).toBeInTheDocument();
     expect(screen.getByText(/nenhum relatório salvo ainda/i)).toBeInTheDocument();
     expect(screen.getByText(/indicador de sentimento/i)).toBeInTheDocument();
-    expect(screen.getByRole("meter", { name: /sentimento neutro/i })).toHaveAttribute(
+    expect(screen.getByRole("meter", { name: /sentimento sem dado/i })).toHaveAttribute(
       "aria-valuenow",
-      "52",
+      "0",
     );
     expect(screen.getByText(/eventos recentes/i)).toBeInTheDocument();
     expect(screen.getByText(/radar inicial preparado/i)).toBeInTheDocument();

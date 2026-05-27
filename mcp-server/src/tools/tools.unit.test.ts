@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { createSupabaseFixtureClient } from "../../../test/fixtures/supabase.js";
 import { getAgentProfile } from "./get-agent-profile.js";
+import { getLatestReport } from "./get-latest-report.js";
 import { getMarketSnapshot } from "./get-market-snapshot.js";
 import { searchAgentMemory } from "./search-agent-memory.js";
 import { compareReports } from "./compare-reports.js";
@@ -67,6 +68,37 @@ describe("MCP tools", () => {
     });
   });
 
+  it("retorna sentimento estruturado do ultimo relatorio", async () => {
+    const { client } = createSupabaseFixtureClient({
+      agent_reports: {
+        data: {
+          attention_points: ["Sem recomendação financeira"],
+          created_at: "2026-05-25T12:00:00.000Z",
+          id: 3,
+          model_used: "gemini",
+          sentiment: "Neutro",
+          sentiment_basis: "Dados persistidos sem pressão direcional relevante.",
+          sentiment_confidence: "media",
+          sentiment_score: 54,
+          source_count: 2,
+          summary: "Resumo estruturado.",
+          title: "Radar diário",
+        },
+        error: null,
+      },
+    });
+    supabaseClient = client;
+
+    await expect(getLatestReport()).resolves.toMatchObject({
+      found: true,
+      report: {
+        sentiment_basis: "Dados persistidos sem pressão direcional relevante.",
+        sentiment_confidence: "media",
+        sentiment_score: 54,
+      },
+    });
+  });
+
   it("busca memoria em fontes, eventos e relatorios", async () => {
     const { client } = createSupabaseFixtureClient({
       agent_reports: {
@@ -75,6 +107,9 @@ describe("MCP tools", () => {
             created_at: "2026-05-25T12:00:00.000Z",
             id: 3,
             sentiment: "Neutro",
+            sentiment_basis: "Base estruturada",
+            sentiment_confidence: "media",
+            sentiment_score: 52,
             summary: "Relatorio sobre dividendos",
             title: "Radar diario",
           },

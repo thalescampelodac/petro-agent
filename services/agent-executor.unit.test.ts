@@ -25,6 +25,7 @@ const context: ManualAgentContext = {
     {
       created_at: "2026-05-24T12:00:00.000Z",
       sentiment: "Neutro",
+      sentiment_score: 50,
       summary: "Resumo anterior sem recomendação.",
       title: "Relatório anterior",
     },
@@ -60,6 +61,7 @@ describe("manual PetroAgent executor", () => {
     expect(prompt).toContain("Fontes recentes");
     expect(prompt).toContain("Eventos recentes");
     expect(prompt).toContain("Relatórios anteriores");
+    expect(prompt).toContain("escore 50/100");
   });
 
   it("extrai citacoes de fontes e eventos persistidos", () => {

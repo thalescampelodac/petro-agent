@@ -36,9 +36,9 @@ usados para substituir dados operacionais ausentes.
 | Dados básicos | Fonte | `market_snapshots.source` quando existe; mock no código quando vazio | Bloqueado por mock |
 | Resumo inteligente | Resumo, geração, fonte | `agent_reports` quando existe; resumo fallback no código quando vazio | Bloqueado por mock |
 | Relatórios recentes | Título, resumo, sentimento, modelo, fontes | `agent_reports` | Alinhado ao banco |
-| Sentimento | Label | `agent_reports.sentiment` indiretamente; fallback fixo `Neutro` | Bloqueado por fallback fixo |
-| Sentimento | Escore `52/100` | Fixo no código | Bloqueado por falta de campo |
-| Sentimento | Confiabilidade, base, fonte | Derivado/fixo no código | Bloqueado por falta de campos |
+| Sentimento | Label | `agent_reports.sentiment` quando existe; estado vazio quando ausente | Alinhado ao banco |
+| Sentimento | Escore | `agent_reports.sentiment_score` quando existe; estado vazio quando ausente | Alinhado ao banco |
+| Sentimento | Confiabilidade, base, fonte | `agent_reports.sentiment_confidence`, `agent_reports.sentiment_basis` e `agent_reports.model_used` | Alinhado ao banco |
 | Sinais monitorados | Dividendos, fatos relevantes, notícias, sentimento | Lista e status fixos no código | Bloqueado por dado fixo |
 | Pulso demonstrativo | Barras do gráfico | Array fixo no código | Bloqueado por mock |
 | Eventos recentes | Eventos, datas, tipo, resumo, relevância | `market_events` quando existe; timeline fallback no código quando vazio | Bloqueado por mock |
@@ -59,8 +59,8 @@ usados para substituir dados operacionais ausentes.
 | Data do relatório | `agent_reports.created_at` | Tool futura `save_agent_report` | `get_latest_report` | Geração do agente | Unit MCP |
 | Fonte/modelo do relatório | `agent_reports.model_used`, `source_count` | Tool futura `save_agent_report` | `get_latest_report` | Execução IA/fallback do agente | Unit MCP |
 | Sentimento textual | `agent_reports.sentiment` | Tool futura `save_agent_report` ou `generate_informative_analysis` | `get_latest_report` | Análise do agente | Unit MCP + contexto painel |
-| Escore de sentimento | Campo futuro em `agent_reports` ou tabela derivada | Tool futura `save_agent_report` | `get_latest_report` | Análise estruturada do agente | Migration + unit MCP |
-| Confiabilidade/base do sentimento | Campos futuros em `agent_reports` ou tabela derivada | Tool futura `save_agent_report` | `get_latest_report` | Análise estruturada do agente | Migration + unit MCP |
+| Escore de sentimento | `agent_reports.sentiment_score` | Tool futura `save_agent_report` | `get_latest_report` | Análise estruturada do agente | Migration + unit MCP |
+| Confiabilidade/base do sentimento | `agent_reports.sentiment_confidence`, `agent_reports.sentiment_basis` | Tool futura `save_agent_report` | `get_latest_report` | Análise estruturada do agente | Migration + unit MCP |
 | Eventos recentes | `market_events.*` | `register_market_event` | `list_market_events` | Fontes coletadas e analisadas pelo agente | Unit MCP + integração painel |
 | Fonte do evento | `market_events.source_id -> sources.id` | `register_source` + `register_market_event` | `list_market_events` e `search_agent_memory` | URL/documento público coletado | Unit MCP |
 | Relevância do evento | `market_events.relevance_score` | `register_market_event` | `list_market_events` | Classificação do agente | Unit MCP |
@@ -86,9 +86,8 @@ Para a Fase 11, cada origem externa precisa ser decidida antes da implementaçã
 1. Remover mocks do painel antes de haver estados vazios explícitos (#98).
 2. Criar tools MCP de escrita antes de definir payloads com origem rastreável
    (#95).
-3. Exibir escore de sentimento sem campo persistido (#106).
-4. Exibir pulso visual com array fixo (#107).
-5. Tratar o agente como autônomo para dados externos sem validação do JSON
+3. Exibir pulso visual com array fixo (#107).
+4. Tratar o agente como autônomo para dados externos sem validação do JSON
    retornado pelo prompt (#104).
 
 ## Sequência recomendada após esta matriz

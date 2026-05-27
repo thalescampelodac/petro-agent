@@ -7,6 +7,9 @@ export type CachedPetrobrasReport = {
   created_at: string;
   model_used: string | null;
   sentiment: string | null;
+  sentiment_basis: string | null;
+  sentiment_confidence: string | null;
+  sentiment_score: number | null;
   source_count: number | null;
   summary: string;
   title: string;
@@ -84,7 +87,9 @@ export async function getCachedPetrobrasData(): Promise<CachedPetrobrasData> {
     client
       .schema(PETROAGENT_SCHEMA)
       .from("agent_reports")
-      .select("created_at, model_used, sentiment, source_count, summary, title")
+      .select(
+        "created_at, model_used, sentiment, sentiment_basis, sentiment_confidence, sentiment_score, source_count, summary, title",
+      )
       .order("created_at", { ascending: false })
       .limit(3),
     client
