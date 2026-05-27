@@ -939,6 +939,13 @@ verdadeiras:
 7. Cada novo caminho agente -> MCP -> banco -> painel deve ter teste unitário,
    integração/contexto ou smoke adequado ao risco.
 
+Exceção explícita: metadados estáticos e canônicos do ativo monitorado, como
+`PETR4`, nome da empresa e nome de exibição institucional, podem permanecer no
+código quando forem tratados como configuração estrutural do produto, não como
+dado operacional coletado. Essa exceção não vale para preço, variação, volume,
+sentimento, eventos, relatórios, status de execução, pulso do painel ou qualquer
+informação que represente estado de mercado ou análise do agente.
+
 ### Matriz obrigatória painel-banco-MCP
 
 Antes de implementar novas coletas ou remoções de mock, a equipe deve manter uma
@@ -1059,15 +1066,16 @@ PETR4 antes de implementar escrita real em `market_snapshots`.
 #### Issue 11.0B — #105 — Modelar metadados do ativo monitorado no banco
 
 **Descrição:**
-Remover dependência de empresa/nome do ativo fixos no código, criando origem
-persistida ou equivalente no schema `petroagent`.
+A issue foi reavaliada e não será implementada. Ticker, empresa e nome de
+exibição do ativo monitorado são configuração estática do produto e não dado
+operacional do agente.
 
 **Critérios de aceite:**
 
-- Origem persistida para ticker, empresa e nome exibido definida.
-- Migration criada quando necessário.
-- Tool MCP de escrita/consulta planejada ou implementada.
-- Testes e matriz atualizados.
+- Issue fechada como não planejada.
+- Exceção documentada em `AGENTES.md`.
+- Matriz painel-banco-MCP atualizada para não bloquear a Fase 11 por
+  metadados estáticos.
 
 ---
 
@@ -1543,6 +1551,16 @@ Decisão da #102:
 - Antes de implementar novas ferramentas/coletas, deve existir matriz
   painel-banco-MCP mapeando campo, tabela/coluna, tool de escrita, tool de
   leitura, origem externa e teste.
+
+Decisão da #105:
+
+- A issue #105 foi fechada como não planejada.
+- Metadados estáticos e canônicos do ativo monitorado, como `PETR4`, nome da
+  empresa e nome de exibição, são configuração estrutural do produto e podem
+  permanecer no código.
+- A regra agente -> MCP -> banco -> painel continua obrigatória para dados
+  operacionais, como preço, variação, volume, eventos, sentimento, relatórios,
+  status de execução e pulso do painel.
 
 ---
 
