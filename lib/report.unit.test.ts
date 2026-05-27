@@ -78,4 +78,45 @@ describe('generateReport', () => {
       },
     });
   });
+
+  it('parses Gemini JSON wrapped in markdown fences', async () => {
+    process.env = {
+      ...originalEnv,
+      GEMINI_API_KEY: 'gemini-key',
+      GEMINI_API_VERSION: 'v1beta',
+      GEMINI_MODEL: 'gemini-2.5-flash',
+      OPENAI_API_KEY: '',
+    };
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({
+        json: async () => ({
+          candidates: [
+            {
+              content: {
+                parts: [
+                  {
+                    text: '```json\\n{\"summary\":\"Resumo em português\",\"highlights\":[\"Ponto observado\"],\"key_facts\":[],\"sources\":[]}\\n```',
+                  },
+                ],
+              },
+            },
+          ],
+        }),
+        ok: true,
+      })),
+    );
+
+    const res = await generateReport({ text: 'Petrobras publicou comunicado.' });
+
+    expect(res).toEqual({
+      engine: 'ai',
+      result: {
+        highlights: ['Ponto observado'],
+        key_facts: [],
+        sources: [],
+        summary: 'Resumo em português',
+      },
+    });
+  });
 });

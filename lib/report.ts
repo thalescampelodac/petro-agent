@@ -37,6 +37,25 @@ type OpenAIRequestBody = {
   model: string;
 };
 
+function parseAIContent(content: string) {
+  const normalized = content
+    .trim()
+    .replace(/^```(?:json)?[\s\\n]*/i, '')
+    .replace(/[\s\\n]*```$/i, '')
+    .trim();
+
+  try {
+    return JSON.parse(normalized);
+  } catch {
+    return {
+      highlights: [],
+      key_facts: [],
+      sources: [],
+      summary: content,
+    };
+  }
+}
+
 async function callAI(prompt: string) {
   // Prefer Gemini when configured, otherwise fall back to OpenAI if available
   const geminiKey = process.env.GEMINI_API_KEY;
@@ -71,11 +90,7 @@ async function callAI(prompt: string) {
       .filter(Boolean)
       .join('\n');
     if (!content) throw new Error('Gemini returned no content');
-    try {
-      return JSON.parse(content);
-    } catch {
-      return { summary: String(content), highlights: [], key_facts: [], sources: [] };
-    }
+    return parseAIContent(content);
   }
 
   if (openaiKey) {
@@ -98,11 +113,7 @@ async function callAI(prompt: string) {
     const data = await res.json();
     const content = data?.choices?.[0]?.message?.content;
     if (!content) throw new Error('AI returned no content');
-    try {
-      return JSON.parse(content);
-    } catch {
-      return { summary: String(content), highlights: [], key_facts: [], sources: [] };
-    }
+    return parseAIContent(content);
   }
 
   throw new Error('No AI key configured');
