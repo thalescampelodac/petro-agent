@@ -1039,6 +1039,66 @@ implementações da Fase 11.
 
 ---
 
+#### Issue 11.0A — #104 — Definir fonte operacional para dados de mercado PETR4
+
+**Descrição:**
+Definir onde o agente buscará preço, variação, volume e horário do snapshot
+PETR4 antes de implementar escrita real em `market_snapshots`.
+
+**Critérios de aceite:**
+
+- Fonte inicial definida e documentada.
+- Limitações de atraso, licença, frequência e confiabilidade registradas.
+- Payload esperado para `upsert_market_snapshot` definido.
+- Matriz painel-banco-MCP atualizada.
+
+---
+
+#### Issue 11.0B — #105 — Modelar metadados do ativo monitorado no banco
+
+**Descrição:**
+Remover dependência de empresa/nome do ativo fixos no código, criando origem
+persistida ou equivalente no schema `petroagent`.
+
+**Critérios de aceite:**
+
+- Origem persistida para ticker, empresa e nome exibido definida.
+- Migration criada quando necessário.
+- Tool MCP de escrita/consulta planejada ou implementada.
+- Testes e matriz atualizados.
+
+---
+
+#### Issue 11.0C — #106 — Modelar sentimento estruturado do agente
+
+**Descrição:**
+Definir como sentimento, escore, confiabilidade e base da análise serão
+persistidos para o painel.
+
+**Critérios de aceite:**
+
+- Campos ou tabela para sentimento estruturado definidos.
+- Payload da análise do agente atualizado.
+- Tool MCP de escrita/consulta compatível planejada ou implementada.
+- Testes e matriz atualizados.
+
+---
+
+#### Issue 11.0D — #107 — Substituir sinais monitorados e pulso por dados persistidos
+
+**Descrição:**
+Definir origem persistida ou derivada para sinais monitorados e gráfico de pulso
+do painel.
+
+**Critérios de aceite:**
+
+- Sinais monitorados não dependem de status fixo em código.
+- Pulso visual não depende de array fixo em código.
+- Origem via eventos, relatórios ou nova tabela documentada.
+- Testes e matriz atualizados.
+
+---
+
 #### Issue 11.1 — #92 — Documentar MCP como contrato operacional
 
 **Descrição:**
