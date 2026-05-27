@@ -107,6 +107,15 @@ Autenticação:
 O endpoint usa `SUPABASE_SERVICE_ROLE_KEY` somente no servidor para inserir na
 tabela `petroagent.sources`.
 
+## Contrato do painel Petrobras
+
+A partir da Fase 11, todo dado operacional exibido em `/petrobras` deve vir do
+schema `petroagent` ou de um estado vazio explícito. Mocks que pareçam dados
+reais são bloqueadores de entrega.
+
+A matriz oficial de rastreabilidade fica em
+[`panel-bank-mcp-matrix.md`](./panel-bank-mcp-matrix.md).
+
 ## Cache do painel
 
 O painel Petrobras consulta primeiro dados persistidos nas tabelas:
@@ -116,5 +125,5 @@ O painel Petrobras consulta primeiro dados persistidos nas tabelas:
 - `petroagent.market_snapshots`
 
 As consultas possuem cache simples em memória por 60 segundos. Se não houver
-dados ou se o Supabase estiver indisponível, o painel mantém fallback
-demonstrativo e transparente.
+dados ou se o Supabase estiver indisponível, o painel deve exibir estados vazios
+claros, sem substituir ausência de dados por valores mockados.
