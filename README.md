@@ -74,6 +74,11 @@ Stack inicial:
 O servidor MCP inicial fica em `mcp-server/` e possui dependências, `tsconfig` e
 scripts próprios. Ele não é executado pelo build do Next.js.
 
+No MVP 2, o MCP passa a ser o contrato operacional do PetroAgent. Agentes
+internos e externos devem usar suas tools para consultar contexto, registrar
+dados e gerar análises. O app Next.js continua responsável apenas por exibir os
+dados, lendo banco/cache server-side quando necessário.
+
 ```bash
 cd mcp-server
 npm install
