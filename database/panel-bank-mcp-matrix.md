@@ -9,9 +9,15 @@ Regra central:
 Agente PetroAgent -> contrato MCP -> banco petroagent -> painel /petrobras
 ```
 
-O painel pode exibir textos estruturais da interface, como títulos, labels e
-avisos legais, diretamente no código. Dados operacionais sobre Petrobras/PETR4
-devem vir do banco ou de um estado vazio explícito.
+O painel pode exibir textos estruturais da interface, como títulos, labels,
+avisos legais e metadados estáticos do ativo monitorado diretamente no código.
+Dados operacionais sobre Petrobras/PETR4 devem vir do banco ou de um estado
+vazio explícito.
+
+Metadados estáticos e canônicos, como `PETR4`, nome da empresa e nome de
+exibição institucional, são configuração estrutural do produto. Eles não exigem
+tabela própria, tool MCP de escrita ou execução do agente, desde que não sejam
+usados para substituir dados operacionais ausentes.
 
 ## Estado atual
 
@@ -19,12 +25,12 @@ devem vir do banco ou de um estado vazio explícito.
 | --- | --- | --- | --- |
 | Hero status | Dados: `Mock`/`Cache` | `market_snapshots` quando existe; mock no código quando vazio | Bloqueado por mock |
 | Hero status | Atualização | `market_snapshots.snapshot_time` quando existe; mock no código quando vazio | Bloqueado por mock |
-| Métricas | Ativo monitorado, empresa | `market_snapshots.ticker` quando existe; empresa fixa no código | Bloqueado por dado fixo |
+| Métricas | Ativo monitorado, empresa | Configuração estática do produto; snapshot define estado operacional | Alinhado como metadado estático |
 | Métricas | Origem dos dados | `market_snapshots.source` quando existe; mock no código quando vazio | Bloqueado por mock |
 | Métricas | Status do radar | Texto fixo `Preparado` | Bloqueado por dado fixo |
 | Métricas | Última atualização | `market_snapshots.snapshot_time` quando existe; mock no código quando vazio | Bloqueado por mock |
-| Dados básicos | Ticker | `market_snapshots.ticker` quando existe; `PETR4` fixo quando vazio | Bloqueado por mock |
-| Dados básicos | Empresa | `Petrobras PN` fixo no código | Bloqueado por falta de tabela/campo |
+| Dados básicos | Ticker | Configuração estática `PETR4`; snapshot define estado operacional | Alinhado como metadado estático |
+| Dados básicos | Empresa | Configuração estática do produto | Alinhado como metadado estático |
 | Dados básicos | Último preço | `market_snapshots.price` quando existe; preço mockado quando vazio | Bloqueado por mock |
 | Dados básicos | Variação | `market_snapshots.variation` quando existe; variação mockada quando vazio | Bloqueado por mock |
 | Dados básicos | Fonte | `market_snapshots.source` quando existe; mock no código quando vazio | Bloqueado por mock |
@@ -41,8 +47,8 @@ devem vir do banco ou de um estado vazio explícito.
 
 | Campo do painel | Tabela/coluna no `petroagent` | Tool MCP que grava/atualiza | Tool MCP que consulta | Origem esperada | Teste necessário |
 | --- | --- | --- | --- | --- | --- |
-| Ticker monitorado | `market_snapshots.ticker` e cadastro de ativo futuro | `upsert_market_snapshot` | `get_market_snapshot` | Prompt guiado `prompts/market-snapshot-petr4.md` após fechamento do pregão | Unit MCP + contexto painel sem mock |
-| Empresa/nome do ativo | Tabela futura `monitored_assets` ou campo equivalente | Tool futura `upsert_monitored_asset` | Tool futura `get_agent_profile` baseada em banco | Curadoria inicial do agente ou cadastro operacional guiado | Unit MCP + contexto painel |
+| Ticker monitorado | Configuração estática do produto; `market_snapshots.ticker` valida snapshot operacional | `upsert_market_snapshot` para snapshots | `get_market_snapshot` | Prompt guiado `prompts/market-snapshot-petr4.md` após fechamento do pregão | Unit MCP + contexto painel sem mock |
+| Empresa/nome do ativo | Configuração estática do produto | Não se aplica | Não se aplica | Curadoria estrutural do produto | Contexto painel |
 | Último preço | `market_snapshots.price` | `upsert_market_snapshot` | `get_market_snapshot` | Prompt guiado priorizando B3, Google Finance, Yahoo Finance, Investing ou InfoMoney | Unit MCP + integração cache |
 | Variação | `market_snapshots.variation` | `upsert_market_snapshot` | `get_market_snapshot` | Prompt guiado priorizando B3, Google Finance, Yahoo Finance, Investing ou InfoMoney | Unit MCP + integração cache |
 | Volume | `market_snapshots.volume` | `upsert_market_snapshot` | `get_market_snapshot` | Prompt guiado; volume deve ser quantidade negociada, não volume financeiro | Unit MCP |
@@ -80,16 +86,15 @@ Para a Fase 11, cada origem externa precisa ser decidida antes da implementaçã
 1. Remover mocks do painel antes de haver estados vazios explícitos (#98).
 2. Criar tools MCP de escrita antes de definir payloads com origem rastreável
    (#95).
-3. Exibir empresa/nome do ativo sem origem no banco (#105).
-4. Exibir escore de sentimento sem campo persistido (#106).
-5. Exibir pulso visual com array fixo (#107).
-6. Tratar o agente como autônomo para dados externos sem validação do JSON
+3. Exibir escore de sentimento sem campo persistido (#106).
+4. Exibir pulso visual com array fixo (#107).
+5. Tratar o agente como autônomo para dados externos sem validação do JSON
    retornado pelo prompt (#104).
 
 ## Sequência recomendada após esta matriz
 
 1. Implementar validação e escrita MCP para o prompt de snapshot PETR4 (#95).
-2. Modelar metadados do ativo e sentimento estruturado (#105 e #106).
+2. Modelar sentimento estruturado (#106).
 3. Implementar tools MCP de escrita com origem rastreável (#95).
 4. Remover mocks do painel e trocar por estados vazios (#98).
 5. Migrar executor para fluxo MCP-first (#94, #96 e #97).
