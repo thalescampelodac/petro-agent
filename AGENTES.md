@@ -1160,6 +1160,16 @@ Decisões da leva #78-#81:
 - O cron não fica ativo até validação manual em produção e aprovação explícita.
 - O runbook operacional fica documentado no README e em `agents/README.md`.
 
+Decisão da #86:
+
+- O provedor IA preferencial do PetroAgent é Gemini API no tier gratuito.
+- O uso de Gemini deve ser pontual, server-side e acionado apenas pelo executor do agente, nunca por acesso público direto.
+- `GEMINI_API_KEY` é secret server-side; não usar prefixo `NEXT_PUBLIC_`.
+- `GEMINI_MODEL` deve apontar para um modelo disponível no free tier, conferido na documentação oficial no momento da configuração.
+- Não ativar billing, pay-as-you-go ou qualquer recurso pago do Google/Gemini sem aprovação explícita.
+- Fallback determinístico continua obrigatório para falta de chave, erro, limite excedido ou indisponibilidade do provedor.
+- Referências oficiais: `https://ai.google.dev/gemini-api/docs/pricing` e `https://ai.google.dev/gemini-api/docs/billing`.
+
 ---
 
 # Prioridade atual
