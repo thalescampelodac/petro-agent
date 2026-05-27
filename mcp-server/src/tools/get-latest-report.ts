@@ -8,6 +8,9 @@ type AgentReportRow = {
   title: string;
   summary: string;
   sentiment: string | null;
+  sentiment_basis: string | null;
+  sentiment_confidence: string | null;
+  sentiment_score: number | null;
   attention_points: string[] | null;
   source_count: number;
   model_used: string | null;
@@ -31,7 +34,7 @@ export async function getLatestReport(): Promise<LatestReportResult> {
     .schema("petroagent")
     .from("agent_reports")
     .select(
-      "id, created_at, title, summary, sentiment, attention_points, source_count, model_used",
+      "id, created_at, title, summary, sentiment, sentiment_basis, sentiment_confidence, sentiment_score, attention_points, source_count, model_used",
     )
     .order("created_at", { ascending: false })
     .limit(1)
@@ -62,8 +65,15 @@ function describeResult(result: LatestReportResult) {
 
   const { report } = result;
   const sentiment = report.sentiment ? ` Sentimento: ${report.sentiment}.` : "";
+  const score =
+    typeof report.sentiment_score === "number"
+      ? ` Escore: ${report.sentiment_score}/100.`
+      : "";
+  const confidence = report.sentiment_confidence
+    ? ` Confiabilidade: ${report.sentiment_confidence}.`
+    : "";
 
-  return `${report.title}: ${report.summary}${sentiment}`;
+  return `${report.title}: ${report.summary}${sentiment}${score}${confidence}`;
 }
 
 export function registerGetLatestReportTool(server: McpServer) {

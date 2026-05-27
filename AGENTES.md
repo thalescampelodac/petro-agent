@@ -1562,6 +1562,16 @@ Decisão da #105:
   operacionais, como preço, variação, volume, eventos, sentimento, relatórios,
   status de execução e pulso do painel.
 
+Decisão da #106:
+
+- O sentimento estruturado fica em `petroagent.agent_reports`.
+- Campos definidos: `sentiment_score` de 0 a 100, `sentiment_confidence` com
+  valores `baixa`, `media` ou `alta`, e `sentiment_basis` com justificativa
+  curta da análise.
+- `get_latest_report` deve retornar esses campos para agentes via MCP.
+- O painel `/petrobras` deve usar esses campos quando existirem e mostrar
+  estado vazio explícito quando ainda não houver análise estruturada.
+
 ---
 
 # Prioridade atual

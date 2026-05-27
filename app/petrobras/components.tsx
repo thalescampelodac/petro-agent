@@ -149,7 +149,7 @@ export function SentimentIndicator({
           <div>
             <CardTitle className="text-white">Indicador de sentimento</CardTitle>
             <CardDescription className="mt-1 text-slate-400">
-              Leitura informativa derivada do resumo disponível.
+              Leitura informativa estruturada salva pelo agente.
             </CardDescription>
           </div>
           <Badge className="w-fit border-sky-300/20 bg-sky-300/10 text-sky-100">
@@ -162,7 +162,7 @@ export function SentimentIndicator({
           <div>
             <div className="flex items-center gap-2 text-sm font-medium text-sky-100">
               <Activity className="size-4" />
-              Escore demonstrativo
+              Escore do agente
             </div>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
               {sentiment.basis}

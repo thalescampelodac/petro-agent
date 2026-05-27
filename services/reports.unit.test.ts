@@ -47,6 +47,9 @@ describe('reports service', () => {
           id: 1,
           model_used: 'fallback',
           sentiment: null,
+          sentiment_basis: null,
+          sentiment_confidence: null,
+          sentiment_score: null,
           source_count: 0,
           summary: 'Resumo',
           title: 'Relatório PetroAgent',
@@ -67,6 +70,12 @@ describe('reports service', () => {
     await expect(
       saveReport('ai', {
         highlights: ['Ponto de atenção'],
+        sentiment: 'Neutro',
+        sentiment_analysis: {
+          basis: 'Sem pressão direcional relevante nos dados persistidos.',
+          confidence: 'média',
+          score: 54,
+        },
         sources: ['https://example.com'],
         summary: 'Resumo gerado',
       }),
@@ -78,7 +87,10 @@ describe('reports service', () => {
     expect(insert).toHaveBeenCalledWith({
       attention_points: ['Ponto de atenção'],
       model_used: 'ai',
-      sentiment: null,
+      sentiment: 'Neutro',
+      sentiment_basis: 'Sem pressão direcional relevante nos dados persistidos.',
+      sentiment_confidence: 'media',
+      sentiment_score: 54,
       source_count: 1,
       summary: 'Resumo gerado',
       title: 'Relatório PetroAgent',

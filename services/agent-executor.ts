@@ -42,6 +42,7 @@ export type AgentMarketSnapshotContext = {
 export type AgentPreviousReportContext = {
   created_at: string;
   sentiment: string | null;
+  sentiment_score: number | null;
   summary: string;
   title: string;
 };
@@ -72,6 +73,15 @@ type AgentReportPayload = {
   key_facts?: unknown[];
   next_steps?: string;
   sentiment?: string;
+  sentiment_analysis?: {
+    basis?: string;
+    confidence?: string;
+    label?: string;
+    score?: number;
+  };
+  sentiment_basis?: string;
+  sentiment_confidence?: string;
+  sentiment_score?: number;
   sources?: string[];
   summary?: string;
 };
@@ -134,7 +144,7 @@ export async function readManualAgentContext(
       client
         .schema(PETROAGENT_SCHEMA)
         .from("agent_reports")
-        .select("created_at, title, summary, sentiment")
+        .select("created_at, title, summary, sentiment, sentiment_score")
         .order("created_at", { ascending: false })
         .limit(3),
     ]);
@@ -310,6 +320,10 @@ function formatPreviousReports(reports: AgentPreviousReportContext[]) {
       (report) =>
         `- ${report.title} (${report.created_at}, sentimento ${
           report.sentiment ?? "não informado"
+        }, escore ${
+          typeof report.sentiment_score === "number"
+            ? `${report.sentiment_score}/100`
+            : "não informado"
         }): ${report.summary}`,
     ),
   ].join("\n");
