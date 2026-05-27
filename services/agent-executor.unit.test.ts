@@ -8,6 +8,7 @@ import {
   type ManualAgentContext,
 } from "./agent-executor";
 import { createSupabaseFixtureClient } from "@/test/fixtures/supabase";
+import type { PetroAgentMcpAdapter } from "./mcp/internal-adapter";
 
 const context: ManualAgentContext = {
   events: [
@@ -51,6 +52,79 @@ const context: ManualAgentContext = {
   ],
 };
 
+function toolResult<T>(structuredContent: T) {
+  return {
+    content: [{ text: "ok", type: "text" as const }],
+    structuredContent,
+  };
+}
+
+function createMcpAdapter(overrides: Partial<PetroAgentMcpAdapter> = {}) {
+  return {
+    compareReports: vi.fn(),
+    generateInformativeAnalysis: vi.fn(async () =>
+      toolResult({
+        citations: ["https://example.com/ri", "petroagent.market_events:20"],
+        payload: {
+          attention_points: ["Fato relevante publicado"],
+          model_used: "fallback",
+          sentiment: "Neutro",
+          sentiment_basis: "Contexto persistido sem pressão direcional relevante.",
+    sentiment_confidence: "baixa" as const,
+          sentiment_score: 50,
+          source_count: 2,
+          summary: "Resumo manual do agente.",
+          title: "Radar informativo PETR4",
+        },
+      }),
+    ),
+    getAgentProfile: vi.fn(),
+    getLatestReport: vi.fn(async () =>
+      toolResult({
+        found: true as const,
+        report: context.previousReports[0],
+      }),
+    ),
+    getMarketSnapshot: vi.fn(async () =>
+      toolResult({
+        found: true as const,
+        snapshot: context.snapshot,
+        ticker: "PETR4",
+      }),
+    ),
+    listMarketEvents: vi.fn(async () =>
+      toolResult({
+        count: context.events.length,
+        events: context.events,
+        filters: {
+          date_from: null,
+          date_to: null,
+          event_type: null,
+          limit: 8,
+        },
+      }),
+    ),
+    registerMarketEvent: vi.fn(),
+    registerSource: vi.fn(),
+    saveAgentReport: vi.fn(async () =>
+      toolResult({
+        id: 123,
+        source: "petroagent.agent_reports",
+      }),
+    ),
+    searchAgentMemory: vi.fn(async () =>
+      toolResult({
+        count: context.sources.length,
+        items: context.sources,
+        query: "Petrobras PETR4",
+      }),
+    ),
+    summarizeContext: vi.fn(),
+    upsertMarketSnapshot: vi.fn(),
+    ...overrides,
+  } as unknown as PetroAgentMcpAdapter;
+}
+
 describe("manual PetroAgent executor", () => {
   it("monta contexto textual com guardrails de produto", () => {
     const prompt = buildManualAgentPrompt(context);
@@ -71,32 +145,15 @@ describe("manual PetroAgent executor", () => {
     ]);
   });
 
-  it("le contexto do Supabase sem banco real", async () => {
-    const { calls, client, schema } = createSupabaseFixtureClient({
-      agent_reports: {
-        data: context.previousReports,
-        error: null,
-      },
-      market_events: {
-        data: context.events,
-        error: null,
-      },
-      market_snapshots: {
-        data: context.snapshot,
-        error: null,
-      },
-      sources: {
-        data: context.sources,
-        error: null,
-      },
-    });
+  it("le contexto usando o adapter MCP", async () => {
+    const mcpAdapter = createMcpAdapter();
 
-    await expect(readManualAgentContext(client as never)).resolves.toEqual(context);
-    expect(schema).toHaveBeenCalledWith("petroagent");
-    expect(calls).toContainEqual({
-      args: ["ticker", "PETR4"],
-      method: "eq",
-      table: "market_snapshots",
+    await expect(readManualAgentContext(mcpAdapter)).resolves.toEqual(context);
+    expect(mcpAdapter.getMarketSnapshot).toHaveBeenCalledWith("PETR4");
+    expect(mcpAdapter.listMarketEvents).toHaveBeenCalledWith({ limit: 8 });
+    expect(mcpAdapter.searchAgentMemory).toHaveBeenCalledWith({
+      limit: 8,
+      query: "Petrobras PETR4",
     });
   });
 
@@ -119,25 +176,17 @@ describe("manual PetroAgent executor", () => {
         error: null,
       },
     });
-    const generate = vi.fn(async () => ({
-      engine: "fallback",
-      result: {
-        highlights: ["Fato relevante publicado"],
-        summary: "Resumo manual do agente.",
-      },
-    }));
-    const persist = vi.fn(async () => ({ id: 123 }));
+    const mcpAdapter = createMcpAdapter();
     const logStart = vi.fn(async () => ({ id: 99 }));
     const logFinish = vi.fn(async () => undefined);
 
     await expect(
       executeManualPetroAgent({
         client: client as never,
-        generate,
         logFinish,
         logStart,
+        mcpAdapter,
         origin: "unit-test",
-        persist,
       }),
     ).resolves.toEqual({
       engine: "fallback",
@@ -147,13 +196,15 @@ describe("manual PetroAgent executor", () => {
       status: "saved",
       summary: "Resumo manual do agente.",
     });
-    expect(generate).toHaveBeenCalledWith({
-      text: expect.stringContaining("PetroAgent manual run"),
-    });
-    expect(persist).toHaveBeenCalledWith(
-      "fallback",
+    expect(mcpAdapter.generateInformativeAnalysis).toHaveBeenCalledWith(
       expect.objectContaining({
-        sources: ["https://example.com/ri", "petroagent.market_events:20"],
+        scope: expect.stringContaining("PetroAgent manual run"),
+        ticker: "PETR4",
+      }),
+    );
+    expect(mcpAdapter.saveAgentReport).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source_count: 2,
         summary: "Resumo manual do agente.",
       }),
     );
@@ -192,8 +243,10 @@ describe("manual PetroAgent executor", () => {
         error: null,
       },
     });
-    const generate = vi.fn(async () => {
-      throw new Error("ai_failed");
+    const mcpAdapter = createMcpAdapter({
+      generateInformativeAnalysis: vi.fn(async () => {
+        throw new Error("ai_failed");
+      }),
     });
     const logStart = vi.fn(async () => ({ id: 101 }));
     const logFinish = vi.fn(async () => undefined);
@@ -201,9 +254,9 @@ describe("manual PetroAgent executor", () => {
     await expect(
       executeManualPetroAgent({
         client: client as never,
-        generate,
         logFinish,
         logStart,
+        mcpAdapter,
       }),
     ).rejects.toThrow("ai_failed");
     expect(logFinish).toHaveBeenCalledWith(client, 101, {

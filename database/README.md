@@ -33,6 +33,9 @@ futuro.
 - `raw_content`: conteúdo bruto capturado.
 - `processed`: indica se a fonte já foi processada pelo agente.
 
+Índice operacional: `sources_url_unique_idx` usa `url` como chave natural quando
+ela existe, permitindo escrita idempotente via MCP.
+
 Permissões: leitura e escrita reservadas ao backend com `service_role`, porque a
 tabela pode conter conteúdo bruto. Referências públicas devem usar tabelas
 derivadas ou uma view sanitizada futura.
@@ -49,6 +52,9 @@ Eventos de mercado extraídos ou registrados a partir das fontes.
 - `summary`: resumo informativo.
 - `source_id`: referência opcional para `petroagent.sources`.
 - `relevance_score`: pontuação de relevância de 0 a 100.
+
+Índice operacional: `market_events_natural_key_idx` usa tipo, título e data do
+evento para evitar duplicidade nas escritas MCP.
 
 ### `petroagent.agent_reports`
 
@@ -79,6 +85,9 @@ Fotografias pontuais de dados de mercado, sem promessa de tempo real.
 - `volume`: volume capturado.
 - `source`: fonte do dado.
 - `snapshot_time`: horário original da fotografia.
+
+Índice operacional: `market_snapshots_ticker_snapshot_time_unique_idx` usa
+ticker e horário do snapshot para escrita idempotente via MCP.
 
 ## Segurança
 

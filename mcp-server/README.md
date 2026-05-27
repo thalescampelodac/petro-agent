@@ -126,6 +126,34 @@ Gera uma sumarização contextual simples usando somente fontes e eventos
 persistidos. Não chama IA externa; a saída é uma síntese determinística para
 evitar custo e dependência no MVP.
 
+### `register_source`
+
+Registra fontes públicas em `petroagent.sources`. Quando a URL existe, a tool usa
+essa URL como chave natural para evitar duplicidade.
+
+### `register_market_event`
+
+Registra eventos em `petroagent.market_events` com payload validado e chave
+natural baseada em tipo, título e data do evento.
+
+### `upsert_market_snapshot`
+
+Registra snapshots em `petroagent.market_snapshots` por ticker e horário do
+snapshot. Essa é a tool esperada para persistir o resultado do prompt de cotação
+PETR4 executado fora do pregão.
+
+### `generate_informative_analysis`
+
+Gera uma análise curta e informativa a partir do contexto persistido. Usa Gemini
+quando configurado via `GEMINI_API_KEY` e fallback determinístico quando a chave
+não existe ou a chamada falha. A saída é compatível com `save_agent_report`.
+
+### `save_agent_report`
+
+Persiste relatórios estruturados em `petroagent.agent_reports`, incluindo
+sentimento textual, escore, confiabilidade, base da análise, modelo e quantidade
+de fontes.
+
 ## Busca semântica futura
 
 A busca semântica com embeddings fica planejada para quando houver necessidade

@@ -28,18 +28,38 @@ describe("PetroAgent MCP internal adapter", () => {
     await adapter.getLatestReport();
     await adapter.getMarketSnapshot("PETR4");
     await adapter.listMarketEvents({ event_type: "RI", limit: 5 });
+    await adapter.registerSource({
+      raw_content: "Fonte",
+      source_type: "ri",
+      url: "https://example.com",
+    });
+    await adapter.registerMarketEvent({
+      event_type: "RI",
+      title: "Evento",
+    });
+    await adapter.upsertMarketSnapshot({
+      snapshot_time: "2026-05-27T19:10:00-03:00",
+      ticker: "PETR4",
+    });
     await adapter.searchAgentMemory({ query: "dividendos" });
     await adapter.compareReports({ limit: 3 });
     await adapter.summarizeContext({ query: "Petrobras" });
+    await adapter.generateInformativeAnalysis({ ticker: "PETR4" });
+    await adapter.saveAgentReport({ summary: "Resumo" });
 
     expect(callTool.mock.calls.map(([name]) => name)).toEqual([
       PETROAGENT_MCP_TOOLS.getAgentProfile,
       PETROAGENT_MCP_TOOLS.getLatestReport,
       PETROAGENT_MCP_TOOLS.getMarketSnapshot,
       PETROAGENT_MCP_TOOLS.listMarketEvents,
+      PETROAGENT_MCP_TOOLS.registerSource,
+      PETROAGENT_MCP_TOOLS.registerMarketEvent,
+      PETROAGENT_MCP_TOOLS.upsertMarketSnapshot,
       PETROAGENT_MCP_TOOLS.searchAgentMemory,
       PETROAGENT_MCP_TOOLS.compareReports,
       PETROAGENT_MCP_TOOLS.summarizeContext,
+      PETROAGENT_MCP_TOOLS.generateInformativeAnalysis,
+      PETROAGENT_MCP_TOOLS.saveAgentReport,
     ]);
     expect(callTool).toHaveBeenCalledWith(PETROAGENT_MCP_TOOLS.getMarketSnapshot, {
       ticker: "PETR4",

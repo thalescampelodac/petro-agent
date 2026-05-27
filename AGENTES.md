@@ -1572,6 +1572,20 @@ Decisão da #106:
 - O painel `/petrobras` deve usar esses campos quando existirem e mostrar
   estado vazio explícito quando ainda não houver análise estruturada.
 
+Decisão do pacote #94, #95, #96 e #97:
+
+- O executor do agente passa a montar contexto via adapter MCP, usando
+  `get_latest_report`, `list_market_events`, `get_market_snapshot` e
+  `search_agent_memory`.
+- Escritas operacionais iniciais do MCP foram padronizadas nas tools
+  `register_source`, `register_market_event`, `upsert_market_snapshot` e
+  `save_agent_report`.
+- `generate_informative_analysis` gera payload persistível compatível com
+  `agent_reports`, usa contexto persistido antes de IA externa e mantém fallback
+  determinístico.
+- O app continua sem chamar MCP para renderizar o painel; o contrato MCP governa
+  coleta, análise e persistência do agente.
+
 ---
 
 # Prioridade atual

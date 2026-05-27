@@ -55,12 +55,12 @@ usados para substituir dados operacionais ausentes.
 | Fonte do snapshot | `market_snapshots.source` | `upsert_market_snapshot` | `get_market_snapshot` | Nome e URL exata da fonte consultada pelo agente | Unit MCP |
 | Horário do snapshot | `market_snapshots.snapshot_time` | `upsert_market_snapshot` | `get_market_snapshot` | Timestamp informado pela fonte; se ausente, `null` | Unit MCP + contexto painel |
 | Status do radar | Derivado de `agent_execution_logs.status` e/ou último dado persistido | Tool futura de log/status ou log existente | Tool futura `get_agent_status` | Execução do agente | Unit service + contexto painel |
-| Resumo inteligente | `agent_reports.summary` | Tool futura `save_agent_report` ou `generate_informative_analysis` persistível | `get_latest_report` | Análise do agente sobre contexto salvo | Unit MCP + integração executor |
-| Data do relatório | `agent_reports.created_at` | Tool futura `save_agent_report` | `get_latest_report` | Geração do agente | Unit MCP |
-| Fonte/modelo do relatório | `agent_reports.model_used`, `source_count` | Tool futura `save_agent_report` | `get_latest_report` | Execução IA/fallback do agente | Unit MCP |
-| Sentimento textual | `agent_reports.sentiment` | Tool futura `save_agent_report` ou `generate_informative_analysis` | `get_latest_report` | Análise do agente | Unit MCP + contexto painel |
-| Escore de sentimento | `agent_reports.sentiment_score` | Tool futura `save_agent_report` | `get_latest_report` | Análise estruturada do agente | Migration + unit MCP |
-| Confiabilidade/base do sentimento | `agent_reports.sentiment_confidence`, `agent_reports.sentiment_basis` | Tool futura `save_agent_report` | `get_latest_report` | Análise estruturada do agente | Migration + unit MCP |
+| Resumo inteligente | `agent_reports.summary` | `generate_informative_analysis` + `save_agent_report` | `get_latest_report` | Análise do agente sobre contexto salvo | Unit MCP + integração executor |
+| Data do relatório | `agent_reports.created_at` | `save_agent_report` | `get_latest_report` | Geração do agente | Unit MCP |
+| Fonte/modelo do relatório | `agent_reports.model_used`, `source_count` | `save_agent_report` | `get_latest_report` | Execução IA/fallback do agente | Unit MCP |
+| Sentimento textual | `agent_reports.sentiment` | `generate_informative_analysis` + `save_agent_report` | `get_latest_report` | Análise do agente | Unit MCP + contexto painel |
+| Escore de sentimento | `agent_reports.sentiment_score` | `save_agent_report` | `get_latest_report` | Análise estruturada do agente | Migration + unit MCP |
+| Confiabilidade/base do sentimento | `agent_reports.sentiment_confidence`, `agent_reports.sentiment_basis` | `save_agent_report` | `get_latest_report` | Análise estruturada do agente | Migration + unit MCP |
 | Eventos recentes | `market_events.*` | `register_market_event` | `list_market_events` | Fontes coletadas e analisadas pelo agente | Unit MCP + integração painel |
 | Fonte do evento | `market_events.source_id -> sources.id` | `register_source` + `register_market_event` | `list_market_events` e `search_agent_memory` | URL/documento público coletado | Unit MCP |
 | Relevância do evento | `market_events.relevance_score` | `register_market_event` | `list_market_events` | Classificação do agente | Unit MCP |
