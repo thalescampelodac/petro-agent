@@ -919,6 +919,49 @@ pode consultar diretamente o banco/cache server-side para renderizar o painel.
 O papel do MCP é alimentar, consultar, transformar e registrar dados usados por
 agentes e automações.
 
+### Regra obrigatória da Fase 11
+
+A Fase 11 só pode ser considerada concluída quando todas as regras abaixo forem
+verdadeiras:
+
+1. Todo dado exibido no painel `/petrobras` vem do banco de dados no schema
+   `petroagent` ou de um estado vazio explícito.
+2. Nenhum dado do painel pode ser mockado, fixo no código ou apresentado como se
+   fosse dado real quando não houver registro persistido.
+3. Todo dado operacional gravado no banco sobre Petrobras/PETR4 deve ser
+   proveniente do agente operando por contrato MCP.
+4. Toda escrita operacional deve passar por tool MCP de escrita ou por camada
+   compartilhada adotada oficialmente pelo MCP.
+5. Todo registro persistido deve ter origem rastreável, como fonte, URL,
+   coletor, tool, execução do agente, timestamp e/ou log operacional.
+6. Qualquer fallback só pode existir como estado de ausência de dado, nunca como
+   número, evento ou análise que pareça dado real.
+7. Cada novo caminho agente -> MCP -> banco -> painel deve ter teste unitário,
+   integração/contexto ou smoke adequado ao risco.
+
+### Matriz obrigatória painel-banco-MCP
+
+Antes de implementar novas coletas ou remoções de mock, a equipe deve manter uma
+matriz que mapeie cada informação exibida no painel:
+
+```text
+Campo do painel
+  -> tabela/coluna no schema petroagent
+  -> tool MCP que grava/atualiza
+  -> tool MCP que consulta
+  -> origem externa ou fonte esperada
+  -> teste que garante o contrato
+```
+
+Essa matriz deve responder, para cada dado:
+
+- onde o agente busca a informação;
+- se o agente consegue coletar sozinho ou se precisa de fonte/configuração
+  guiada;
+- qual tool MCP transforma ou persiste o dado;
+- como o painel se comporta quando o dado ainda não existe;
+- qual teste impede regressão para mock ou dado fixo.
+
 ### Tipos de capacidade MCP
 
 #### 1. Prompt e análise do agente
@@ -976,6 +1019,25 @@ Agente interno ou externo
 ```
 
 ### Issues sugeridas
+
+#### Issue 11.0 — Mapear contrato painel-banco-MCP
+
+**Descrição:**
+Criar a matriz obrigatória painel-banco-MCP antes de avançar nas próximas
+implementações da Fase 11.
+
+**Critérios de aceite:**
+
+- Todos os campos exibidos em `/petrobras` estão mapeados.
+- Cada campo possui tabela/coluna de origem no schema `petroagent`.
+- Cada campo possui tool MCP planejada para gravação/atualização.
+- Cada campo possui tool MCP planejada para consulta.
+- Cada campo possui origem externa/fonte esperada ou decisão explícita de
+  curadoria guiada.
+- Cada campo possui teste planejado ou existente.
+- Campos ainda mockados ficam marcados como bloqueadores da Fase 11.
+
+---
 
 #### Issue 11.1 — #92 — Documentar MCP como contrato operacional
 
@@ -1407,6 +1469,19 @@ Decisão da #93:
 - O `agent-executor` deve migrar para esse adapter nas próximas issues, sem
   manter queries diretas ao Supabase como caminho definitivo de contexto.
 
+Decisão da #102:
+
+- A Fase 11 passa a exigir contrato estrito agente-banco-painel.
+- Todo dado exibido como real no painel `/petrobras` deve vir do banco de dados
+  no schema `petroagent`.
+- Todo dado operacional gravado no banco sobre Petrobras/PETR4 deve ser
+  proveniente do agente operando por contrato MCP.
+- O painel pode exibir estados vazios quando não houver dado, mas não pode
+  substituir ausência de dado por mock que pareça real.
+- Antes de implementar novas ferramentas/coletas, deve existir matriz
+  painel-banco-MCP mapeando campo, tabela/coluna, tool de escrita, tool de
+  leitura, origem externa e teste.
+
 ---
 
 # Prioridade atual
@@ -1416,8 +1491,9 @@ ativar automação recorrente.
 
 Sequência recomendada:
 
-1. Concluir a documentação do contrato MCP operacional.
-2. Criar adapter interno para o executor consumir tools MCP.
+1. Criar matriz painel-banco-MCP obrigatória.
+2. Identificar quais dados o agente consegue coletar sozinho e quais precisam
+   de fonte/configuração guiada.
 3. Migrar leituras de contexto do agente para tools MCP.
 4. Criar tools MCP de escrita para fontes, eventos, snapshots e relatórios.
 5. Remover mocks enganosos do painel Petrobras.
