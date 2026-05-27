@@ -23,8 +23,12 @@ async function fetchUrls(urls: string[]) {
 }
 
 type GeminiRequestBody = {
-  instances: Array<{ content: string }>;
-  temperature: number;
+  contents: Array<{
+    parts: Array<{ text: string }>;
+  }>;
+  generationConfig: {
+    temperature: number;
+  };
 };
 
 type OpenAIRequestBody = {
@@ -39,13 +43,33 @@ async function callAI(prompt: string) {
   const openaiKey = process.env.OPENAI_API_KEY || process.env.AI_API_KEY;
 
   if (geminiKey) {
-    const model = process.env.GEMINI_MODEL || 'gemini-1.0';
-    const url = `https://generativelanguage.googleapis.com/v1beta2/models/${model}:generate?key=${geminiKey}`;
-    const body: GeminiRequestBody = { instances: [{ content: prompt }], temperature: 0.2 };
-    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const apiVersion = process.env.GEMINI_API_VERSION?.trim() || 'v1beta';
+    const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+    const url = `https://generativelanguage.googleapis.com/${apiVersion}/models/${model}:generateContent`;
+    const body: GeminiRequestBody = {
+      contents: [
+        {
+          parts: [{ text: prompt }],
+        },
+      ],
+      generationConfig: {
+        temperature: 0.2,
+      },
+    };
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': geminiKey,
+      },
+      body: JSON.stringify(body),
+    });
     if (!res.ok) throw new Error(`Gemini call failed: ${res.status}`);
     const data = await res.json();
-    const content = data?.predictions?.[0]?.content || data?.candidates?.[0]?.content || data?.output?.[0]?.content;
+    const content = data?.candidates?.[0]?.content?.parts
+      ?.map((part: { text?: string }) => part.text)
+      .filter(Boolean)
+      .join('\n');
     if (!content) throw new Error('Gemini returned no content');
     try {
       return JSON.parse(content);

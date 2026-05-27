@@ -167,11 +167,20 @@ Requisitos:
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `PETROAGENT_AGENT_RUN_TOKEN` para o gatilho HTTP manual
 - `CRON_SECRET` para o gatilho futuro via Vercel Cron
+- opcionalmente `GEMINI_API_KEY`, `GEMINI_API_VERSION` e `GEMINI_MODEL` para IA real via Gemini free tier
 - opcionalmente `OPENAI_API_KEY` para IA real
 
-Sem chave de IA, o executor usa fallback determinístico. O comando não agenda
-execuções, não cria endpoint público e não deve gerar recomendação financeira,
-preço-alvo ou promessa de rentabilidade.
+Sem chave de IA, ou se o provedor falhar/atingir limite, o executor usa fallback
+determinístico. O comando não agenda execuções, não cria endpoint público e não
+deve gerar recomendação financeira, preço-alvo ou promessa de rentabilidade.
+
+Configuração recomendada para Gemini:
+
+```env
+GEMINI_API_KEY=
+GEMINI_API_VERSION=v1beta
+GEMINI_MODEL=gemini-2.5-flash
+```
 
 ### Gatilho protegido
 
@@ -253,9 +262,9 @@ cobrança deve usar `billingType: PIX` e a recuperação do QRCode deve ficar em
 endpoint protegido no servidor, nunca no client.
 
 `SUPABASE_SERVICE_ROLE_KEY`, `PETROAGENT_COLLECTOR_TOKEN`,
-`PETROAGENT_AGENT_RUN_TOKEN`, `CRON_SECRET`, `ASAAS_API_KEY` e `OPENAI_API_KEY`
-são variáveis somente de servidor. Não exponha chaves privadas com prefixo
-`NEXT_PUBLIC_`.
+`PETROAGENT_AGENT_RUN_TOKEN`, `CRON_SECRET`, `ASAAS_API_KEY`, `GEMINI_API_KEY` e
+`OPENAI_API_KEY` são variáveis somente de servidor. Não exponha chaves privadas
+com prefixo `NEXT_PUBLIC_`.
 
 ## Deploy na Vercel
 

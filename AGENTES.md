@@ -56,9 +56,15 @@ Sempre que trabalhar neste projeto:
 
 ### IA
 
-- OpenAI ou outro provedor configurável por variável de ambiente
+- Gemini API em tier gratuito como provedor preferencial inicial
+- Usar `GEMINI_API_KEY`, `GEMINI_API_VERSION` e `GEMINI_MODEL` quando IA real estiver habilitada
+- Valor padrão de `GEMINI_API_VERSION`: `v1beta`
+- OpenAI fica apenas como alternativa configurável por variável de ambiente
 - Chamadas pontuais e com cache
 - Nunca executar IA a cada acesso público do usuário no MVP 1
+- Nunca ativar billing, tier pago ou uso com custo sem aprovação explícita
+- Se Gemini não estiver configurado, exceder limite ou falhar, usar fallback determinístico
+- Limites, preços e disponibilidade do free tier variam por modelo e devem ser conferidos na documentação oficial antes de qualquer mudança operacional
 
 ---
 
