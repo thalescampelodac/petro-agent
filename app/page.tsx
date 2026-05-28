@@ -125,36 +125,40 @@ export default async function Home() {
     <main className="dark min-h-screen overflow-hidden bg-[#070b10] text-foreground">
       <section className="relative border-b border-white/10">
         <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(16,185,129,0.18),transparent_32%),radial-gradient(circle_at_78%_18%,rgba(59,130,246,0.18),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.04),transparent)]" />
-        <a
-          className="absolute left-1/2 top-24 z-20 -translate-x-1/2 text-sm text-emerald-100/75 transition hover:text-emerald-100 sm:top-9"
-          href="#criador"
-        >
-          Criador
-        </a>
-        <div className="absolute right-4 top-4 z-20 sm:right-8 sm:top-8">
-          <LikeButton />
-        </div>
-        <div className="relative mx-auto grid w-full max-w-7xl gap-8 px-5 pb-8 pt-28 sm:px-6 sm:pb-10 sm:pt-24 lg:min-h-screen lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:px-8">
-          <div className="flex flex-col gap-6">
-            <nav className="max-w-[12rem] sm:max-w-none sm:pr-72 lg:pr-0">
-              <div className="flex w-fit items-center gap-3">
-                <div className="flex size-12 items-center justify-center overflow-hidden rounded-lg border border-emerald-300/25 bg-emerald-300/10 shadow-lg shadow-emerald-950/20">
-                  <Image
-                    alt=""
-                    aria-hidden="true"
-                    className="size-11 object-cover"
-                    height={88}
-                    priority
-                    src="/images/logo-mark.png"
-                    width={88}
-                  />
-                </div>
-                <span className="text-base font-semibold text-white">
-                  PetroAgent
-                </span>
+        <header className="relative z-20 mx-auto flex w-full max-w-7xl flex-wrap items-start justify-between gap-4 px-5 pt-8 sm:px-6 md:grid md:grid-cols-[1fr_auto_1fr] lg:px-8">
+          <div className="justify-self-start">
+            <div className="flex w-fit items-center gap-3">
+              <div className="flex size-11 items-center justify-center overflow-hidden rounded-lg border border-emerald-300/25 bg-emerald-300/10 shadow-lg shadow-emerald-950/20">
+                <Image
+                  alt=""
+                  aria-hidden="true"
+                  className="size-10 object-cover"
+                  height={80}
+                  priority
+                  src="/images/logo-mark.png"
+                  width={80}
+                />
               </div>
-            </nav>
+              <span className="text-base font-semibold text-white">
+                PetroAgent
+              </span>
+            </div>
+          </div>
 
+          <a
+            className="order-3 w-full pt-0 text-center text-sm text-emerald-100/75 transition hover:text-emerald-100 md:order-none md:w-auto md:justify-self-center md:pt-2"
+            href="#criador"
+          >
+            Criador
+          </a>
+
+          <div className="justify-self-end">
+            <LikeButton />
+          </div>
+        </header>
+
+        <div className="relative mx-auto grid w-full max-w-7xl gap-8 px-5 pb-8 pt-10 sm:px-6 sm:pb-10 sm:pt-12 lg:min-h-[calc(100vh-6.5rem)] lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:px-8">
+          <div className="flex flex-col gap-6">
             <div className="space-y-5">
               <div className="flex flex-wrap gap-3">
                 <Badge className="border-emerald-300/30 bg-emerald-300/10 text-emerald-100">
