@@ -1,7 +1,6 @@
 import {
   ArrowLeft,
   BarChart3,
-  Clock3,
   Radar,
 } from "lucide-react";
 import Link from "next/link";
@@ -21,9 +20,8 @@ import {
 } from "@/lib/petrobras";
 import { APP_VERSION_BADGE } from "@/lib/app-version";
 import {
+  AnalysisReportsCard,
   BasicDataCard,
-  MetricCard,
-  RecentReportsCard,
   SentimentIndicator,
   SignalCard,
   SummaryCard,
@@ -39,7 +37,6 @@ export const metadata = {
 export default async function PetrobrasPage() {
   const {
     basicData,
-    latestAgentUpdate,
     monitoredSignals,
     panelMetrics,
     pulse,
@@ -81,7 +78,7 @@ export default async function PetrobrasPage() {
                   <p className="text-sm font-semibold text-emerald-100">
                     PetroAgent
                   </p>
-                  <p className="text-xs text-slate-500">Radar Petrobras/PETR4</p>
+                  <p className="text-xs text-slate-500">Radar Petrobras</p>
                 </div>
               </div>
 
@@ -96,14 +93,10 @@ export default async function PetrobrasPage() {
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-              <HeroStatusCard
-                detail="Horário de Brasília"
-                icon={Clock3}
-                label="Última atualização"
-                tone="sky"
-                value={latestAgentUpdate}
-              />
+            <div className="grid gap-3 sm:grid-cols-2">
+              {panelMetrics.map((metric) => (
+                <HeroStatusCard key={metric.label} {...metric} />
+              ))}
             </div>
           </div>
         </div>
@@ -111,17 +104,11 @@ export default async function PetrobrasPage() {
 
       <section className="mx-auto grid w-full max-w-7xl gap-6 px-5 py-6 sm:px-6 sm:py-8 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
         <div className="space-y-6">
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {panelMetrics.map((metric) => (
-              <MetricCard key={metric.label} {...metric} />
-            ))}
-          </div>
-
           <BasicDataCard data={basicData} />
 
           <SummaryCard report={report} />
 
-          <RecentReportsCard reports={recentReports} />
+          <AnalysisReportsCard reports={recentReports} />
 
           <SentimentIndicator sentiment={sentiment} />
 
@@ -192,21 +179,15 @@ function HeroStatusCard({
   detail,
   icon: Icon,
   label,
-  tone,
   value,
 }: {
   detail: string;
   icon: ComponentType<{ className?: string }>;
   label: string;
-  tone: "sky";
   value: string;
 }) {
-  const toneClass = {
-    sky: "border-sky-300/20 bg-sky-300/[0.06] text-sky-100",
-  }[tone];
-
   return (
-    <Card className={`${toneClass} shadow-none`}>
+    <Card className="border-sky-300/20 bg-sky-300/[0.06] text-sky-100 shadow-none">
       <CardHeader className="space-y-4 p-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex size-9 items-center justify-center rounded-lg bg-white/10">
@@ -216,9 +197,11 @@ function HeroStatusCard({
         </div>
         <div>
           <CardTitle className="text-base text-white">{value}</CardTitle>
-          <CardDescription className="mt-1 text-current/70">
-            {detail}
-          </CardDescription>
+          {detail ? (
+            <CardDescription className="mt-1 text-current/70">
+              {detail}
+            </CardDescription>
+          ) : null}
         </div>
       </CardHeader>
     </Card>

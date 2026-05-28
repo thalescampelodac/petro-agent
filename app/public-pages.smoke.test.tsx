@@ -84,10 +84,12 @@ describe("public pages smoke", () => {
     expect(
       screen.getByRole("heading", { name: /painel petrobras petr4/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/dados básicos petr4/i)).toBeInTheDocument();
+    expect(screen.getByText(/dados de mercado/i)).toBeInTheDocument();
     expect(screen.getByText(/resumo inteligente/i)).toBeInTheDocument();
+    expect(screen.getByText(/análises recentes/i)).toBeInTheDocument();
     expect(screen.getByText(/sinais monitorados/i)).toBeInTheDocument();
     expect(screen.getByText(/pulso do mercado/i)).toBeInTheDocument();
+    expect(screen.getByText(/eventos monitorados/i)).toBeInTheDocument();
     expect(console.error).not.toHaveBeenCalled();
   });
 });

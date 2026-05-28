@@ -36,20 +36,23 @@ describe("PetrobrasPage", () => {
       "href",
       "/",
     );
-    expect(screen.getByText(/dados básicos petr4/i)).toBeInTheDocument();
+    expect(screen.getByText(/radar petrobras/i)).toBeInTheDocument();
+    expect(screen.getByText(/dados de mercado/i)).toBeInTheDocument();
     expect(screen.getAllByText(/aguardando coleta/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/resumo inteligente/i)).toBeInTheDocument();
     expect(screen.getByText(/aguardando a primeira análise/i)).toBeInTheDocument();
-    expect(screen.getByText(/relatórios recentes/i)).toBeInTheDocument();
-    expect(screen.getByText(/nenhum relatório salvo ainda/i)).toBeInTheDocument();
+    expect(screen.getByText(/análises recentes/i)).toBeInTheDocument();
+    expect(screen.getByText(/nenhuma análise salva ainda/i)).toBeInTheDocument();
     expect(screen.getByText(/indicador de sentimento/i)).toBeInTheDocument();
     expect(screen.getByRole("meter", { name: /sentimento sem dado/i })).toHaveAttribute(
       "aria-valuenow",
       "0",
     );
-    expect(screen.getAllByText(/eventos recentes/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/nenhum evento recente/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/eventos/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/nenhum evento monitorado/i)).toBeInTheDocument();
     expect(screen.getByText(/aguardando eventos recentes/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/última atualização/i)).toHaveLength(1);
+    expect(screen.queryByText(/horário de brasília/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/persistidos/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/banco de dados/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/mcp-first/i)).not.toBeInTheDocument();
@@ -101,11 +104,14 @@ describe("PetrobrasPage", () => {
       "href",
       "https://www.google.com/finance/quote/PETR4:BVMF",
     );
+    expect(screen.getByText(/análises recentes/i)).toBeInTheDocument();
+    expect(screen.getByText(/eventos monitorados/i)).toBeInTheDocument();
     expect(screen.getByRole("meter", { name: /sentimento neutro/i })).toHaveAttribute(
       "aria-valuenow",
       "54",
     );
     expect(screen.getByText(/dividendo em monitoramento/i)).toBeInTheDocument();
+    expect(screen.queryByText(/evento acompanhado pelo agente/i)).not.toBeInTheDocument();
     expect(screen.getByLabelText("Pulso 1: 82")).toBeInTheDocument();
     expect(screen.queryByText(/gemini/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/banco de dados/i)).not.toBeInTheDocument();

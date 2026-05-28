@@ -18,35 +18,6 @@ import type {
   PetrobrasTimelineEvent,
 } from "@/lib/petrobras";
 
-export function MetricCard({
-  label,
-  value,
-  detail,
-  icon: Icon,
-}: {
-  label: string;
-  value: string;
-  detail: string;
-  icon: ComponentType<{ className?: string }>;
-}) {
-  return (
-    <Card className="border-white/10 bg-white/[0.035] shadow-none transition hover:-translate-y-0.5 hover:border-emerald-300/25">
-      <CardHeader className="space-y-4 p-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-emerald-300/12">
-            <Icon className="size-4 text-emerald-200" />
-          </div>
-          <span className="text-xs text-slate-500">{label}</span>
-        </div>
-        <div>
-          <CardTitle className="font-mono text-2xl text-white">{value}</CardTitle>
-          <CardDescription className="mt-1 text-slate-400">{detail}</CardDescription>
-        </div>
-      </CardHeader>
-    </Card>
-  );
-}
-
 export function BasicDataCard({
   data,
 }: {
@@ -57,7 +28,7 @@ export function BasicDataCard({
       <CardHeader className="border-b border-white/10">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle className="text-white">Dados básicos PETR4</CardTitle>
+            <CardTitle className="text-white">Dados de mercado</CardTitle>
             <CardDescription className="text-slate-400">
               Cotação e variação identificadas na última consulta.
             </CardDescription>
@@ -204,7 +175,7 @@ export function SentimentIndicator({
   );
 }
 
-export function RecentReportsCard({
+export function AnalysisReportsCard({
   reports,
 }: {
   reports: PetrobrasRecentReport[];
@@ -214,43 +185,45 @@ export function RecentReportsCard({
       <CardHeader className="border-b border-white/10">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle className="text-white">Relatórios recentes</CardTitle>
+            <CardTitle className="text-white">Análises recentes</CardTitle>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3 p-5">
+      <CardContent className="p-5">
         {reports.length > 0 ? (
-          reports.map((report) => (
-            <article
-              className="rounded-lg border border-white/10 bg-black/20 p-4 transition hover:border-emerald-300/25"
-              key={`${report.generatedAt}-${report.title}`}
-            >
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <time className="font-mono text-xs text-slate-500">
-                      {report.generatedAt}
-                    </time>
+          <div className="petro-scroll max-h-[34rem] space-y-3 overflow-y-auto pr-2">
+            {reports.map((report) => (
+              <article
+                className="rounded-lg border border-white/10 bg-black/20 p-4 transition hover:border-emerald-300/25"
+                key={`${report.generatedAt}-${report.title}`}
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <time className="font-mono text-xs text-slate-500">
+                        {report.generatedAt}
+                      </time>
+                    </div>
+                    <h2 className="mt-3 text-base font-semibold leading-6 text-white">
+                      {report.title}
+                    </h2>
                   </div>
-                  <h2 className="mt-3 text-base font-semibold leading-6 text-white">
-                    {report.title}
-                  </h2>
+                  <div className="flex min-w-0 shrink-0 flex-wrap gap-2 text-xs text-slate-400 sm:justify-end">
+                    <span className="rounded bg-white/[0.06] px-2 py-1">
+                      {report.sourceCount}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex min-w-0 shrink-0 flex-wrap gap-2 text-xs text-slate-400 sm:justify-end">
-                  <span className="rounded bg-white/[0.06] px-2 py-1">
-                    {report.sourceCount}
-                  </span>
-                </div>
-              </div>
-              <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-300">
-                {report.summary}
-              </p>
-            </article>
-          ))
+                <p className="mt-3 text-sm leading-6 text-slate-300">
+                  {report.summary}
+                </p>
+              </article>
+            ))}
+          </div>
         ) : (
           <div className="rounded-lg border border-dashed border-white/15 bg-black/20 p-5">
             <p className="text-sm font-medium text-white">
-              Nenhum relatório salvo ainda
+              Nenhuma análise salva ainda
             </p>
             <p className="mt-2 text-sm leading-6 text-slate-400">
               Quando o agente gerar novas análises, elas aparecerão aqui com
@@ -273,59 +246,55 @@ export function TimelineCard({
       <CardHeader className="border-b border-white/10">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <CardTitle className="text-white">Eventos recentes</CardTitle>
+            <CardTitle className="text-white">Eventos monitorados</CardTitle>
           </div>
           <Badge className="h-auto w-fit whitespace-normal border-sky-300/20 bg-sky-300/10 text-sky-100">
             {events.length > 0 ? `${events.length} sinais` : "Sem eventos"}
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3 p-5">
+      <CardContent className="p-5">
         {events.length > 0 ? (
-          events.map((event) => (
-            <article
-              className="group relative overflow-hidden rounded-lg border border-white/10 bg-black/20 p-4 transition hover:border-sky-300/25"
-              key={`${event.date}-${event.title}`}
-            >
-              <div className="absolute bottom-4 left-0 top-4 w-px bg-gradient-to-b from-sky-300/20 via-emerald-300/70 to-sky-300/20" />
-              <div className="flex flex-col gap-4 pl-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge className="border-emerald-300/20 bg-emerald-300/10 text-xs text-emerald-100">
-                    {event.type}
-                  </Badge>
-                  <span className="flex items-center gap-1 font-mono text-xs text-slate-500">
-                    <Clock3 className="size-3" />
-                    <time>{event.date}</time>
-                  </span>
-                </div>
+          <div className="petro-scroll max-h-[36rem] space-y-3 overflow-y-auto pr-2">
+            {events.map((event) => (
+              <article
+                className="group relative overflow-hidden rounded-lg border border-white/10 bg-black/20 p-4 transition hover:border-sky-300/25"
+                key={`${event.date}-${event.title}`}
+              >
+                <div className="absolute bottom-4 left-0 top-4 w-px bg-gradient-to-b from-sky-300/20 via-emerald-300/70 to-sky-300/20" />
+                <div className="flex flex-col gap-4 pl-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge className="border-emerald-300/20 bg-emerald-300/10 text-xs text-emerald-100">
+                      {event.type}
+                    </Badge>
+                    <span className="flex items-center gap-1 font-mono text-xs text-slate-500">
+                      <Clock3 className="size-3" />
+                      <time>{event.date}</time>
+                    </span>
+                  </div>
 
-                <div>
                   <h2 className="text-sm font-semibold leading-6 text-white">
                     {event.title}
                   </h2>
-                  <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-400">
-                    {event.summary ??
-                      "Evento acompanhado pelo radar ainda sem resumo detalhado."}
-                  </p>
-                </div>
 
-                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
-                  <div className="flex w-fit items-center gap-2 rounded bg-white/[0.06] px-2 py-1 text-xs text-slate-300">
-                    <Gauge className="size-3 text-sky-200" />
-                    <span>{event.relevanceLabel}</span>
-                    {typeof event.relevanceScore === "number" ? (
-                      <span className="font-mono text-slate-500">
-                        {event.relevanceScore}/100
-                      </span>
-                    ) : null}
+                  <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+                    <div className="flex w-fit items-center gap-2 rounded bg-white/[0.06] px-2 py-1 text-xs text-slate-300">
+                      <Gauge className="size-3 text-sky-200" />
+                      <span>{event.relevanceLabel}</span>
+                      {typeof event.relevanceScore === "number" ? (
+                        <span className="font-mono text-slate-500">
+                          {event.relevanceScore}/100
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </article>
-          ))
+              </article>
+            ))}
+          </div>
         ) : (
           <div className="rounded-lg border border-dashed border-white/15 bg-black/20 p-5">
-            <p className="text-sm font-medium text-white">Nenhum evento recente</p>
+            <p className="text-sm font-medium text-white">Nenhum evento monitorado</p>
             <p className="mt-2 text-sm leading-6 text-slate-400">
               O painel exibirá eventos quando o radar encontrar fatos
               relevantes, notícias ou registros públicos.
