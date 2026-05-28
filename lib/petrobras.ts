@@ -18,7 +18,7 @@ export type PetrobrasBasicData = {
   lastPrice: string;
   change: string;
   updatedAt: string;
-  source: "Mock" | "Cache" | "Real";
+  source: "Banco" | "Aguardando coleta";
   origin: string;
   note: string;
 };
@@ -82,41 +82,30 @@ export type PetrobrasDashboardData = {
   basicData: PetrobrasBasicData;
   monitoredSignals: PetrobrasSignal[];
   panelMetrics: PetrobrasPanelMetric[];
+  pulse: number[];
   report: PetrobrasReport | null;
   recentReports: PetrobrasRecentReport[];
   sentiment: PetrobrasSentiment;
   timelineEvents: PetrobrasTimelineEvent[];
 };
 
-const BASIC_DATA: PetrobrasBasicData = {
+const EMPTY_BASIC_DATA: PetrobrasBasicData = {
   ticker: "PETR4",
   company: "Petrobras PN",
-  lastPrice: "R$ 28,45",
-  change: "+1,2%",
-  updatedAt: "19/05/2026 14:30",
-  source: "Mock",
-  origin: "Mock interno",
-  note: "Dados demonstrativos para validação do painel",
-};
-
-const LATEST_REPORT: PetrobrasReport = {
-  summary:
-    "O PetroAgent continua monitorando PETR4 com foco em dividendos, fatos relevantes e sentimento setorial. O painel atual exibe o último contexto disponível em modo demonstrativo, sem indicação de operação.",
-  generatedAt: "19/05/2026 14:35",
-  sentimentBasis: null,
-  sentimentConfidence: null,
-  sentimentLabel: null,
-  sentimentScore: null,
-  source: "Fallback demonstrativo",
-  status: "Fallback",
+  lastPrice: "Aguardando coleta",
+  change: "Aguardando coleta",
+  updatedAt: "Aguardando coleta",
+  source: "Aguardando coleta",
+  origin: "Sem snapshot persistido",
+  note: "Execute o agente para salvar um snapshot de mercado no banco",
 };
 
 export function getPetrobrasBasicData(): PetrobrasBasicData {
-  return BASIC_DATA;
+  return EMPTY_BASIC_DATA;
 }
 
 export function getLatestPetrobrasReport(): PetrobrasReport | null {
-  return LATEST_REPORT;
+  return null;
 }
 
 export function getPetrobrasPanelMetrics(
@@ -137,8 +126,11 @@ export function getPetrobrasPanelMetrics(
     },
     {
       label: "Status do radar",
-      value: "Preparado",
-      detail: "Aguardando dados reais",
+      value: basicData.source === "Banco" ? "Com dados" : "Aguardando coleta",
+      detail:
+        basicData.source === "Banco"
+          ? "Último snapshot persistido localizado"
+          : "Sem snapshot persistido no banco",
       icon: Radar,
     },
     {
@@ -150,68 +142,48 @@ export function getPetrobrasPanelMetrics(
   ];
 }
 
-export function getPetrobrasMonitoredSignals(): PetrobrasSignal[] {
+export function getPetrobrasMonitoredSignals(
+  events: PetrobrasTimelineEvent[],
+  sentiment: PetrobrasSentiment,
+): PetrobrasSignal[] {
+  const hasDividend = events.some((event) => matchesAny(event, ["dividendo", "provento"]));
+  const hasRelevantFact = events.some((event) =>
+    matchesAny(event, ["fato", "relevante", "ri"]),
+  );
+  const hasNews = events.some((event) =>
+    matchesAny(event, ["notícia", "noticia", "news"]),
+  );
+
   return [
     {
       title: "Dividendos",
       description: "Agenda de proventos, comunicados e contexto histórico.",
-      status: "Em observação",
+      status: hasDividend ? "Registro persistido" : "Aguardando evento",
       icon: BadgeDollarSign,
     },
     {
       title: "Fatos relevantes",
       description: "Eventos corporativos publicados por canais oficiais.",
-      status: "Sem alerta crítico",
+      status: hasRelevantFact ? "Registro persistido" : "Aguardando evento",
       icon: FileText,
     },
     {
       title: "Notícias públicas",
       description: "Leitura contextual de notícias setoriais e institucionais.",
-      status: "Aguardando fonte",
+      status: hasNews ? "Registro persistido" : "Aguardando evento",
       icon: Newspaper,
     },
     {
       title: "Sentimento",
       description: "Classificação textual cautelosa, sem recomendação.",
-      status: "Neutro",
+      status: sentiment.label === "Sem dado" ? "Aguardando análise" : sentiment.label,
       icon: Activity,
     },
   ];
 }
 
 export function getPetrobrasTimelineEvents(): PetrobrasTimelineEvent[] {
-  return sortPetrobrasTimelineEvents([
-    {
-      date: "19/05/2026",
-      relevanceLabel: "Demonstração",
-      relevanceScore: null,
-      summary:
-        "Estrutura inicial do radar preparada para receber eventos persistidos sobre Petrobras/PETR4.",
-      title: "Radar inicial preparado",
-      type: "Sistema",
-      source: "Mock interno",
-    },
-    {
-      date: "18/05/2026",
-      relevanceLabel: "Média",
-      relevanceScore: 62,
-      summary:
-        "Acompanhamento demonstrativo de proventos e comunicados relacionados ao ativo.",
-      title: "Monitoramento de dividendos em destaque",
-      type: "Dividendos",
-      source: "Fallback",
-    },
-    {
-      date: "17/05/2026",
-      relevanceLabel: "Baixa",
-      relevanceScore: 28,
-      summary:
-        "Estado de exemplo para sinalizar ausência de alerta crítico no painel público.",
-      title: "Sem fato relevante crítico no painel demonstrativo",
-      type: "RI",
-      source: "Mock interno",
-    },
-  ]);
+  return [];
 }
 
 export async function getPetrobrasDashboardData(): Promise<PetrobrasDashboardData> {
@@ -223,6 +195,7 @@ export async function getPetrobrasDashboardData(): Promise<PetrobrasDashboardDat
     ? mapAgentReportToPetrobrasReport(cachedData.report)
     : getLatestPetrobrasReport();
   const recentReports = cachedData.reports.map(mapAgentReportToRecentReport);
+  const sentiment = getPetrobrasSentiment(report);
   const timelineEvents =
     cachedData.events.length > 0
       ? sortPetrobrasTimelineEvents(
@@ -240,11 +213,12 @@ export async function getPetrobrasDashboardData(): Promise<PetrobrasDashboardDat
 
   return {
     basicData,
-    monitoredSignals: getPetrobrasMonitoredSignals(),
+    monitoredSignals: getPetrobrasMonitoredSignals(timelineEvents, sentiment),
     panelMetrics: getPetrobrasPanelMetrics(basicData),
+    pulse: getPetrobrasPulse(timelineEvents),
     report,
     recentReports,
-    sentiment: getPetrobrasSentiment(report),
+    sentiment,
     timelineEvents,
   };
 }
@@ -279,6 +253,14 @@ export function getPetrobrasSentiment(
   };
 }
 
+export function getPetrobrasPulse(events: PetrobrasTimelineEvent[]) {
+  return events
+    .filter((event) => typeof event.relevanceScore === "number")
+    .slice(0, 10)
+    .map((event) => Math.min(Math.max(event.relevanceScore ?? 0, 8), 100))
+    .reverse();
+}
+
 function sortPetrobrasTimelineEvents(
   events: PetrobrasTimelineEvent[],
 ): PetrobrasTimelineEvent[] {
@@ -307,6 +289,22 @@ function getRelevanceLabel(score: number | null) {
   }
 
   return "Baixa";
+}
+
+function matchesAny(event: PetrobrasTimelineEvent, terms: string[]) {
+  const searchable = `${event.type} ${event.title} ${event.summary ?? ""}`
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
+
+  return terms.some((term) =>
+    searchable.includes(
+      term
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .toLowerCase(),
+    ),
+  );
 }
 
 function mapAgentReportToPetrobrasReport(report: {
@@ -436,7 +434,7 @@ function mapMarketSnapshotToBasicData(snapshot: {
         : "Preço indisponível",
     note: "Dado persistido em cache no banco",
     origin: snapshot.source ?? "Banco de dados",
-    source: "Cache",
+    source: "Banco",
     ticker: snapshot.ticker,
     updatedAt: snapshot.snapshot_time
       ? formatDateTime(snapshot.snapshot_time)

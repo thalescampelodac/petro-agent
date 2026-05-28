@@ -29,12 +29,16 @@ npm run agent:run
 
 Fluxo atual:
 
-1. Ler `sources`, `market_events`, `market_snapshots` e `agent_reports` no schema
-   `petroagent`.
+1. Consultar o contrato MCP interno por `get_latest_report`,
+   `list_market_events`, `get_market_snapshot` e `search_agent_memory`.
 2. Montar um prompt/contexto operacional com guardrails explícitos.
-3. Gerar relatório via IA quando configurada ou fallback determinístico.
-4. Persistir o resultado em `petroagent.agent_reports`.
+3. Gerar payload informativo por `generate_informative_analysis`, usando Gemini
+   quando configurado ou fallback determinístico.
+4. Persistir o resultado por `save_agent_report`.
 5. Registrar a execução em `petroagent.agent_execution_logs`.
+
+O executor é o orquestrador. Ele não deve voltar a consultar ou persistir dados
+operacionais por um caminho paralelo ao contrato MCP.
 
 ## Gatilho protegido
 

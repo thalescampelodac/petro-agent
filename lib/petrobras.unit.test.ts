@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { getPetrobrasSentiment, type PetrobrasReport } from "./petrobras";
+import {
+  getPetrobrasBasicData,
+  getPetrobrasPulse,
+  getPetrobrasSentiment,
+  type PetrobrasReport,
+} from "./petrobras";
 
 describe("Petrobras dashboard sentiment", () => {
   it("usa sentimento estruturado salvo no relatório do agente", () => {
@@ -32,5 +37,39 @@ describe("Petrobras dashboard sentiment", () => {
       score: 0,
       source: "Banco de dados",
     });
+  });
+
+  it("usa estado vazio para dados básicos sem snapshot persistido", () => {
+    expect(getPetrobrasBasicData()).toMatchObject({
+      change: "Aguardando coleta",
+      lastPrice: "Aguardando coleta",
+      origin: "Sem snapshot persistido",
+      source: "Aguardando coleta",
+    });
+  });
+
+  it("deriva pulso a partir da relevância dos eventos persistidos", () => {
+    expect(
+      getPetrobrasPulse([
+        {
+          date: "27/05/2026",
+          relevanceLabel: "Alta",
+          relevanceScore: 82,
+          source: "Banco de dados",
+          summary: "Evento",
+          title: "Evento A",
+          type: "RI",
+        },
+        {
+          date: "26/05/2026",
+          relevanceLabel: "Baixa",
+          relevanceScore: 20,
+          source: "Banco de dados",
+          summary: "Evento",
+          title: "Evento B",
+          type: "Notícia",
+        },
+      ]),
+    ).toEqual([20, 82]);
   });
 });
