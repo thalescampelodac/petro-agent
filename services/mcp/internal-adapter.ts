@@ -167,6 +167,7 @@ export type AgentReportPayload = {
 export type WriteToolResult = {
   id: number;
   source: string;
+  ticker?: string;
 };
 
 export type GenerateInformativeAnalysisParams = {

@@ -38,14 +38,40 @@ export async function registerSource(
     title: params.title ?? null,
     url: params.url ?? null,
   };
-  const query = params.url
-    ? client
-        .schema("petroagent")
-        .from("sources")
-        .upsert(row, { onConflict: "url" })
-    : client.schema("petroagent").from("sources").insert(row);
+  let data: unknown;
+  let error: unknown;
 
-  const { data, error } = await query.select("id").single();
+  if (params.url) {
+    const existing = await client
+      .schema("petroagent")
+      .from("sources")
+      .select("id")
+      .eq("url", params.url)
+      .maybeSingle();
+
+    if (existing.error) {
+      throw existing.error;
+    }
+
+    const existingId = (existing.data as { id?: number } | null)?.id;
+    const result = existingId
+      ? await client
+          .schema("petroagent")
+          .from("sources")
+          .update(row)
+          .eq("id", existingId)
+          .select("id")
+          .single()
+      : await client.schema("petroagent").from("sources").insert(row).select("id").single();
+
+    data = result.data;
+    error = result.error;
+  } else {
+    const result = await client.schema("petroagent").from("sources").insert(row).select("id").single();
+
+    data = result.data;
+    error = result.error;
+  }
 
   if (error) {
     throw error;
