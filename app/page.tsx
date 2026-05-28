@@ -15,7 +15,6 @@ import {
   ShieldCheck,
   Sparkles,
   TrendingUp,
-  Zap,
   MessageCircle,
 } from "lucide-react";
 import Image from "next/image";
@@ -137,15 +136,23 @@ export default async function Home() {
         </div>
         <div className="relative mx-auto grid w-full max-w-7xl gap-8 px-5 pb-8 pt-28 sm:px-6 sm:pb-10 sm:pt-24 lg:min-h-screen lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:px-8">
           <div className="flex flex-col gap-6">
-            <nav className="max-w-[9rem] sm:max-w-none sm:pr-72 lg:pr-0">
-              <Image
-                alt="PetroAgent"
-                className="h-12 w-auto object-contain object-left sm:h-14"
-                height={120}
-                priority
-                src="/images/logo.png"
-                width={360}
-              />
+            <nav className="max-w-[12rem] sm:max-w-none sm:pr-72 lg:pr-0">
+              <div className="flex w-fit items-center gap-3">
+                <div className="flex size-12 items-center justify-center overflow-hidden rounded-lg border border-emerald-300/25 bg-emerald-300/10 shadow-lg shadow-emerald-950/20">
+                  <Image
+                    alt=""
+                    aria-hidden="true"
+                    className="size-11 object-cover"
+                    height={88}
+                    priority
+                    src="/images/logo-mark.png"
+                    width={88}
+                  />
+                </div>
+                <span className="text-base font-semibold text-white">
+                  PetroAgent
+                </span>
+              </div>
             </nav>
 
             <div className="space-y-5">

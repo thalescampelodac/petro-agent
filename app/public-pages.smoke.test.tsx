@@ -63,7 +63,7 @@ describe("public pages smoke", () => {
         name: /um agente inteligente acompanhando a petrobrás para você/i,
       }),
     ).toBeInTheDocument();
-    expect(screen.getByAltText("PetroAgent")).toBeInTheDocument();
+    expect(screen.getAllByText("PetroAgent").length).toBeGreaterThan(0);
     expect(
       screen.getByRole("link", { name: /ver painel petrobras/i }),
     ).toBeInTheDocument();

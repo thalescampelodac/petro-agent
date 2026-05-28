@@ -22,7 +22,7 @@ describe("Home", () => {
         name: /um agente inteligente acompanhando a petrobrás para você/i,
       }),
     ).toBeInTheDocument();
-    expect(screen.getByAltText("PetroAgent")).toBeInTheDocument();
+    expect(screen.getAllByText("PetroAgent").length).toBeGreaterThan(0);
     expect(screen.getByText(/petroagent transforma sinais públicos/i)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /o que o agente monitora/i })).toBeInTheDocument();
     expect(
