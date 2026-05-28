@@ -16,6 +16,7 @@ import {
   Sparkles,
   TrendingUp,
   Zap,
+  MessageCircle,
 } from "lucide-react";
 import Image from "next/image";
 import type { ComponentType } from "react";
@@ -396,12 +397,12 @@ export default async function Home() {
                 label="GitHub"
               />
               <CreatorLink
-                href="https://www.linkedin.com/in/thalescampelodac"
+                href="https://www.linkedin.com/in/thalescampelo"
                 icon={Link}
                 label="LinkedIn"
               />
-              <CreatorLink href="#" icon={Globe} label="Landing profissional" />
-              <CreatorLink href="mailto:contato@petroagent.dev" icon={Zap} label="Contato" />
+              <CreatorLink href="https://thalescampelo.vercel.app/" icon={Globe} label="Landing profissional" />
+              <CreatorLink href="https://wa.me/5532991594895?text=Olá%20vim%20pelo%20PetroAgent" icon={MessageCircle} label="WhatsApp"/>
               <PixSupport />
             </CardContent>
           </Card>
