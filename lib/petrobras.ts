@@ -118,7 +118,7 @@ export function getPetrobrasPanelMetrics(
     {
       label: "Última atualização",
       value: latestAgentUpdate,
-      detail: "Horário de Brasília",
+      detail: "",
       icon: CalendarClock,
     },
   ];

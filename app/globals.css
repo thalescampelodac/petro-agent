@@ -128,3 +128,28 @@
     @apply font-sans;
   }
 }
+
+@layer utilities {
+  .petro-scroll {
+    scrollbar-color: rgb(110 231 183 / 45%) rgb(15 23 42 / 55%);
+    scrollbar-width: thin;
+  }
+
+  .petro-scroll::-webkit-scrollbar {
+    width: 0.45rem;
+  }
+
+  .petro-scroll::-webkit-scrollbar-track {
+    background: rgb(15 23 42 / 55%);
+    border-radius: 999px;
+  }
+
+  .petro-scroll::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      180deg,
+      rgb(110 231 183 / 70%),
+      rgb(56 189 248 / 45%)
+    );
+    border-radius: 999px;
+  }
+}
