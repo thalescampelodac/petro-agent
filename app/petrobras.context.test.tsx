@@ -26,7 +26,7 @@ describe("PetrobrasPage", () => {
     });
   });
 
-  it("apresenta estados vazios quando ainda nao ha dados persistidos", async () => {
+  it("apresenta estados vazios quando ainda nao ha dados do agente", async () => {
     render(await PetrobrasPage());
 
     expect(
@@ -39,7 +39,7 @@ describe("PetrobrasPage", () => {
     expect(screen.getByText(/dados básicos petr4/i)).toBeInTheDocument();
     expect(screen.getAllByText(/aguardando coleta/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/resumo inteligente/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/aguardando relatório/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/aguardando a primeira análise/i)).toBeInTheDocument();
     expect(screen.getByText(/relatórios recentes/i)).toBeInTheDocument();
     expect(screen.getByText(/nenhum relatório salvo ainda/i)).toBeInTheDocument();
     expect(screen.getByText(/indicador de sentimento/i)).toBeInTheDocument();
@@ -47,13 +47,15 @@ describe("PetrobrasPage", () => {
       "aria-valuenow",
       "0",
     );
-    expect(screen.getByText(/eventos recentes/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/eventos recentes/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/nenhum evento recente/i)).toBeInTheDocument();
-    expect(screen.getByText(/aguardando eventos persistidos/i)).toBeInTheDocument();
-    expect(screen.getByText(/sem recomendação financeira/i)).toBeInTheDocument();
+    expect(screen.getByText(/aguardando eventos recentes/i)).toBeInTheDocument();
+    expect(screen.queryByText(/persistidos/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/banco de dados/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/mcp-first/i)).not.toBeInTheDocument();
   });
 
-  it("apresenta dados persistidos de snapshot, relatório e eventos", async () => {
+  it("apresenta dados do agente de snapshot, relatório e eventos", async () => {
     vi.mocked(getCachedPetrobrasData).mockResolvedValue({
       events: [
         {
@@ -62,7 +64,7 @@ describe("PetrobrasPage", () => {
           event_type: "Dividendos",
           relevance_score: 82,
           source_id: 7,
-          summary: "Evento persistido pelo agente.",
+          summary: "Evento acompanhado pelo agente.",
           title: "Dividendo em monitoramento",
         },
       ],
@@ -70,7 +72,7 @@ describe("PetrobrasPage", () => {
         created_at: "2026-05-27T19:00:00.000Z",
         model_used: "gemini",
         sentiment: "Neutro",
-        sentiment_basis: "Base persistida pelo agente.",
+        sentiment_basis: "Base acompanhada pelo agente.",
         sentiment_confidence: "media",
         sentiment_score: 54,
         source_count: 2,
@@ -81,7 +83,7 @@ describe("PetrobrasPage", () => {
       snapshot: {
         price: 42.82,
         snapshot_time: "2026-05-27T17:10:00-03:00",
-        source: "Google Finance",
+        source: "Google Finance - https://www.google.com/finance/quote/PETR4:BVMF",
         ticker: "PETR4",
         variation: -1.43,
         volume: 287654321,
@@ -93,13 +95,20 @@ describe("PetrobrasPage", () => {
 
     expect(screen.getByText("R$ 42,82")).toBeInTheDocument();
     expect(screen.getByText("-1,43%")).toBeInTheDocument();
+    expect(screen.getByText("287.654.321")).toBeInTheDocument();
     expect(screen.getByText("Resumo salvo pelo agente.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /google finance/i })).toHaveAttribute(
+      "href",
+      "https://www.google.com/finance/quote/PETR4:BVMF",
+    );
     expect(screen.getByRole("meter", { name: /sentimento neutro/i })).toHaveAttribute(
       "aria-valuenow",
       "54",
     );
     expect(screen.getByText(/dividendo em monitoramento/i)).toBeInTheDocument();
     expect(screen.getByLabelText("Pulso 1: 82")).toBeInTheDocument();
+    expect(screen.queryByText(/gemini/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/banco de dados/i)).not.toBeInTheDocument();
   });
 
   it("declara metadados públicos da rota", () => {

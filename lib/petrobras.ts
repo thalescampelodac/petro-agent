@@ -3,35 +3,32 @@ import {
   Activity,
   BadgeDollarSign,
   CalendarClock,
-  DatabaseZap,
   FileText,
   Newspaper,
-  Radar,
   TrendingUp,
 } from "lucide-react";
 
 import { getCachedPetrobrasData } from "@/services/petrobras-cache";
 
 export type PetrobrasBasicData = {
-  ticker: string;
+  change: string;
   company: string;
   lastPrice: string;
-  change: string;
-  updatedAt: string;
-  source: "Banco" | "Aguardando coleta";
-  origin: string;
-  note: string;
+  sourceName: string;
+  sourceUrl: string | null;
+  ticker: string;
+  volume: string;
 };
 
 export type PetrobrasReport = {
-  summary: string;
   generatedAt: string;
+  summary: string;
   sentimentBasis: string | null;
   sentimentConfidence: PetrobrasSentimentConfidence | null;
   sentimentLabel: PetrobrasSentimentLabel | null;
   sentimentScore: number | null;
-  source: string;
   status: "Saved" | "Fallback";
+  title: string;
 };
 
 export type PetrobrasRecentReport = {
@@ -72,7 +69,6 @@ export type PetrobrasSentiment = {
   score: number;
   confidence: PetrobrasSentimentConfidence | "Sem dado";
   basis: string;
-  source: string;
 };
 
 type PetrobrasSentimentLabel = "Neutro" | "Positivo" | "Negativo";
@@ -80,6 +76,7 @@ type PetrobrasSentimentConfidence = "Baixa" | "Média" | "Alta";
 
 export type PetrobrasDashboardData = {
   basicData: PetrobrasBasicData;
+  latestAgentUpdate: string;
   monitoredSignals: PetrobrasSignal[];
   panelMetrics: PetrobrasPanelMetric[];
   pulse: number[];
@@ -90,14 +87,13 @@ export type PetrobrasDashboardData = {
 };
 
 const EMPTY_BASIC_DATA: PetrobrasBasicData = {
-  ticker: "PETR4",
+  change: "Aguardando coleta",
   company: "Petrobras PN",
   lastPrice: "Aguardando coleta",
-  change: "Aguardando coleta",
-  updatedAt: "Aguardando coleta",
-  source: "Aguardando coleta",
-  origin: "Sem snapshot persistido",
-  note: "Execute o agente para salvar um snapshot de mercado no banco",
+  sourceName: "Aguardando coleta",
+  sourceUrl: null,
+  ticker: "PETR4",
+  volume: "Aguardando coleta",
 };
 
 export function getPetrobrasBasicData(): PetrobrasBasicData {
@@ -110,6 +106,7 @@ export function getLatestPetrobrasReport(): PetrobrasReport | null {
 
 export function getPetrobrasPanelMetrics(
   basicData: PetrobrasBasicData,
+  latestAgentUpdate: string,
 ): PetrobrasPanelMetric[] {
   return [
     {
@@ -119,24 +116,9 @@ export function getPetrobrasPanelMetrics(
       icon: TrendingUp,
     },
     {
-      label: "Origem dos dados",
-      value: basicData.source,
-      detail: basicData.origin,
-      icon: DatabaseZap,
-    },
-    {
-      label: "Status do radar",
-      value: basicData.source === "Banco" ? "Com dados" : "Aguardando coleta",
-      detail:
-        basicData.source === "Banco"
-          ? "Último snapshot persistido localizado"
-          : "Sem snapshot persistido no banco",
-      icon: Radar,
-    },
-    {
       label: "Última atualização",
-      value: basicData.updatedAt,
-      detail: basicData.note,
+      value: latestAgentUpdate,
+      detail: "Horário de Brasília",
       icon: CalendarClock,
     },
   ];
@@ -158,19 +140,19 @@ export function getPetrobrasMonitoredSignals(
     {
       title: "Dividendos",
       description: "Agenda de proventos, comunicados e contexto histórico.",
-      status: hasDividend ? "Registro persistido" : "Aguardando evento",
+      status: hasDividend ? "Acompanhado" : "Aguardando evento",
       icon: BadgeDollarSign,
     },
     {
       title: "Fatos relevantes",
       description: "Eventos corporativos publicados por canais oficiais.",
-      status: hasRelevantFact ? "Registro persistido" : "Aguardando evento",
+      status: hasRelevantFact ? "Acompanhado" : "Aguardando evento",
       icon: FileText,
     },
     {
       title: "Notícias públicas",
       description: "Leitura contextual de notícias setoriais e institucionais.",
-      status: hasNews ? "Registro persistido" : "Aguardando evento",
+      status: hasNews ? "Acompanhado" : "Aguardando evento",
       icon: Newspaper,
     },
     {
@@ -196,6 +178,7 @@ export async function getPetrobrasDashboardData(): Promise<PetrobrasDashboardDat
     : getLatestPetrobrasReport();
   const recentReports = cachedData.reports.map(mapAgentReportToRecentReport);
   const sentiment = getPetrobrasSentiment(report);
+  const latestAgentUpdate = getLatestAgentUpdate(cachedData);
   const timelineEvents =
     cachedData.events.length > 0
       ? sortPetrobrasTimelineEvents(
@@ -203,7 +186,7 @@ export async function getPetrobrasDashboardData(): Promise<PetrobrasDashboardDat
             date: formatDate(event.event_date ?? event.created_at),
             relevanceLabel: getRelevanceLabel(event.relevance_score),
             relevanceScore: event.relevance_score,
-            source: event.source_id ? `Fonte #${event.source_id}` : "Banco de dados",
+            source: event.source_id ? "Fonte vinculada" : "Fonte não informada",
             summary: event.summary,
             title: event.title,
             type: event.event_type,
@@ -213,8 +196,9 @@ export async function getPetrobrasDashboardData(): Promise<PetrobrasDashboardDat
 
   return {
     basicData,
+    latestAgentUpdate,
     monitoredSignals: getPetrobrasMonitoredSignals(timelineEvents, sentiment),
-    panelMetrics: getPetrobrasPanelMetrics(basicData),
+    panelMetrics: getPetrobrasPanelMetrics(basicData, latestAgentUpdate),
     pulse: getPetrobrasPulse(timelineEvents),
     report,
     recentReports,
@@ -234,11 +218,10 @@ export function getPetrobrasSentiment(
   ) {
     return {
       basis:
-        "Aguardando análise estruturada do agente salva no banco de dados.",
+        "Aguardando análise estruturada do agente.",
       confidence: "Sem dado",
       label: "Sem dado",
       score: 0,
-      source: "Banco de dados",
     };
   }
 
@@ -249,7 +232,6 @@ export function getPetrobrasSentiment(
     confidence: report.sentimentConfidence ?? "Sem dado",
     label: report.sentimentLabel,
     score: report.sentimentScore,
-    source: report.source,
   };
 }
 
@@ -323,9 +305,9 @@ function mapAgentReportToPetrobrasReport(report: {
     sentimentConfidence: normalizeSentimentConfidence(report.sentiment_confidence),
     sentimentLabel: normalizeSentimentLabel(report.sentiment),
     sentimentScore: normalizeSentimentScore(report.sentiment_score),
-    source: report.model_used ? `Banco de dados · ${report.model_used}` : "Banco de dados",
     status: "Saved",
     summary: report.summary,
+    title: report.title,
   };
 }
 
@@ -421,6 +403,7 @@ function mapMarketSnapshotToBasicData(snapshot: {
   volume: number | null;
 }): PetrobrasBasicData {
   const variation = snapshot.variation ?? 0;
+  const source = normalizeSource(snapshot.source);
 
   return {
     change: `${variation > 0 ? "+" : ""}${variation.toLocaleString("pt-BR")}%`,
@@ -432,30 +415,93 @@ function mapMarketSnapshotToBasicData(snapshot: {
             style: "currency",
           })
         : "Preço indisponível",
-    note: "Dado persistido em cache no banco",
-    origin: snapshot.source ?? "Banco de dados",
-    source: "Banco",
+    sourceName: source.name,
+    sourceUrl: source.url,
     ticker: snapshot.ticker,
-    updatedAt: snapshot.snapshot_time
-      ? formatDateTime(snapshot.snapshot_time)
-      : "Horário indisponível",
+    volume:
+      typeof snapshot.volume === "number"
+        ? snapshot.volume.toLocaleString("pt-BR")
+        : "Volume indisponível",
   };
 }
 
-function formatDate(value: string) {
+export function formatDate(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",
+    timeZone: "America/Sao_Paulo",
     year: "numeric",
   }).format(new Date(value));
 }
 
-function formatDateTime(value: string) {
+export function formatDateTime(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
     month: "2-digit",
+    timeZone: "America/Sao_Paulo",
     year: "numeric",
   }).format(new Date(value));
+}
+
+export function normalizeSource(value: string | null) {
+  if (!value?.trim()) {
+    return {
+      name: "Fonte não informada",
+      url: null,
+    };
+  }
+
+  const trimmed = value.trim();
+  const urlMatch = trimmed.match(/https?:\/\/\S+/);
+  const url = urlMatch?.[0] ?? null;
+  const name = (url ? trimmed.slice(0, urlMatch?.index).replace(/\s+-\s*$/, "") : trimmed)
+    .replace(/^Banco de dados\s*·\s*/i, "")
+    .replace(/^Fonte\s*:\s*/i, "")
+    .trim();
+
+  return {
+    name: name || getHostLabel(url) || "Fonte externa",
+    url,
+  };
+}
+
+function getHostLabel(url: string | null) {
+  if (!url) {
+    return null;
+  }
+
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, "");
+
+    if (host.includes("vertexaisearch.cloud.google.com")) {
+      return "Fonte consultada pelo Gemini";
+    }
+
+    return host;
+  } catch {
+    return null;
+  }
+}
+
+function getLatestAgentUpdate(data: {
+  events: Array<{ created_at: string; event_date: string | null }>;
+  report: { created_at: string } | null;
+  snapshot: { snapshot_time: string | null } | null;
+}) {
+  const timestamps = [
+    data.report?.created_at,
+    data.snapshot?.snapshot_time,
+    ...data.events.flatMap((event) => [event.event_date, event.created_at]),
+  ]
+    .filter((value): value is string => Boolean(value))
+    .map((value) => new Date(value).getTime())
+    .filter(Number.isFinite);
+
+  if (timestamps.length === 0) {
+    return "Aguardando coleta";
+  }
+
+  return formatDateTime(new Date(Math.max(...timestamps)).toISOString());
 }

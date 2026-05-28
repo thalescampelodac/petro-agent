@@ -2,10 +2,7 @@ import {
   ArrowLeft,
   BarChart3,
   Clock3,
-  DatabaseZap,
   Radar,
-  ShieldAlert,
-  ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
 import type { ComponentType } from "react";
@@ -36,12 +33,13 @@ import {
 export const metadata = {
   title: "Painel Petrobras | PetroAgent",
   description:
-    "Painel público do PetroAgent para acompanhamento informativo de Petrobras/PETR4 com dados persistidos quando disponíveis.",
+    "Painel operacional do PetroAgent para acompanhamento informativo de Petrobras/PETR4.",
 };
 
 export default async function PetrobrasPage() {
   const {
     basicData,
+    latestAgentUpdate,
     monitoredSignals,
     panelMetrics,
     pulse,
@@ -95,35 +93,16 @@ export default async function PetrobrasPage() {
                   Painel Petrobras
                   <span className="block">PETR4</span>
                 </h1>
-                <p className="max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-                  Um painel público para acompanhar sinais, resumos e eventos
-                  ligados à Petrobras com contexto visual, dados persistidos
-                  quando disponíveis e estados vazios transparentes.
-                </p>
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
               <HeroStatusCard
-                detail="Sem recomendação financeira"
-                icon={ShieldAlert}
-                label="Aviso"
-                tone="amber"
-                value="Informativo"
-              />
-              <HeroStatusCard
-                detail={basicData.origin}
-                icon={DatabaseZap}
-                label="Dados"
-                tone="emerald"
-                value={basicData.source}
-              />
-              <HeroStatusCard
-                detail={basicData.updatedAt}
+                detail="Horário de Brasília"
                 icon={Clock3}
-                label="Atualização"
+                label="Última atualização"
                 tone="sky"
-                value="Monitorado"
+                value={latestAgentUpdate}
               />
             </div>
           </div>
@@ -152,13 +131,9 @@ export default async function PetrobrasPage() {
                 <div>
                   <CardTitle className="text-white">Sinais monitorados</CardTitle>
                   <CardDescription className="mt-1 text-slate-400">
-                    Sinais derivados de eventos e relatórios persistidos.
+                    Categorias acompanhadas pelo radar.
                   </CardDescription>
                 </div>
-                <Badge className="w-fit border-emerald-300/20 bg-emerald-300/10 text-emerald-100">
-                  <ShieldCheck className="size-3" />
-                  Dados persistidos
-                </Badge>
               </div>
             </CardHeader>
             <CardContent className="grid gap-3 md:grid-cols-2">
@@ -177,7 +152,7 @@ export default async function PetrobrasPage() {
                 Pulso do mercado
               </CardTitle>
               <CardDescription className="text-slate-400">
-                Série derivada da relevância dos eventos persistidos.
+                Intensidade dos eventos recentes.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -195,11 +170,11 @@ export default async function PetrobrasPage() {
               ) : (
                 <div className="rounded-lg border border-dashed border-white/15 bg-black/20 p-5">
                   <p className="text-sm font-medium text-white">
-                    Aguardando eventos persistidos
+                    Aguardando eventos recentes
                   </p>
                   <p className="mt-2 text-sm leading-6 text-slate-400">
-                    O pulso será calculado a partir da relevância dos eventos
-                    salvos no banco.
+                    O pulso será calculado quando houver eventos classificados
+                    pelo agente.
                   </p>
                 </div>
               )}
@@ -223,12 +198,10 @@ function HeroStatusCard({
   detail: string;
   icon: ComponentType<{ className?: string }>;
   label: string;
-  tone: "amber" | "emerald" | "sky";
+  tone: "sky";
   value: string;
 }) {
   const toneClass = {
-    amber: "border-amber-200/20 bg-amber-200/[0.06] text-amber-100",
-    emerald: "border-emerald-300/20 bg-emerald-300/[0.06] text-emerald-100",
     sky: "border-sky-300/20 bg-sky-300/[0.06] text-sky-100",
   }[tone];
 
