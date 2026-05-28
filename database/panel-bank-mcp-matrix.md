@@ -23,25 +23,25 @@ usados para substituir dados operacionais ausentes.
 
 | Área do painel | Campo exibido | Origem atual | Status Fase 11 |
 | --- | --- | --- | --- |
-| Hero status | Dados: `Mock`/`Cache` | `market_snapshots` quando existe; mock no código quando vazio | Bloqueado por mock |
-| Hero status | Atualização | `market_snapshots.snapshot_time` quando existe; mock no código quando vazio | Bloqueado por mock |
+| Hero status | Dados | `market_snapshots` quando existe; estado vazio quando ausente | Alinhado ao banco |
+| Hero status | Atualização | `market_snapshots.snapshot_time` quando existe; estado vazio quando ausente | Alinhado ao banco |
 | Métricas | Ativo monitorado, empresa | Configuração estática do produto; snapshot define estado operacional | Alinhado como metadado estático |
-| Métricas | Origem dos dados | `market_snapshots.source` quando existe; mock no código quando vazio | Bloqueado por mock |
-| Métricas | Status do radar | Texto fixo `Preparado` | Bloqueado por dado fixo |
-| Métricas | Última atualização | `market_snapshots.snapshot_time` quando existe; mock no código quando vazio | Bloqueado por mock |
+| Métricas | Origem dos dados | `market_snapshots.source` quando existe; estado vazio quando ausente | Alinhado ao banco |
+| Métricas | Status do radar | Derivado da presença de `market_snapshots` | Alinhado ao banco |
+| Métricas | Última atualização | `market_snapshots.snapshot_time` quando existe; estado vazio quando ausente | Alinhado ao banco |
 | Dados básicos | Ticker | Configuração estática `PETR4`; snapshot define estado operacional | Alinhado como metadado estático |
 | Dados básicos | Empresa | Configuração estática do produto | Alinhado como metadado estático |
-| Dados básicos | Último preço | `market_snapshots.price` quando existe; preço mockado quando vazio | Bloqueado por mock |
-| Dados básicos | Variação | `market_snapshots.variation` quando existe; variação mockada quando vazio | Bloqueado por mock |
-| Dados básicos | Fonte | `market_snapshots.source` quando existe; mock no código quando vazio | Bloqueado por mock |
-| Resumo inteligente | Resumo, geração, fonte | `agent_reports` quando existe; resumo fallback no código quando vazio | Bloqueado por mock |
+| Dados básicos | Último preço | `market_snapshots.price` quando existe; estado vazio quando ausente | Alinhado ao banco |
+| Dados básicos | Variação | `market_snapshots.variation` quando existe; estado vazio quando ausente | Alinhado ao banco |
+| Dados básicos | Fonte | `market_snapshots.source` quando existe; estado vazio quando ausente | Alinhado ao banco |
+| Resumo inteligente | Resumo, geração, fonte | `agent_reports` quando existe; estado vazio quando ausente | Alinhado ao banco |
 | Relatórios recentes | Título, resumo, sentimento, modelo, fontes | `agent_reports` | Alinhado ao banco |
 | Sentimento | Label | `agent_reports.sentiment` quando existe; estado vazio quando ausente | Alinhado ao banco |
 | Sentimento | Escore | `agent_reports.sentiment_score` quando existe; estado vazio quando ausente | Alinhado ao banco |
 | Sentimento | Confiabilidade, base, fonte | `agent_reports.sentiment_confidence`, `agent_reports.sentiment_basis` e `agent_reports.model_used` | Alinhado ao banco |
-| Sinais monitorados | Dividendos, fatos relevantes, notícias, sentimento | Lista e status fixos no código | Bloqueado por dado fixo |
-| Pulso demonstrativo | Barras do gráfico | Array fixo no código | Bloqueado por mock |
-| Eventos recentes | Eventos, datas, tipo, resumo, relevância | `market_events` quando existe; timeline fallback no código quando vazio | Bloqueado por mock |
+| Sinais monitorados | Dividendos, fatos relevantes, notícias, sentimento | Derivado de `market_events` e `agent_reports`; estado vazio quando ausente | Alinhado ao banco |
+| Pulso do mercado | Barras do gráfico | Derivado de `market_events.relevance_score`; estado vazio quando ausente | Alinhado ao banco |
+| Eventos recentes | Eventos, datas, tipo, resumo, relevância | `market_events` quando existe; estado vazio quando ausente | Alinhado ao banco |
 
 ## Matriz alvo
 
@@ -64,13 +64,14 @@ usados para substituir dados operacionais ausentes.
 | Eventos recentes | `market_events.*` | `register_market_event` | `list_market_events` | Fontes coletadas e analisadas pelo agente | Unit MCP + integração painel |
 | Fonte do evento | `market_events.source_id -> sources.id` | `register_source` + `register_market_event` | `list_market_events` e `search_agent_memory` | URL/documento público coletado | Unit MCP |
 | Relevância do evento | `market_events.relevance_score` | `register_market_event` | `list_market_events` | Classificação do agente | Unit MCP |
-| Sinais monitorados | Derivado de `market_events`, `agent_reports` ou tabela futura de sinais | Tool futura `upsert_signal_status` ou derivação documentada | Tool futura `list_signal_statuses` | Análise do agente por categoria | Issue específica + testes |
-| Pulso do painel | Derivado de `market_events.relevance_score` por período ou tabela futura | Tool futura ou derivação documentada | Tool futura `list_market_pulse` | Série gerada pelo agente a partir de eventos/snapshots | Issue específica + smoke visual |
+| Sinais monitorados | Derivado de `market_events` e `agent_reports` | `register_market_event` e `save_agent_report` | `list_market_events` e `get_latest_report` | Análise do agente por categoria | Contexto painel |
+| Pulso do painel | Derivado de `market_events.relevance_score` | `register_market_event` | `list_market_events` | Série gerada pelo agente a partir de eventos | Unit + smoke visual |
 
 ## Dados que o agente consegue buscar sozinho
 
-O agente só consegue buscar dados sozinho quando houver uma fonte/tool definida.
-Para a Fase 11, cada origem externa precisa ser decidida antes da implementação:
+O agente só consegue buscar dados sozinho quando houver fonte, prompt, payload e
+tool MCP definidos. Para a Fase 11, a regra é não inventar dado ausente: quando
+a coleta ainda não existe, o painel mostra estado vazio explícito.
 
 | Dado | Autonomia esperada do agente | Decisão pendente |
 | --- | --- | --- |
@@ -78,23 +79,19 @@ Para a Fase 11, cada origem externa precisa ser decidida antes da implementaçã
 | Comunicados de RI/fatos relevantes | Parcial | Definir fonte pública inicial e formato de coleta |
 | Notícias públicas | Parcial | Definir fonte pública inicial e política de relevância |
 | Dividendos/proventos | Parcial | Definir fonte pública inicial |
-| Sentimento/escala/confiança | Sim, a partir dos dados persistidos | Definir schema de sentimento estruturado |
-| Relatórios do agente | Sim | Persistência via contrato MCP ainda pendente |
+| Sentimento/escala/confiança | Sim, a partir dos dados persistidos | Persistido em `agent_reports` via MCP |
+| Relatórios do agente | Sim | Persistência via `generate_informative_analysis` e `save_agent_report` |
 
 ## Bloqueadores criados pela matriz
 
-1. Remover mocks do painel antes de haver estados vazios explícitos (#98).
-2. Criar tools MCP de escrita antes de definir payloads com origem rastreável
-   (#95).
-3. Exibir pulso visual com array fixo (#107).
-4. Tratar o agente como autônomo para dados externos sem validação do JSON
+1. Tratar o agente como autônomo para dados externos sem validação do JSON
    retornado pelo prompt (#104).
 
 ## Sequência recomendada após esta matriz
 
-1. Implementar validação e escrita MCP para o prompt de snapshot PETR4 (#95).
-2. Modelar sentimento estruturado (#106).
-3. Implementar tools MCP de escrita com origem rastreável (#95).
-4. Remover mocks do painel e trocar por estados vazios (#98).
-5. Migrar executor para fluxo MCP-first (#94, #96 e #97).
-6. Validar que `agent -> MCP -> banco -> painel` funciona com testes (#99).
+1. Validar o pacote final da Fase 11 em preview: painel sem mocks enganosos,
+   executor MCP-first, relatório persistido e estados vazios explícitos.
+2. Só ativar cron após validação manual de execução, logs, relatório e painel em
+   produção.
+3. Para novas coletas externas, abrir issue específica com fonte, prompt,
+   payload, validação, tool MCP de escrita e teste de regressão.

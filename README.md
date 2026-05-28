@@ -164,10 +164,10 @@ Matriz de validacao atual:
 
 ## Execução manual do agente
 
-O agente do PetroAgent começa de forma manual. Ele lê fontes, eventos, snapshots
-e relatórios persistidos no schema `petroagent`, monta um contexto textual com
-guardrails de produto, usa IA apenas se houver provedor configurado e salva o
-resultado em `petroagent.agent_reports`.
+O agente do PetroAgent começa de forma manual e segue o contrato MCP-first. Ele
+consulta contexto por tools MCP, monta um contexto textual com guardrails de
+produto, usa IA apenas se houver provedor configurado e salva o resultado por
+capacidade MCP em `petroagent.agent_reports`.
 
 ```bash
 npm run agent:run
@@ -214,6 +214,20 @@ Cada execução grava um registro em `petroagent.agent_execution_logs` com
 `started`, `saved` ou `failed`, origem, engine, relatório gerado, quantidade de
 fontes e erro resumido quando existir. Essa tabela é operacional e fica restrita
 ao backend com `service_role`.
+
+Checklist de validação:
+
+1. Rodar `npm run agent:run` em ambiente com variáveis server-side configuradas.
+2. Confirmar novo registro em `petroagent.agent_execution_logs`.
+3. Confirmar novo relatório em `petroagent.agent_reports`.
+4. Confirmar que `/petrobras` reflete relatório, sentimento, snapshot ou eventos
+   quando eles existirem no banco.
+5. Confirmar que `/petrobras` exibe estado vazio explícito quando o banco ainda
+   não tiver dados.
+
+Rollback operacional: remover temporariamente `PETROAGENT_AGENT_RUN_TOKEN`,
+`CRON_SECRET` ou o bloco `crons` quando existir; para código, reverter o merge
+da PR correspondente.
 
 ### Agendamento futuro
 

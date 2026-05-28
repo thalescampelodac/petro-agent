@@ -13,7 +13,8 @@ describe("contrato painel-banco-MCP", () => {
     expect(matrix).toContain("Agente PetroAgent -> contrato MCP -> banco petroagent");
     expect(matrix).toContain("Campo do painel");
     expect(matrix).toContain("Tool MCP que grava/atualiza");
-    expect(matrix).toContain("Bloqueado por mock");
+    expect(matrix).toContain("estado vazio quando ausente");
+    expect(matrix).toContain("Alinhado ao banco");
     expect(matrix).toContain("upsert_market_snapshot");
     expect(matrix).toContain("prompts/market-snapshot-petr4.md");
     expect(matrix).toContain("register_market_event");

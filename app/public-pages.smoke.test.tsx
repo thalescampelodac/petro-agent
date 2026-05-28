@@ -87,7 +87,7 @@ describe("public pages smoke", () => {
     expect(screen.getByText(/dados básicos petr4/i)).toBeInTheDocument();
     expect(screen.getByText(/resumo inteligente/i)).toBeInTheDocument();
     expect(screen.getByText(/sinais monitorados/i)).toBeInTheDocument();
-    expect(screen.getByText(/pulso demonstrativo/i)).toBeInTheDocument();
+    expect(screen.getByText(/pulso do mercado/i)).toBeInTheDocument();
     expect(console.error).not.toHaveBeenCalled();
   });
 });

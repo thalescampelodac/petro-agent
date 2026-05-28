@@ -380,7 +380,7 @@ Exibir dados básicos da ação PETR4.
 **Critérios de aceite:**
 
 - Card visualmente claro.
-- Indica quando dado é mock, cache ou dado real.
+- Indica quando dado vem do banco ou quando ainda está aguardando coleta.
 - Não promete tempo real.
 
 ---
@@ -393,7 +393,7 @@ Exibir resumo mais recente gerado pelo agente.
 **Critérios de aceite:**
 
 - Mostra resumo salvo no banco.
-- Mostra fallback se não houver relatório.
+- Mostra estado vazio explícito se não houver relatório.
 - Indica data da geração.
 
 ---
@@ -428,7 +428,7 @@ Exibir últimos eventos relevantes acompanhados pelo agente.
 - Timeline ordenada por data.
 - Exibe tipo do evento.
 - Exibe fonte quando disponível.
-- Usa dados do banco ou fallback.
+- Usa dados do banco ou estado vazio explícito.
 
 ---
 
@@ -1586,22 +1586,37 @@ Decisão do pacote #94, #95, #96 e #97:
 - O app continua sem chamar MCP para renderizar o painel; o contrato MCP governa
   coleta, análise e persistência do agente.
 
+Decisão do pacote #107, #98 e #99:
+
+- O painel `/petrobras` não deve exibir preço, variação, data, eventos, pulso ou
+  análise simulados como se fossem dados reais.
+- Sem snapshot, evento ou relatório persistido, o painel exibe estados vazios
+  explícitos como "aguardando coleta", "aguardando relatório" e "aguardando
+  eventos persistidos".
+- Dados básicos operacionais vêm de `market_snapshots`; relatórios e sentimento
+  vêm de `agent_reports`; eventos recentes vêm de `market_events`; sinais
+  monitorados e pulso são derivados de `market_events` e `agent_reports`.
+- O executor segue MCP-first: consulta contexto por tools MCP, gera análise pela
+  capacidade `generate_informative_analysis`, persiste por `save_agent_report` e
+  mantém logs em `agent_execution_logs`.
+- A execução recorrente por cron continua fora de produção até validação manual
+  em preview/produção e aprovação explícita.
+
 ---
 
 # Prioridade atual
 
-A prioridade atual é transformar o MCP em contrato operacional completo antes de
-ativar automação recorrente.
+A prioridade atual é validar o fluxo operacional completo antes de ativar
+automação recorrente.
 
 Sequência recomendada:
 
-1. Criar matriz painel-banco-MCP obrigatória.
-2. Identificar quais dados o agente consegue coletar sozinho e quais precisam
-   de fonte/configuração guiada.
-3. Migrar leituras de contexto do agente para tools MCP.
-4. Criar tools MCP de escrita para fontes, eventos, snapshots e relatórios.
-5. Remover mocks enganosos do painel Petrobras.
-6. Validar execução MCP-first localmente, em preview e só então considerar cron.
+1. Manter a matriz painel-banco-MCP atualizada a cada novo dado exibido.
+2. Validar o fluxo `agente -> MCP -> banco -> painel` em preview e produção.
+3. Só ativar cron depois de confirmação manual de logs, relatório, snapshot e
+   painel atualizado.
+4. Próximas coletas externas devem definir fonte, prompt, payload, validação e
+   tool MCP antes da escrita no banco.
 
 Cada issue deve ter branch própria, PR, preview validado e merge para `main` somente após aprovação.
 

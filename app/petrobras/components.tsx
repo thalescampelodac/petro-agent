@@ -59,7 +59,7 @@ export function BasicDataCard({
           <div>
             <CardTitle className="text-white">Dados básicos PETR4</CardTitle>
             <CardDescription className="text-slate-400">
-              Dados demonstrativos do ativo e indicação de origem.
+              Dados de mercado salvos pelo agente e indicação de origem.
             </CardDescription>
           </div>
           <Badge variant="outline" className="w-fit border-white/15">
@@ -95,11 +95,11 @@ export function SummaryCard({
             <CardDescription className="mt-1 text-slate-400">
               {hasReport
                 ? "Resumo salvo no banco de dados."
-                : "Fallback exibido enquanto não há resumo salvo."}
+                : "Aguardando relatório salvo pelo agente."}
             </CardDescription>
           </div>
           <Badge variant="outline" className="w-fit border-white/15">
-            {hasReport ? "Banco de dados" : "Fallback mockado"}
+            {hasReport ? "Banco de dados" : "Aguardando relatório"}
           </Badge>
         </div>
       </CardHeader>
@@ -107,19 +107,19 @@ export function SummaryCard({
         <div className="rounded-lg border border-emerald-300/15 bg-gradient-to-br from-emerald-300/[0.08] to-sky-300/[0.035] p-4">
           <div className="flex items-center gap-2 text-sm font-medium text-emerald-100">
             <Sparkles className="size-4" />
-            {hasReport ? "Resumo do agente" : "Resumo de fallback"}
+            {hasReport ? "Resumo do agente" : "Sem relatório salvo"}
           </div>
           <p className="mt-3 max-w-3xl text-base leading-8 text-slate-200">
             {report?.summary ??
-              "Sem relatório salvo no banco. Este conteúdo é um fallback demonstrativo para manter o painel informativo sem sugerir operação."}
+              "Sem relatório salvo no banco. Execute o agente para gerar uma análise informativa persistida."}
           </p>
         </div>
 
         <div className="grid gap-3 md:grid-cols-3">
           {[
             ["Data da geração", report?.generatedAt ?? "—"],
-            ["Fonte", report?.source ?? "Fallback"],
-            ["Confiança do dado", hasReport ? "Salvo" : "Fallback"],
+            ["Fonte", report?.source ?? "Banco de dados"],
+            ["Confiança do dado", hasReport ? "Salvo" : "Aguardando coleta"],
           ].map(([label, value]) => (
             <div
               className="rounded-lg border border-white/10 bg-black/20 p-4"
