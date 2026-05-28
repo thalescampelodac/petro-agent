@@ -6,6 +6,10 @@ import {
   startAgentExecutionLog,
 } from "./agent-execution-logs";
 import {
+  hasGeminiGroundedConfig,
+  runGeminiGroundedPetroAgent,
+} from "./gemini-grounded-agent";
+import {
   createPetroAgentMcpAdapter,
   type AgentReportPayload,
   type PetroAgentMcpAdapter,
@@ -66,7 +70,7 @@ export type ManualAgentExecutionResult =
       summary: string;
     }
   | {
-      reason: "missing_supabase_admin_config";
+      reason: "missing_gemini_config" | "missing_supabase_admin_config";
       status: "disabled";
     };
 
@@ -181,10 +185,39 @@ export async function executeManualPetroAgent(
   const mcpAdapter =
     dependencies.mcpAdapter ?? createPetroAgentMcpAdapter(createLocalMcpToolClient(client));
   const origin = dependencies.origin ?? "manual-cli";
+
+  if (!dependencies.mcpAdapter && !hasGeminiGroundedConfig()) {
+    return {
+      reason: "missing_gemini_config",
+      status: "disabled",
+    };
+  }
+
   const started = await logStart(client, { origin });
 
   try {
     const context = await readManualAgentContext(mcpAdapter);
+
+    if (!dependencies.mcpAdapter) {
+      const grounded = await runGeminiGroundedPetroAgent(mcpAdapter, context);
+
+      await logFinish(client, started.id, {
+        engine: grounded.engine,
+        reportId: grounded.reportId,
+        sourceCount: grounded.sourceCount,
+        status: "saved",
+      });
+
+      return {
+        engine: grounded.engine,
+        logId: started.id,
+        reportId: grounded.reportId,
+        sourceCount: grounded.sourceCount,
+        status: "saved",
+        summary: grounded.summary,
+      };
+    }
+
     const prompt = buildManualAgentPrompt(context);
     const citations = getManualAgentCitations(context);
     const analysis = await mcpAdapter.generateInformativeAnalysis({

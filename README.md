@@ -102,8 +102,9 @@ Tools disponíveis:
 - `register_source`: registra fontes públicas no schema `petroagent`.
 - `register_market_event`: registra eventos relevantes derivados de fontes.
 - `upsert_market_snapshot`: salva snapshots de mercado por ticker e horário.
-- `generate_informative_analysis`: gera análise curta com Gemini server-side
-  quando configurado ou fallback determinístico.
+- `generate_informative_analysis`: gera análise curta no contrato MCP; no
+  executor operacional real, dados persistidos devem vir de Gemini com busca
+  fundamentada.
 - `save_agent_report`: persiste relatórios estruturados em
   `petroagent.agent_reports`.
 
@@ -166,8 +167,10 @@ Matriz de validacao atual:
 
 O agente do PetroAgent começa de forma manual e segue o contrato MCP-first. Ele
 consulta contexto por tools MCP, monta um contexto textual com guardrails de
-produto, usa IA apenas se houver provedor configurado e salva o resultado por
-capacidade MCP em `petroagent.agent_reports`.
+produto, chama Gemini com busca fundamentada quando executado pelo caminho real
+e salva o pacote operacional por capacidades MCP em `petroagent.sources`,
+`petroagent.market_snapshots`, `petroagent.market_events` e
+`petroagent.agent_reports`.
 
 ```bash
 npm run agent:run
@@ -178,13 +181,14 @@ Requisitos:
 - `NEXT_PUBLIC_SUPABASE_URL` ou `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `PETROAGENT_AGENT_RUN_TOKEN` para o gatilho HTTP manual
-- `CRON_SECRET` para o gatilho futuro via Vercel Cron
-- opcionalmente `GEMINI_API_KEY`, `GEMINI_API_VERSION` e `GEMINI_MODEL` para IA real via Gemini free tier
+- `CRON_SECRET` para o gatilho via Vercel Cron
+- `GEMINI_API_KEY`, `GEMINI_API_VERSION` e `GEMINI_MODEL` para IA real via Gemini free tier
 - opcionalmente `OPENAI_API_KEY` para IA real
 
-Sem chave de IA, ou se o provedor falhar/atingir limite, o executor usa fallback
-determinístico. O comando não agenda execuções, não cria endpoint público e não
-deve gerar recomendação financeira, preço-alvo ou promessa de rentabilidade.
+Sem chave de IA, o executor real não persiste fallback como dado operacional do
+painel. Erros do provedor devem ser registrados em log operacional e tratados
+como falha da execução. O comando não deve gerar recomendação financeira,
+preço-alvo ou promessa de rentabilidade.
 
 Configuração recomendada para Gemini:
 
@@ -200,8 +204,7 @@ O endpoint operacional fica em `/api/agent/run`:
 
 - `POST /api/agent/run`: execução manual protegida por
   `PETROAGENT_AGENT_RUN_TOKEN`.
-- `GET /api/agent/run`: reservado para Vercel Cron futuro, protegido por
-  `CRON_SECRET`.
+- `GET /api/agent/run`: execução via Vercel Cron, protegida por `CRON_SECRET`.
 
 Exemplo manual:
 
@@ -226,31 +229,31 @@ Checklist de validação:
    não tiver dados.
 
 Rollback operacional: remover temporariamente `PETROAGENT_AGENT_RUN_TOKEN`,
-`CRON_SECRET` ou o bloco `crons` quando existir; para código, reverter o merge
-da PR correspondente.
+`CRON_SECRET` ou o bloco `crons`; para código, reverter o merge da PR
+correspondente.
 
-### Agendamento futuro
+### Agendamento
 
-O agendamento ainda não está ativo. Quando a execução manual estiver validada em
-produção, a configuração sugerida para Vercel Cron é diária, respeitando o limite
-do plano Hobby:
+O agendamento oficial roda uma vez por dia após o fechamento do pregão. A Vercel
+usa cron em UTC; por isso `0 22 * * *` equivale a 19:00 no horário de Brasília
+em 28 de maio de 2026.
 
 ```json
 {
   "crons": [
     {
       "path": "/api/agent/run",
-      "schedule": "0 11 * * *"
+      "schedule": "0 22 * * *"
     }
   ]
 }
 ```
 
-Antes de ativar:
+Antes de manter ativo:
 
 1. Configurar `CRON_SECRET` na Vercel.
 2. Confirmar que `GET /api/agent/run` retorna `401` sem token.
-3. Confirmar que a execução manual gera log e relatório.
+3. Confirmar que a execução real gera log, fonte, snapshot, evento e relatório.
 4. Ter plano de rollback removendo o bloco `crons` do `vercel.json` ou zerando
    `CRON_SECRET`.
 
