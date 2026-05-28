@@ -265,7 +265,10 @@ describe("MCP tools", () => {
 
   it("registra fonte com chave natural por URL", async () => {
     const { calls, client } = createSupabaseFixtureClient({
-      sources: { data: { id: 10 }, error: null },
+      sources: [
+        { data: null, error: null },
+        { data: { id: 10 }, error: null },
+      ],
     });
     supabaseClient = client;
 
@@ -278,8 +281,8 @@ describe("MCP tools", () => {
       }),
     ).resolves.toEqual({ id: 10, source: "petroagent.sources" });
     expect(calls).toContainEqual({
-      args: [expect.any(Object), { onConflict: "url" }],
-      method: "upsert",
+      args: [expect.any(Object)],
+      method: "insert",
       table: "sources",
     });
   });
@@ -308,7 +311,10 @@ describe("MCP tools", () => {
 
   it("salva snapshot de mercado por ticker e horario", async () => {
     const { calls, client } = createSupabaseFixtureClient({
-      market_snapshots: { data: { id: 30 }, error: null },
+      market_snapshots: [
+        { data: null, error: null },
+        { data: { id: 30 }, error: null },
+      ],
     });
     supabaseClient = client;
 
@@ -327,8 +333,8 @@ describe("MCP tools", () => {
       ticker: "PETR4",
     });
     expect(calls).toContainEqual({
-      args: [expect.any(Object), { onConflict: "ticker,snapshot_time" }],
-      method: "upsert",
+      args: [expect.any(Object)],
+      method: "insert",
       table: "market_snapshots",
     });
   });

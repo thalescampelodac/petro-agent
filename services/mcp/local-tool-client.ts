@@ -190,6 +190,151 @@ export function createLocalMcpToolClient(client: SupabaseClient): McpToolClient 
         );
       }
 
+      if (name === PETROAGENT_MCP_TOOLS.registerSource) {
+        const url = typeof args.url === "string" && args.url.trim() ? args.url.trim() : null;
+        const row = {
+          processed: typeof args.processed === "boolean" ? args.processed : false,
+          published_at:
+            typeof args.published_at === "string" ? args.published_at : null,
+          raw_content: String(args.raw_content ?? ""),
+          source_type: String(args.source_type ?? ""),
+          title: typeof args.title === "string" ? args.title : null,
+          url,
+        };
+        let data: unknown;
+        let error: unknown;
+
+        if (url) {
+          const existing = await client
+            .schema(PETROAGENT_SCHEMA)
+            .from("sources")
+            .select("id")
+            .eq("url", url)
+            .maybeSingle();
+
+          if (existing.error) throw existing.error;
+
+          const existingId = (existing.data as { id?: number } | null)?.id;
+          const result = existingId
+            ? await client
+                .schema(PETROAGENT_SCHEMA)
+                .from("sources")
+                .update(row)
+                .eq("id", existingId)
+                .select("id")
+                .single()
+            : await client
+                .schema(PETROAGENT_SCHEMA)
+                .from("sources")
+                .insert(row)
+                .select("id")
+                .single();
+
+          data = result.data;
+          error = result.error;
+        } else {
+          const result = await client
+            .schema(PETROAGENT_SCHEMA)
+            .from("sources")
+            .insert(row)
+            .select("id")
+            .single();
+
+          data = result.data;
+          error = result.error;
+        }
+
+        if (error) throw error;
+
+        const id = (data as { id: number }).id;
+
+        return castResult(
+          textResult(`Fonte registrada em petroagent.sources:${id}.`, {
+            id,
+            source: "petroagent.sources",
+          }),
+        );
+      }
+
+      if (name === PETROAGENT_MCP_TOOLS.registerMarketEvent) {
+        const row = {
+          event_date: typeof args.event_date === "string" ? args.event_date : null,
+          event_type: String(args.event_type ?? ""),
+          relevance_score:
+            typeof args.relevance_score === "number" ? args.relevance_score : null,
+          source_id: typeof args.source_id === "number" ? args.source_id : null,
+          summary: typeof args.summary === "string" ? args.summary : null,
+          title: String(args.title ?? ""),
+        };
+        const { data, error } = await client
+          .schema(PETROAGENT_SCHEMA)
+          .from("market_events")
+          .upsert(row, { onConflict: "event_type,title,event_date" })
+          .select("id")
+          .single();
+
+        if (error) throw error;
+
+        const id = (data as { id: number }).id;
+
+        return castResult(
+          textResult(`Evento registrado em petroagent.market_events:${id}.`, {
+            id,
+            source: "petroagent.market_events",
+          }),
+        );
+      }
+
+      if (name === PETROAGENT_MCP_TOOLS.upsertMarketSnapshot) {
+        const ticker = String(args.ticker ?? "PETR4").trim().toUpperCase();
+        const snapshotTime = String(args.snapshot_time);
+        const row = {
+          price: typeof args.price === "number" ? args.price : null,
+          snapshot_time: snapshotTime,
+          source: typeof args.source === "string" ? args.source : null,
+          ticker,
+          variation: typeof args.variation === "number" ? args.variation : null,
+          volume: typeof args.volume === "number" ? args.volume : null,
+        };
+        const existing = await client
+          .schema(PETROAGENT_SCHEMA)
+          .from("market_snapshots")
+          .select("id")
+          .eq("ticker", ticker)
+          .eq("snapshot_time", snapshotTime)
+          .maybeSingle();
+
+        if (existing.error) throw existing.error;
+
+        const existingId = (existing.data as { id?: number } | null)?.id;
+        const { data, error } = existingId
+          ? await client
+              .schema(PETROAGENT_SCHEMA)
+              .from("market_snapshots")
+              .update(row)
+              .eq("id", existingId)
+              .select("id")
+              .single()
+          : await client
+              .schema(PETROAGENT_SCHEMA)
+              .from("market_snapshots")
+              .insert(row)
+              .select("id")
+              .single();
+
+        if (error) throw error;
+
+        const id = (data as { id: number }).id;
+
+        return castResult(
+          textResult(`Snapshot ${ticker} salvo em market_snapshots:${id}.`, {
+            id,
+            source: "petroagent.market_snapshots",
+            ticker,
+          }),
+        );
+      }
+
       if (name === PETROAGENT_MCP_TOOLS.generateInformativeAnalysis) {
         const context = await this.callTool(PETROAGENT_MCP_TOOLS.summarizeContext, {
           limit: args.context_limit,

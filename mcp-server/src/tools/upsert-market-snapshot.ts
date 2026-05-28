@@ -33,23 +33,41 @@ export async function upsertMarketSnapshot(
 ): Promise<UpsertMarketSnapshotResult> {
   const client = createPetroAgentSupabaseClient();
   const ticker = normalizeTicker(params.ticker);
-
-  const { data, error } = await client
+  const row = {
+    price: params.price ?? null,
+    snapshot_time: params.snapshot_time,
+    source: params.source ?? null,
+    ticker,
+    variation: params.variation ?? null,
+    volume: params.volume ?? null,
+  };
+  const existing = await client
     .schema("petroagent")
     .from("market_snapshots")
-    .upsert(
-      {
-        price: params.price ?? null,
-        snapshot_time: params.snapshot_time,
-        source: params.source ?? null,
-        ticker,
-        variation: params.variation ?? null,
-        volume: params.volume ?? null,
-      },
-      { onConflict: "ticker,snapshot_time" },
-    )
     .select("id")
-    .single();
+    .eq("ticker", ticker)
+    .eq("snapshot_time", params.snapshot_time)
+    .maybeSingle();
+
+  if (existing.error) {
+    throw existing.error;
+  }
+
+  const existingId = (existing.data as { id?: number } | null)?.id;
+  const { data, error } = existingId
+    ? await client
+        .schema("petroagent")
+        .from("market_snapshots")
+        .update(row)
+        .eq("id", existingId)
+        .select("id")
+        .single()
+    : await client
+        .schema("petroagent")
+        .from("market_snapshots")
+        .insert(row)
+        .select("id")
+        .single();
 
   if (error) {
     throw error;
