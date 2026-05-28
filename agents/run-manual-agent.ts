@@ -8,9 +8,12 @@ async function main() {
   const result = await executeManualPetroAgent();
 
   if (result.status === "disabled") {
-    console.error(
-      "PetroAgent manual run disabled: configure NEXT_PUBLIC_SUPABASE_URL/SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.",
-    );
+    const message =
+      result.reason === "missing_gemini_config"
+        ? "PetroAgent manual run disabled: configure GEMINI_API_KEY for real agent execution."
+        : "PetroAgent manual run disabled: configure NEXT_PUBLIC_SUPABASE_URL/SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.";
+
+    console.error(message);
     process.exitCode = 1;
     return;
   }

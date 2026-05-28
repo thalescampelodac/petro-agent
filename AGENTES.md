@@ -63,7 +63,8 @@ Sempre que trabalhar neste projeto:
 - Chamadas pontuais e com cache
 - Nunca executar IA a cada acesso público do usuário no MVP 1
 - Nunca ativar billing, tier pago ou uso com custo sem aprovação explícita
-- Se Gemini não estiver configurado, exceder limite ou falhar, usar fallback determinístico
+- No executor operacional real, falha ou ausência de Gemini deve virar erro/log
+  operacional, sem persistir fallback como dado do painel
 - Limites, preços e disponibilidade do free tier variam por modelo e devem ser conferidos na documentação oficial antes de qualquer mudança operacional
 
 ---
@@ -1186,7 +1187,8 @@ no contexto disponível, respeitando guardrails financeiros.
 - Tool aceita ticker, período e escopo de contexto.
 - Usa contexto persistido antes de qualquer chamada externa.
 - Chama Gemini apenas server-side quando configurado.
-- Usa fallback determinístico quando IA falhar ou estiver ausente.
+- Não persiste fallback como dado operacional real quando IA falhar ou estiver
+  ausente.
 - Retorna payload estruturado compatível com `agent_reports`.
 - Não recomenda compra, venda ou manutenção de ativos.
 
@@ -1491,7 +1493,8 @@ Decisão da #77:
 
 - O agente começa com `npm run agent:run`.
 - O executor lê contexto persistido e salva novo relatório em `petroagent.agent_reports`.
-- Sem chave de IA, usa fallback determinístico.
+- Decisão substituída pela ativação Gemini: sem chave de IA, o executor real
+  fica desabilitado e não salva fallback operacional.
 - Não há cron, endpoint público ou automação nesta etapa.
 
 Decisões da leva #78-#81:
@@ -1509,7 +1512,7 @@ Decisão da #86:
 - `GEMINI_API_KEY` é secret server-side; não usar prefixo `NEXT_PUBLIC_`.
 - `GEMINI_MODEL` deve apontar para um modelo disponível no free tier, conferido na documentação oficial no momento da configuração.
 - Não ativar billing, pay-as-you-go ou qualquer recurso pago do Google/Gemini sem aprovação explícita.
-- Fallback determinístico continua obrigatório para falta de chave, erro, limite excedido ou indisponibilidade do provedor.
+- No executor operacional real, falta de chave, erro, limite excedido ou indisponibilidade do provedor deve virar execução desabilitada/falha registrada, nunca dado operacional persistido no painel.
 - Referências oficiais: `https://ai.google.dev/gemini-api/docs/pricing` e `https://ai.google.dev/gemini-api/docs/billing`.
 
 Decisão da #92:
@@ -1602,6 +1605,20 @@ Decisão do pacote #107, #98 e #99:
 - A execução recorrente por cron continua fora de produção até validação manual
   em preview/produção e aprovação explícita.
 
+Decisão da ativação cron Gemini:
+
+- A execução recorrente do agente passa a ser diária via Vercel Cron.
+- Agenda oficial: `0 22 * * *`, equivalente a 19:00 no horário de Brasília em
+  28 de maio de 2026.
+- O gatilho é `GET /api/agent/run`, protegido por `CRON_SECRET`.
+- O executor real deve usar Gemini com busca fundamentada e persistir o pacote
+  operacional por MCP: `register_source`, `upsert_market_snapshot`,
+  `register_market_event` e `save_agent_report`.
+- Sem `GEMINI_API_KEY`, o executor real retorna estado desabilitado e não salva
+  fallback como dado de painel.
+- O fallback determinístico fica restrito a testes/adapters controlados, não à
+  automação operacional em produção.
+
 ---
 
 # Prioridade atual
@@ -1613,8 +1630,8 @@ Sequência recomendada:
 
 1. Manter a matriz painel-banco-MCP atualizada a cada novo dado exibido.
 2. Validar o fluxo `agente -> MCP -> banco -> painel` em preview e produção.
-3. Só ativar cron depois de confirmação manual de logs, relatório, snapshot e
-   painel atualizado.
+3. Monitorar a primeira execução diária da cron e confirmar logs, fonte,
+   snapshot, evento, relatório e painel atualizado.
 4. Próximas coletas externas devem definir fonte, prompt, payload, validação e
    tool MCP antes da escrita no banco.
 

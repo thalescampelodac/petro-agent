@@ -32,9 +32,10 @@ Fluxo atual:
 1. Consultar o contrato MCP interno por `get_latest_report`,
    `list_market_events`, `get_market_snapshot` e `search_agent_memory`.
 2. Montar um prompt/contexto operacional com guardrails explícitos.
-3. Gerar payload informativo por `generate_informative_analysis`, usando Gemini
-   quando configurado ou fallback determinístico.
-4. Persistir o resultado por `save_agent_report`.
+3. No executor real, chamar Gemini com busca fundamentada para gerar pacote de
+   fonte, snapshot, evento e relatório.
+4. Persistir o pacote por `register_source`, `upsert_market_snapshot`,
+   `register_market_event` e `save_agent_report`.
 5. Registrar a execução em `petroagent.agent_execution_logs`.
 
 O executor é o orquestrador. Ele não deve voltar a consultar ou persistir dados
@@ -45,7 +46,7 @@ operacionais por um caminho paralelo ao contrato MCP.
 O endpoint `/api/agent/run` permite disparo operacional controlado:
 
 - `POST`: execução manual usando `PETROAGENT_AGENT_RUN_TOKEN`.
-- `GET`: reservado para Vercel Cron usando `CRON_SECRET`.
+- `GET`: execução agendada via Vercel Cron usando `CRON_SECRET`.
 
 O endpoint não deve ser chamado por telas públicas. Ele retorna `401` sem token
 válido e `503` se a variável esperada não estiver configurada.
@@ -65,9 +66,10 @@ A tabela `petroagent.agent_execution_logs` registra:
 Não registrar secrets, tokens, payload completo da IA ou dados sensíveis nos
 logs.
 
-## Agendamento futuro
+## Agendamento
 
-O cron ainda não está ativo. Quando aprovado, usar Vercel Cron apontando para
-`GET /api/agent/run` com `CRON_SECRET`. No plano Hobby, manter no máximo uma
-execução diária. Rollback: remover o bloco `crons` do `vercel.json` ou remover
+O cron roda uma vez por dia pela Vercel em `GET /api/agent/run`, protegido por
+`CRON_SECRET`. A agenda oficial é `0 22 * * *`, equivalente a 19:00 no horário
+de Brasília em 28 de maio de 2026. No plano Hobby, manter no máximo uma execução
+diária. Rollback: remover o bloco `crons` do `vercel.json` ou remover
 `CRON_SECRET` do ambiente.
