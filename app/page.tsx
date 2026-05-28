@@ -17,6 +17,7 @@ import {
   TrendingUp,
   Zap,
 } from "lucide-react";
+import Image from "next/image";
 import type { ComponentType } from "react";
 
 import { LikeButton } from "@/components/landing/like-button";
@@ -30,6 +31,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { APP_VERSION_BADGE } from "@/lib/app-version";
+import { getPetrobrasDashboardData } from "@/lib/petrobras";
 import { cn } from "@/lib/utils";
 
 const monitorItems = [
@@ -97,17 +99,17 @@ const workflow = [
 const roadmap = [
   {
     title: "MVP 1",
-    status: "Em construção",
+    status: "Concluído",
     description:
-      "Landing page, painel Petrobras, curtidas públicas, banco de conhecimento e primeiros resumos mockados.",
-    items: ["Portal público", "Painel PETR4", "Interação sem cadastro"],
+      "Fundação pública do PetroAgent com landing, curtidas, banco, deploy e painel inicial.",
+    items: ["Portal público", "Interação sem cadastro", "Base Supabase/Vercel"],
   },
   {
     title: "MVP 2",
-    status: "Planejado",
+    status: "Em execução",
     description:
-      "Camada MCP para agentes consultarem relatórios, eventos, snapshots e memória do PetroAgent.",
-    items: ["Tools MCP", "Memória consultável", "Arquitetura multiagente"],
+      "Camada operacional MCP-first com agente, consultas persistidas, cron diário e painel Petrobras alimentado por dados do banco.",
+    items: ["Tools MCP", "Agente Gemini", "Painel com dados persistidos"],
   },
 ];
 
@@ -115,7 +117,10 @@ const asaasPixQrCodeImage = process.env.NEXT_PUBLIC_ASAAS_PIX_QRCODE_IMAGE?.trim
 const asaasPixCopyPaste = process.env.NEXT_PUBLIC_ASAAS_PIX_COPY_PASTE?.trim();
 const asaasPaymentUrl = process.env.NEXT_PUBLIC_ASAAS_PAYMENT_URL?.trim();
 
-export default function Home() {
+export default async function Home() {
+  const { basicData, latestAgentUpdate, sentiment } =
+    await getPetrobrasDashboardData();
+
   return (
     <main className="dark min-h-screen overflow-hidden bg-[#070b10] text-foreground">
       <section className="relative border-b border-white/10">
@@ -129,20 +134,20 @@ export default function Home() {
         <div className="absolute right-4 top-4 z-20 sm:right-8 sm:top-8">
           <LikeButton />
         </div>
-        <div className="relative mx-auto grid min-h-[92vh] w-full max-w-7xl gap-10 px-5 pb-10 pt-32 sm:px-6 sm:py-10 lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:px-8">
-          <div className="flex flex-col gap-8">
+        <div className="relative mx-auto grid w-full max-w-7xl gap-8 px-5 pb-8 pt-28 sm:px-6 sm:pb-10 sm:pt-24 lg:min-h-screen lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:px-8">
+          <div className="flex flex-col gap-6">
             <nav className="max-w-[9rem] sm:max-w-none sm:pr-72 lg:pr-0">
-              <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-lg border border-emerald-300/30 bg-emerald-300/15">
-                  <Radar className="size-5 text-emerald-200" />
-                </div>
-                <span className="text-sm font-semibold text-white">
-                  PetroAgent
-                </span>
-              </div>
+              <Image
+                alt="PetroAgent"
+                className="h-12 w-auto object-contain object-left sm:h-14"
+                height={120}
+                priority
+                src="/images/logo.png"
+                width={360}
+              />
             </nav>
 
-            <div className="space-y-6">
+            <div className="space-y-5">
               <div className="flex flex-wrap gap-3">
                 <Badge className="border-emerald-300/30 bg-emerald-300/10 text-emerald-100">
                   Radar Petrobras/PETR4
@@ -153,10 +158,10 @@ export default function Home() {
               </div>
 
               <div className="space-y-5">
-                <h1 className="max-w-4xl text-4xl font-semibold leading-[1.05] text-white sm:text-6xl lg:text-7xl">
-                  Um agente inteligente acompanhando Petrobras para você.
+                <h1 className="max-w-4xl text-4xl font-semibold leading-[1.05] text-white sm:text-5xl lg:text-6xl">
+                  Um agente inteligente acompanhando a Petrobrás para você.
                 </h1>
-                <p className="max-w-2xl text-lg leading-8 text-slate-300">
+                <p className="max-w-2xl text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">
                   PetroAgent transforma sinais públicos sobre PETR4 em um radar
                   claro, visual e acessível para acompanhar fatos, dividendos,
                   notícias e contexto de mercado.
@@ -191,12 +196,12 @@ export default function Home() {
 
             <div className="grid max-w-2xl gap-3 sm:grid-cols-3">
               {[
-                ["6", "sinais monitorados"],
+                ["MVP 2", "fase atual"],
                 ["0", "recomendações financeiras"],
-                ["24h", "radar preparado"],
+                [APP_VERSION_BADGE.replace("MVP 2 • ", ""), "versão do app"],
               ].map(([value, label]) => (
                 <div
-                  className="rounded-lg border border-white/10 bg-white/[0.04] p-4"
+                  className="rounded-lg border border-white/10 bg-white/[0.04] p-3"
                   key={label}
                 >
                   <p className="font-mono text-2xl text-white">{value}</p>
@@ -206,7 +211,11 @@ export default function Home() {
             </div>
           </div>
 
-          <HeroDashboard />
+          <HeroDashboard
+            basicData={basicData}
+            latestAgentUpdate={latestAgentUpdate}
+            sentimentLabel={sentiment.label}
+          />
         </div>
       </section>
 
@@ -246,35 +255,35 @@ export default function Home() {
       >
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <SectionHeader
-            eyebrow="Resumo mockado"
+            eyebrow="Resumo"
             title="Resumo inteligente do agente"
-            description="Conteúdo simulado para validar experiência, tom e estrutura antes de conectar dados reais."
+            description="A landing apresenta a proposta do produto; o painel concentra os dados operacionais gerados pelo agente."
           />
 
           <Card className="border-emerald-300/20 bg-[#0c151b] shadow-2xl shadow-emerald-950/30">
             <CardHeader className="gap-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <Badge className="bg-emerald-300/15 text-emerald-100">
-                  Simulação
+                  Visão do produto
                 </Badge>
                 <span className="font-mono text-xs text-slate-500">
-                  Atualizado: 19/05/2026
+                  {APP_VERSION_BADGE}
                 </span>
               </div>
               <div>
                 <CardTitle className="text-2xl text-white">
-                  O agente observou uma sessão de atenção moderada
+                  O agente transforma sinais públicos em contexto acompanhado
                 </CardTitle>
                 <CardDescription className="mt-3 text-base leading-7 text-slate-300">
-                  PETR4 segue no radar por combinação de notícias setoriais,
-                  expectativa sobre dividendos e comunicados corporativos. A
-                  leitura é informativa: vale acompanhar os próximos eventos e
-                  diferenciar fato publicado de interpretação de mercado.
+                  A proposta do PetroAgent é registrar dados, eventos e análises
+                  em banco antes de exibir qualquer informação no painel. A
+                  experiência é informativa, pública e sem recomendação
+                  financeira.
                 </CardDescription>
               </div>
             </CardHeader>
             <CardContent className="grid gap-3 sm:grid-cols-3">
-              {["Sentimento neutro", "Dividendos em foco", "Sem dado real"].map(
+              {["MCP-first", "Dados persistidos", "Painel operacional"].map(
                 (item) => (
                   <div
                     className="rounded-lg border border-white/10 bg-white/[0.04] p-3 text-sm text-slate-300"
@@ -293,7 +302,7 @@ export default function Home() {
         <SectionHeader
           eyebrow="Método"
           title="Como funciona"
-          description="O MVP começa simples, com dados mockados e arquitetura preparada para evoluir."
+          description="O produto evolui com agente, contratos MCP e dados persistidos antes de chegar ao painel."
         />
         <div className="mt-10 grid gap-4 md:grid-cols-4">
           {workflow.map((step, index) => {
@@ -467,18 +476,28 @@ function PixSupport() {
   );
 }
 
-function HeroDashboard() {
+function HeroDashboard({
+  basicData,
+  latestAgentUpdate,
+  sentimentLabel,
+}: {
+  basicData: {
+    change: string;
+    lastPrice: string;
+    sourceName: string;
+    ticker: string;
+  };
+  latestAgentUpdate: string;
+  sentimentLabel: string;
+}) {
   return (
-    <div className="relative min-h-[430px] sm:min-h-[520px]">
+    <div className="relative min-h-[360px] sm:min-h-[420px]">
       <div className="absolute inset-x-4 top-4 h-56 rounded-[2rem] border border-emerald-300/20 bg-emerald-300/10 blur-3xl" />
       <Card className="relative overflow-hidden border-white/10 bg-[#0b1218]/90 shadow-2xl shadow-black/50 backdrop-blur">
         <CardHeader className="border-b border-white/10">
           <div className="flex items-center justify-between gap-4">
             <div>
               <CardTitle className="text-white">Painel PETR4</CardTitle>
-              <CardDescription className="text-slate-400">
-                Preview visual com dados demonstrativos
-              </CardDescription>
             </div>
             <Badge className="bg-emerald-300/15 text-emerald-100">
               Radar ativo
@@ -488,9 +507,9 @@ function HeroDashboard() {
         <CardContent className="space-y-5 p-5">
           <div className="grid gap-3 sm:grid-cols-3">
             {[
-              ["Ticker", "PETR4"],
-              ["Sentimento", "Neutro"],
-              ["Fonte", "Mock"],
+              ["Cotação", basicData.lastPrice],
+              ["Variação", basicData.change],
+              ["Sentimento", sentimentLabel],
             ].map(([label, value]) => (
               <div className="rounded-lg bg-white/[0.04] p-3" key={label}>
                 <p className="text-xs text-slate-500">{label}</p>
@@ -504,7 +523,7 @@ function HeroDashboard() {
               <p className="text-sm font-medium text-white">Sinais da semana</p>
               <Sparkles className="size-4 text-emerald-200" />
             </div>
-            <div className="flex h-36 items-end gap-2">
+            <div className="flex h-28 items-end gap-2 sm:h-32">
               {[42, 64, 51, 78, 58, 86, 72, 92, 69, 83, 75, 88].map(
                 (height, index) => (
                   <div
@@ -518,8 +537,8 @@ function HeroDashboard() {
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <Signal label="Dividendos" value="Em observação" />
-            <Signal label="Fatos relevantes" value="Sem alerta crítico" />
+            <Signal label="Fonte" value={basicData.sourceName} />
+            <Signal label="Última atualização" value={latestAgentUpdate} />
           </div>
         </CardContent>
       </Card>
