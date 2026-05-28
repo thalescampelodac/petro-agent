@@ -99,6 +99,13 @@ Tools disponíveis:
 - `compare_reports`: compara relatórios por período e aponta mudanças básicas
   de sentimento e quantidade de fontes.
 - `summarize_context`: sintetiza fontes e eventos persistidos sem chamada de IA.
+- `register_source`: registra fontes públicas no schema `petroagent`.
+- `register_market_event`: registra eventos relevantes derivados de fontes.
+- `upsert_market_snapshot`: salva snapshots de mercado por ticker e horário.
+- `generate_informative_analysis`: gera análise curta com Gemini server-side
+  quando configurado ou fallback determinístico.
+- `save_agent_report`: persiste relatórios estruturados em
+  `petroagent.agent_reports`.
 
 A busca semântica com embeddings permanece como evolução futura e só deve ser
 ativada quando houver volume e necessidade real. Até lá, a busca textual mantém

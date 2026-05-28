@@ -1,14 +1,16 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-import generateReport from "../lib/report";
 import {
   finishAgentExecutionLog,
   serializeAgentError,
   startAgentExecutionLog,
 } from "./agent-execution-logs";
-import { saveReport } from "./reports";
-
-const PETROAGENT_SCHEMA = "petroagent";
+import {
+  createPetroAgentMcpAdapter,
+  type AgentReportPayload,
+  type PetroAgentMcpAdapter,
+} from "./mcp/internal-adapter";
+import { createLocalMcpToolClient } from "./mcp/local-tool-client";
 
 export type AgentSourceContext = {
   created_at: string;
@@ -68,9 +70,10 @@ export type ManualAgentExecutionResult =
       status: "disabled";
     };
 
-type AgentReportPayload = {
+type GeneratedReportPayload = {
   highlights?: string[];
   key_facts?: unknown[];
+  model_used?: string;
   next_steps?: string;
   sentiment?: string;
   sentiment_analysis?: {
@@ -82,17 +85,18 @@ type AgentReportPayload = {
   sentiment_basis?: string;
   sentiment_confidence?: string;
   sentiment_score?: number;
+  source_count?: number;
   sources?: string[];
   summary?: string;
+  title?: string;
 };
 
 type ManualAgentDependencies = {
   client?: SupabaseClient | null;
-  generate?: typeof generateReport;
   logFinish?: typeof finishAgentExecutionLog;
   logStart?: typeof startAgentExecutionLog;
+  mcpAdapter?: PetroAgentMcpAdapter;
   origin?: string;
-  persist?: typeof saveReport;
 };
 
 function getSupabaseAdminClient() {
@@ -112,58 +116,28 @@ function getSupabaseAdminClient() {
 }
 
 export async function readManualAgentContext(
-  client: SupabaseClient,
+  mcpAdapter: PetroAgentMcpAdapter,
 ): Promise<ManualAgentContext> {
-  const [sourcesResult, eventsResult, snapshotResult, reportsResult] =
-    await Promise.all([
-      client
-        .schema(PETROAGENT_SCHEMA)
-        .from("sources")
-        .select("id, created_at, published_at, source_type, title, url, raw_content")
-        .order("published_at", { ascending: false, nullsFirst: false })
-        .order("created_at", { ascending: false })
-        .limit(8),
-      client
-        .schema(PETROAGENT_SCHEMA)
-        .from("market_events")
-        .select(
-          "id, created_at, event_date, event_type, title, summary, relevance_score",
-        )
-        .order("event_date", { ascending: false, nullsFirst: false })
-        .order("created_at", { ascending: false })
-        .limit(8),
-      client
-        .schema(PETROAGENT_SCHEMA)
-        .from("market_snapshots")
-        .select("ticker, price, variation, volume, source, snapshot_time")
-        .eq("ticker", "PETR4")
-        .order("snapshot_time", { ascending: false, nullsFirst: false })
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-      client
-        .schema(PETROAGENT_SCHEMA)
-        .from("agent_reports")
-        .select("created_at, title, summary, sentiment, sentiment_score")
-        .order("created_at", { ascending: false })
-        .limit(3),
-    ]);
-
-  const error =
-    sourcesResult.error ??
-    eventsResult.error ??
-    snapshotResult.error ??
-    reportsResult.error;
-
-  if (error) {
-    throw error;
-  }
+  const [memoryResult, eventsResult, snapshotResult, reportResult] = await Promise.all([
+    mcpAdapter.searchAgentMemory({ limit: 8, query: "Petrobras PETR4" }),
+    mcpAdapter.listMarketEvents({ limit: 8 }),
+    mcpAdapter.getMarketSnapshot("PETR4"),
+    mcpAdapter.getLatestReport(),
+  ]);
+  const memory = memoryResult.structuredContent;
+  const events = eventsResult.structuredContent.events as AgentMarketEventContext[];
+  const snapshot = snapshotResult.structuredContent.found
+    ? (snapshotResult.structuredContent.snapshot as AgentMarketSnapshotContext)
+    : null;
+  const latestReport = reportResult.structuredContent.found
+    ? (reportResult.structuredContent.report as AgentPreviousReportContext)
+    : null;
 
   return {
-    events: (eventsResult.data ?? []) as AgentMarketEventContext[],
-    previousReports: (reportsResult.data ?? []) as AgentPreviousReportContext[],
-    snapshot: (snapshotResult.data ?? null) as AgentMarketSnapshotContext | null,
-    sources: (sourcesResult.data ?? []) as AgentSourceContext[],
+    events,
+    previousReports: latestReport ? [latestReport] : [],
+    snapshot,
+    sources: memory.items as AgentSourceContext[],
   };
 }
 
@@ -202,33 +176,44 @@ export async function executeManualPetroAgent(
     };
   }
 
-  const generate = dependencies.generate ?? generateReport;
   const logFinish = dependencies.logFinish ?? finishAgentExecutionLog;
   const logStart = dependencies.logStart ?? startAgentExecutionLog;
+  const mcpAdapter =
+    dependencies.mcpAdapter ?? createPetroAgentMcpAdapter(createLocalMcpToolClient(client));
   const origin = dependencies.origin ?? "manual-cli";
-  const persist = dependencies.persist ?? saveReport;
   const started = await logStart(client, { origin });
 
   try {
-    const context = await readManualAgentContext(client);
+    const context = await readManualAgentContext(mcpAdapter);
     const prompt = buildManualAgentPrompt(context);
     const citations = getManualAgentCitations(context);
-    const output = await generate({ text: prompt });
-    const payload = normalizeReportPayload(output.result, citations);
-    const saved = await persist(output.engine, payload);
+    const analysis = await mcpAdapter.generateInformativeAnalysis({
+      context_limit: 8,
+      query: "Petrobras PETR4",
+      scope: prompt,
+      ticker: "PETR4",
+    });
+    const payload = normalizeReportPayload(
+      analysis.structuredContent.payload,
+      citations.length > 0 ? citations : analysis.structuredContent.citations,
+    );
+    const saved = await mcpAdapter.saveAgentReport(payload);
+    const reportId = saved.structuredContent.id;
+    const engine = payload.model_used ?? "mcp";
+    const sourceCount = payload.source_count ?? citations.length;
 
     await logFinish(client, started.id, {
-      engine: output.engine,
-      reportId: saved.id,
-      sourceCount: citations.length,
+      engine,
+      reportId,
+      sourceCount,
       status: "saved",
     });
 
     return {
-      engine: output.engine,
+      engine,
       logId: started.id,
-      reportId: saved.id,
-      sourceCount: citations.length,
+      reportId,
+      sourceCount,
       status: "saved",
       summary: payload.summary ?? "Relatório gerado sem resumo textual estruturado.",
     };
@@ -248,16 +233,43 @@ function normalizeReportPayload(
 ): AgentReportPayload {
   const normalized =
     typeof payload === "object" && payload !== null
-      ? ({ ...payload } as AgentReportPayload)
+      ? ({ ...payload } as GeneratedReportPayload)
       : { summary: String(payload ?? "") };
+  const sentimentAnalysis = normalized.sentiment_analysis ?? {};
 
   return {
-    ...normalized,
-    sources:
-      Array.isArray(normalized.sources) && normalized.sources.length > 0
-        ? normalized.sources
-        : citations,
+    attention_points: normalized.highlights,
+    model_used: normalized.model_used,
+    sentiment: normalized.sentiment ?? sentimentAnalysis.label,
+    sentiment_basis: normalized.sentiment_basis ?? sentimentAnalysis.basis,
+    sentiment_confidence: normalizeReportConfidence(
+      normalized.sentiment_confidence ?? sentimentAnalysis.confidence,
+    ),
+    sentiment_score: normalized.sentiment_score ?? sentimentAnalysis.score,
+    source_count: Array.isArray(normalized.sources)
+      ? normalized.sources.length
+      : citations.length,
+    summary: normalized.summary ?? "Relatório gerado sem resumo textual estruturado.",
+    title: normalized.title ?? "Relatório PetroAgent",
   };
+}
+
+function normalizeReportConfidence(value: unknown) {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const normalized = value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .trim()
+    .toLowerCase();
+
+  if (normalized === "baixa" || normalized === "media" || normalized === "alta") {
+    return normalized;
+  }
+
+  return undefined;
 }
 
 function formatSnapshot(snapshot: AgentMarketSnapshotContext | null) {

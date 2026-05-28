@@ -73,6 +73,10 @@ export function createSupabaseFixtureClient(results: FixtureMap) {
         calls.push({ args, method: "update", table });
         return query;
       }),
+      upsert: vi.fn((...args: unknown[]) => {
+        calls.push({ args, method: "upsert", table });
+        return query;
+      }),
     };
 
     return query;

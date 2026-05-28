@@ -6,7 +6,12 @@ import { getLatestReport } from "./get-latest-report.js";
 import { getMarketSnapshot } from "./get-market-snapshot.js";
 import { searchAgentMemory } from "./search-agent-memory.js";
 import { compareReports } from "./compare-reports.js";
+import { generateInformativeAnalysis } from "./generate-informative-analysis.js";
+import { registerMarketEvent } from "./register-market-event.js";
+import { registerSource } from "./register-source.js";
+import { saveAgentReport } from "./save-agent-report.js";
 import { summarizeContext } from "./summarize-context.js";
+import { upsertMarketSnapshot } from "./upsert-market-snapshot.js";
 import { registerTools } from "./index.js";
 
 let supabaseClient: unknown;
@@ -257,6 +262,175 @@ describe("MCP tools", () => {
       summary: expect.stringContaining("Nenhuma fonte persistida"),
     });
   });
+
+  it("registra fonte com chave natural por URL", async () => {
+    const { calls, client } = createSupabaseFixtureClient({
+      sources: { data: { id: 10 }, error: null },
+    });
+    supabaseClient = client;
+
+    await expect(
+      registerSource({
+        raw_content: "Conteúdo público",
+        source_type: "ri",
+        title: "Fonte RI",
+        url: "https://example.com/ri",
+      }),
+    ).resolves.toEqual({ id: 10, source: "petroagent.sources" });
+    expect(calls).toContainEqual({
+      args: [expect.any(Object), { onConflict: "url" }],
+      method: "upsert",
+      table: "sources",
+    });
+  });
+
+  it("registra evento de mercado de forma idempotente", async () => {
+    const { calls, client } = createSupabaseFixtureClient({
+      market_events: { data: { id: 20 }, error: null },
+    });
+    supabaseClient = client;
+
+    await expect(
+      registerMarketEvent({
+        event_date: "2026-05-27T12:00:00.000Z",
+        event_type: "RI",
+        relevance_score: 80,
+        summary: "Evento acompanhado.",
+        title: "Fato relevante",
+      }),
+    ).resolves.toEqual({ id: 20, source: "petroagent.market_events" });
+    expect(calls).toContainEqual({
+      args: [expect.any(Object), { onConflict: "event_type,title,event_date" }],
+      method: "upsert",
+      table: "market_events",
+    });
+  });
+
+  it("salva snapshot de mercado por ticker e horario", async () => {
+    const { calls, client } = createSupabaseFixtureClient({
+      market_snapshots: { data: { id: 30 }, error: null },
+    });
+    supabaseClient = client;
+
+    await expect(
+      upsertMarketSnapshot({
+        price: 42.82,
+        snapshot_time: "2026-05-27T17:10:00-03:00",
+        source: "Google Finance",
+        ticker: "petr4",
+        variation: -1.43,
+        volume: 287654321,
+      }),
+    ).resolves.toEqual({
+      id: 30,
+      source: "petroagent.market_snapshots",
+      ticker: "PETR4",
+    });
+    expect(calls).toContainEqual({
+      args: [expect.any(Object), { onConflict: "ticker,snapshot_time" }],
+      method: "upsert",
+      table: "market_snapshots",
+    });
+  });
+
+  it("salva relatorio estruturado do agente", async () => {
+    const { calls, client } = createSupabaseFixtureClient({
+      agent_reports: { data: { id: 40 }, error: null },
+    });
+    supabaseClient = client;
+
+    await expect(
+      saveAgentReport({
+        sentiment: "Neutro",
+        sentiment_basis: "Sem pressão direcional relevante.",
+        sentiment_confidence: "baixa",
+        sentiment_score: 50,
+        summary: "Resumo informativo.",
+      }),
+    ).resolves.toEqual({ id: 40, source: "petroagent.agent_reports" });
+    expect(calls).toContainEqual({
+      args: [expect.objectContaining({ sentiment_score: 50 })],
+      method: "insert",
+      table: "agent_reports",
+    });
+  });
+
+  it("gera analise informativa com fallback persistivel", async () => {
+    const originalGeminiKey = process.env.GEMINI_API_KEY;
+    process.env.GEMINI_API_KEY = "";
+    const { client } = createSupabaseFixtureClient({
+      market_events: { data: [], error: null },
+      sources: { data: [], error: null },
+    });
+    supabaseClient = client;
+
+    try {
+      await expect(
+        generateInformativeAnalysis({ ticker: "PETR4" }),
+      ).resolves.toMatchObject({
+        payload: {
+          model_used: "fallback",
+          sentiment: "Neutro",
+          sentiment_score: 50,
+        },
+      });
+    } finally {
+      process.env.GEMINI_API_KEY = originalGeminiKey;
+    }
+  });
+
+  it("gera analise informativa com Gemini quando configurado", async () => {
+    const originalGeminiKey = process.env.GEMINI_API_KEY;
+    process.env.GEMINI_API_KEY = "test-key";
+    const fetchMock = vi.fn(async () => ({
+      json: async () => ({
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  text: JSON.stringify({
+                    attention_points: ["Contexto persistido considerado."],
+                    sentiment: "Positivo",
+                    sentiment_basis: "Eventos recentes indicam leitura informativa construtiva.",
+                    sentiment_confidence: "media",
+                    sentiment_score: 61,
+                    summary: "Análise curta baseada no contexto salvo.",
+                    title: "Radar PETR4",
+                  }),
+                },
+              ],
+            },
+          },
+        ],
+      }),
+      ok: true,
+    }));
+    const originalFetch = globalThis.fetch;
+    vi.stubGlobal("fetch", fetchMock);
+    const { client } = createSupabaseFixtureClient({
+      market_events: { data: [], error: null },
+      sources: { data: [], error: null },
+    });
+    supabaseClient = client;
+
+    try {
+      await expect(
+        generateInformativeAnalysis({ ticker: "PETR4" }),
+      ).resolves.toMatchObject({
+        payload: {
+          model_used: "gemini",
+          sentiment: "Positivo",
+          sentiment_confidence: "media",
+          sentiment_score: 61,
+        },
+      });
+      expect(fetchMock).toHaveBeenCalled();
+    } finally {
+      process.env.GEMINI_API_KEY = originalGeminiKey;
+      vi.stubGlobal("fetch", originalFetch);
+    }
+  });
 });
 
 describe("MCP tools registry", () => {
@@ -267,15 +441,20 @@ describe("MCP tools registry", () => {
 
     registerTools(server as never);
 
-    expect(server.registerTool).toHaveBeenCalledTimes(7);
+    expect(server.registerTool).toHaveBeenCalledTimes(12);
     expect(server.registerTool.mock.calls.map(([name]) => name).sort()).toEqual([
       "compare_reports",
+      "generate_informative_analysis",
       "get_agent_profile",
       "get_latest_report",
       "get_market_snapshot",
       "list_market_events",
+      "register_market_event",
+      "register_source",
+      "save_agent_report",
       "search_agent_memory",
       "summarize_context",
+      "upsert_market_snapshot",
     ]);
   });
 });

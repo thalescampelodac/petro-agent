@@ -1,11 +1,16 @@
 export const PETROAGENT_MCP_TOOLS = {
   compareReports: "compare_reports",
+  generateInformativeAnalysis: "generate_informative_analysis",
   getAgentProfile: "get_agent_profile",
   getLatestReport: "get_latest_report",
   getMarketSnapshot: "get_market_snapshot",
   listMarketEvents: "list_market_events",
+  registerMarketEvent: "register_market_event",
+  registerSource: "register_source",
+  saveAgentReport: "save_agent_report",
   searchAgentMemory: "search_agent_memory",
   summarizeContext: "summarize_context",
+  upsertMarketSnapshot: "upsert_market_snapshot",
 } as const;
 
 export type PetroAgentMcpToolName =
@@ -120,6 +125,62 @@ export type SummarizeContextResult = {
   summary: string;
 };
 
+export type RegisterSourceParams = {
+  processed?: boolean;
+  published_at?: string | null;
+  raw_content: string;
+  source_type: string;
+  title?: string | null;
+  url?: string | null;
+};
+
+export type RegisterMarketEventParams = {
+  event_date?: string | null;
+  event_type: string;
+  relevance_score?: number | null;
+  source_id?: number | null;
+  summary?: string | null;
+  title: string;
+};
+
+export type UpsertMarketSnapshotParams = {
+  price?: number | null;
+  snapshot_time: string;
+  source?: string | null;
+  ticker?: string;
+  variation?: number | null;
+  volume?: number | null;
+};
+
+export type AgentReportPayload = {
+  attention_points?: string[];
+  model_used?: string | null;
+  sentiment?: string | null;
+  sentiment_basis?: string | null;
+  sentiment_confidence?: "baixa" | "media" | "alta" | null;
+  sentiment_score?: number | null;
+  source_count?: number;
+  summary: string;
+  title?: string;
+};
+
+export type WriteToolResult = {
+  id: number;
+  source: string;
+};
+
+export type GenerateInformativeAnalysisParams = {
+  context_limit?: number;
+  query?: string;
+  scope?: string;
+  ticker?: string;
+};
+
+export type GenerateInformativeAnalysisResult = {
+  citations: string[];
+  payload: AgentReportPayload;
+};
+
 export function createPetroAgentMcpAdapter(client: McpToolClient) {
   async function call<TStructuredContent>(
     name: PetroAgentMcpToolName,
@@ -139,6 +200,12 @@ export function createPetroAgentMcpAdapter(client: McpToolClient) {
     getAgentProfile() {
       return call<AgentProfileResult>(PETROAGENT_MCP_TOOLS.getAgentProfile);
     },
+    generateInformativeAnalysis(params: GenerateInformativeAnalysisParams = {}) {
+      return call<GenerateInformativeAnalysisResult>(
+        PETROAGENT_MCP_TOOLS.generateInformativeAnalysis,
+        params,
+      );
+    },
     getLatestReport() {
       return call<LatestReportResult>(PETROAGENT_MCP_TOOLS.getLatestReport);
     },
@@ -153,6 +220,15 @@ export function createPetroAgentMcpAdapter(client: McpToolClient) {
         params,
       );
     },
+    registerMarketEvent(params: RegisterMarketEventParams) {
+      return call<WriteToolResult>(PETROAGENT_MCP_TOOLS.registerMarketEvent, params);
+    },
+    registerSource(params: RegisterSourceParams) {
+      return call<WriteToolResult>(PETROAGENT_MCP_TOOLS.registerSource, params);
+    },
+    saveAgentReport(params: AgentReportPayload) {
+      return call<WriteToolResult>(PETROAGENT_MCP_TOOLS.saveAgentReport, params);
+    },
     searchAgentMemory(params: SearchAgentMemoryParams) {
       return call<SearchAgentMemoryResult>(
         PETROAGENT_MCP_TOOLS.searchAgentMemory,
@@ -161,6 +237,9 @@ export function createPetroAgentMcpAdapter(client: McpToolClient) {
     },
     summarizeContext(params: SummarizeContextParams = {}) {
       return call<SummarizeContextResult>(PETROAGENT_MCP_TOOLS.summarizeContext, params);
+    },
+    upsertMarketSnapshot(params: UpsertMarketSnapshotParams) {
+      return call<WriteToolResult>(PETROAGENT_MCP_TOOLS.upsertMarketSnapshot, params);
     },
   };
 }
