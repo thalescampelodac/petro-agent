@@ -1,6 +1,6 @@
-import type { ComponentType } from "react";
+import type { ComponentType, ReactNode } from "react";
 
-import { Activity, Clock3, Gauge, Sparkles } from "lucide-react";
+import { Activity, Clock3, ExternalLink, Gauge, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -59,21 +59,34 @@ export function BasicDataCard({
           <div>
             <CardTitle className="text-white">Dados básicos PETR4</CardTitle>
             <CardDescription className="text-slate-400">
-              Dados de mercado salvos pelo agente e indicação de origem.
+              Cotação e variação identificadas na última consulta.
             </CardDescription>
           </div>
-          <Badge variant="outline" className="w-fit border-white/15">
-            {data.source}
-          </Badge>
         </div>
       </CardHeader>
       <CardContent className="grid gap-3 p-5 text-slate-200 sm:grid-cols-2">
-        <InfoCell label="Ticker" value={data.ticker} mono />
         <InfoCell label="Empresa" value={data.company} />
         <InfoCell label="Último preço" value={data.lastPrice} mono highlight />
         <InfoCell label="Variação" value={data.change} mono highlight />
-        <InfoCell label="Última atualização" value={data.updatedAt} />
-        <InfoCell label="Fonte" value={data.origin} />
+        <InfoCell label="Volume" value={data.volume} mono />
+        <InfoCell
+          label="Fonte"
+          value={
+            data.sourceUrl ? (
+              <a
+                className="inline-flex items-center gap-2 text-emerald-100 underline-offset-4 hover:underline"
+                href={data.sourceUrl}
+                rel="noreferrer"
+                target="_blank"
+              >
+                {data.sourceName}
+                <ExternalLink className="size-4" />
+              </a>
+            ) : (
+              data.sourceName
+            )
+          }
+        />
       </CardContent>
     </Card>
   );
@@ -92,15 +105,7 @@ export function SummaryCard({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle className="text-white">Resumo inteligente</CardTitle>
-            <CardDescription className="mt-1 text-slate-400">
-              {hasReport
-                ? "Resumo salvo no banco de dados."
-                : "Aguardando relatório salvo pelo agente."}
-            </CardDescription>
           </div>
-          <Badge variant="outline" className="w-fit border-white/15">
-            {hasReport ? "Banco de dados" : "Aguardando relatório"}
-          </Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-5 p-5">
@@ -111,15 +116,14 @@ export function SummaryCard({
           </div>
           <p className="mt-3 max-w-3xl text-base leading-8 text-slate-200">
             {report?.summary ??
-              "Sem relatório salvo no banco. Execute o agente para gerar uma análise informativa persistida."}
+              "Aguardando a primeira análise informativa do agente."}
           </p>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2">
           {[
-            ["Data da geração", report?.generatedAt ?? "—"],
-            ["Fonte", report?.source ?? "Banco de dados"],
-            ["Confiança do dado", hasReport ? "Salvo" : "Aguardando coleta"],
+            ["Gerado em", report?.generatedAt ?? "—"],
+            ["Sentimento", report?.sentimentLabel ?? "Aguardando análise"],
           ].map(([label, value]) => (
             <div
               className="rounded-lg border border-white/10 bg-black/20 p-4"
@@ -149,7 +153,7 @@ export function SentimentIndicator({
           <div>
             <CardTitle className="text-white">Indicador de sentimento</CardTitle>
             <CardDescription className="mt-1 text-slate-400">
-              Leitura informativa estruturada salva pelo agente.
+              Leitura informativa do relatório mais recente.
             </CardDescription>
           </div>
           <Badge className="w-fit border-sky-300/20 bg-sky-300/10 text-sky-100">
@@ -187,16 +191,12 @@ export function SentimentIndicator({
           />
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-1">
           <div className="rounded-lg border border-white/10 bg-black/20 p-4">
             <p className="text-xs text-slate-500">Confiabilidade</p>
             <p className="mt-2 font-mono text-lg text-white">
               {sentiment.confidence}
             </p>
-          </div>
-          <div className="rounded-lg border border-white/10 bg-black/20 p-4">
-            <p className="text-xs text-slate-500">Fonte</p>
-            <p className="mt-2 text-lg text-white">{sentiment.source}</p>
           </div>
         </div>
       </CardContent>
@@ -215,13 +215,7 @@ export function RecentReportsCard({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle className="text-white">Relatórios recentes</CardTitle>
-            <CardDescription className="mt-1 text-slate-400">
-              Últimos resumos salvos pelo agente, sem gerar IA no carregamento.
-            </CardDescription>
           </div>
-          <Badge className="h-auto w-fit whitespace-normal border-emerald-300/20 bg-emerald-300/10 text-emerald-100">
-            {reports.length > 0 ? "Banco de dados" : "Aguardando registros"}
-          </Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-3 p-5">
@@ -234,9 +228,6 @@ export function RecentReportsCard({
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant="outline" className="border-white/15 text-xs">
-                      {report.sentiment}
-                    </Badge>
                     <time className="font-mono text-xs text-slate-500">
                       {report.generatedAt}
                     </time>
@@ -246,9 +237,6 @@ export function RecentReportsCard({
                   </h2>
                 </div>
                 <div className="flex min-w-0 shrink-0 flex-wrap gap-2 text-xs text-slate-400 sm:justify-end">
-                  <span className="rounded bg-white/[0.06] px-2 py-1">
-                    {report.modelUsed}
-                  </span>
                   <span className="rounded bg-white/[0.06] px-2 py-1">
                     {report.sourceCount}
                   </span>
@@ -265,8 +253,8 @@ export function RecentReportsCard({
               Nenhum relatório salvo ainda
             </p>
             <p className="mt-2 text-sm leading-6 text-slate-400">
-              Quando o pipeline salvar relatórios em banco, eles aparecerão aqui
-              com resumo, sentimento, data e modelo utilizado.
+              Quando o agente gerar novas análises, elas aparecerão aqui com
+              resumo e data.
             </p>
           </div>
         )}
@@ -286,9 +274,6 @@ export function TimelineCard({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <CardTitle className="text-white">Eventos recentes</CardTitle>
-            <CardDescription className="mt-1 text-slate-400">
-              Timeline ordenada por data com tipo, contexto e relevância.
-            </CardDescription>
           </div>
           <Badge className="h-auto w-fit whitespace-normal border-sky-300/20 bg-sky-300/10 text-sky-100">
             {events.length > 0 ? `${events.length} sinais` : "Sem eventos"}
@@ -320,12 +305,11 @@ export function TimelineCard({
                   </h2>
                   <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-400">
                     {event.summary ??
-                      "Evento registrado sem resumo textual estruturado. O painel mantém o item visível para preservar rastreabilidade."}
+                      "Evento acompanhado pelo radar ainda sem resumo detalhado."}
                   </p>
                 </div>
 
-                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-                  <p className="text-xs text-slate-500">Fonte: {event.source}</p>
+                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
                   <div className="flex w-fit items-center gap-2 rounded bg-white/[0.06] px-2 py-1 text-xs text-slate-300">
                     <Gauge className="size-3 text-sky-200" />
                     <span>{event.relevanceLabel}</span>
@@ -343,8 +327,8 @@ export function TimelineCard({
           <div className="rounded-lg border border-dashed border-white/15 bg-black/20 p-5">
             <p className="text-sm font-medium text-white">Nenhum evento recente</p>
             <p className="mt-2 text-sm leading-6 text-slate-400">
-              O painel exibirá eventos salvos no banco quando o radar encontrar
-              fatos relevantes, notícias ou registros públicos.
+              O painel exibirá eventos quando o radar encontrar fatos
+              relevantes, notícias ou registros públicos.
             </p>
           </div>
         )}
@@ -400,7 +384,7 @@ function InfoCell({
   highlight?: boolean;
   label: string;
   mono?: boolean;
-  value: string;
+  value: ReactNode;
 }) {
   return (
     <div className="rounded-lg border border-white/10 bg-black/20 p-4">

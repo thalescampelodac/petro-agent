@@ -1619,6 +1619,19 @@ Decisão da ativação cron Gemini:
 - O fallback determinístico fica restrito a testes/adapters controlados, não à
   automação operacional em produção.
 
+Decisão de versionamento:
+
+- A versão oficial do app fica em `package.json`.
+- Qualquer issue que altere comportamento, visual público, contrato de dados,
+  documentação operacional ou fluxo de deploy deve avaliar atualização de
+  versão no mesmo PR.
+- Usar SemVer: `patch` para correções e refinamentos pequenos, `minor` para
+  nova capacidade visível/compatível e `major` apenas para quebra deliberada de
+  contrato.
+- A tag pública de versão deve consumir `package.json`, nunca número hardcoded
+  duplicado em componentes.
+- Quando `package.json` mudar, manter `package-lock.json` em consonância.
+
 ---
 
 # Prioridade atual
