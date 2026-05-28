@@ -22,6 +22,7 @@ import {
 import {
   getPetrobrasDashboardData,
 } from "@/lib/petrobras";
+import { APP_VERSION_BADGE } from "@/lib/app-version";
 import {
   BasicDataCard,
   MetricCard,
@@ -68,7 +69,7 @@ export default async function PetrobrasPage() {
               Voltar para home
             </Link>
             <Badge className="w-fit border-emerald-300/25 bg-emerald-300/10 text-emerald-100">
-              MVP 2 • MCP-first
+              {APP_VERSION_BADGE}
             </Badge>
           </nav>
 

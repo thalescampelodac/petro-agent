@@ -29,6 +29,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { APP_VERSION_BADGE } from "@/lib/app-version";
 import { cn } from "@/lib/utils";
 
 const monitorItems = [
@@ -147,7 +148,7 @@ export default function Home() {
                   Radar Petrobras/PETR4
                 </Badge>
                 <Badge variant="outline" className="border-white/15 text-white/70">
-                  MVP 1 em andamento
+                  {APP_VERSION_BADGE}
                 </Badge>
               </div>
 
