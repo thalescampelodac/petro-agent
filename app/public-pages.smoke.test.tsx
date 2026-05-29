@@ -53,16 +53,17 @@ describe("public pages smoke", () => {
   it.each([
     ["desktop", 1280],
     ["mobile", 390],
-  ])("renderiza a home em %s sem erro visual evidente", (_name, width) => {
+  ])("renderiza a home em %s sem erro visual evidente", async (_name, width) => {
     setViewport(width);
 
-    render(<Home />);
+    render(await Home());
 
     expect(
       screen.getByRole("heading", {
-        name: /um agente inteligente acompanhando petrobras para você/i,
+        name: /um agente inteligente acompanhando a petrobrás para você/i,
       }),
     ).toBeInTheDocument();
+    expect(screen.getAllByText("PetroAgent").length).toBeGreaterThan(0);
     expect(
       screen.getByRole("link", { name: /ver painel petrobras/i }),
     ).toBeInTheDocument();
@@ -70,6 +71,10 @@ describe("public pages smoke", () => {
       screen.getByRole("button", { name: /gostei do projeto/i }),
     ).toBeInTheDocument();
     expect(screen.getByText(/roadmap do projeto/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/mvp 2/i).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/mvp 1 em andamento/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/preview visual/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/mock/i)).not.toBeInTheDocument();
     expect(console.error).not.toHaveBeenCalled();
   });
 
