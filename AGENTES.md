@@ -1240,6 +1240,238 @@ persiste resultado e o painel reflete o dado salvo.
 
 ---
 
+## Fase 12 — Cenários probabilísticos e projeções interpretativas
+
+### Objetivo
+
+Adicionar ao PetroAgent a capacidade de gerar cenários probabilísticos e sinais
+interpretativos sobre Petrobras/PETR4, acumulando as funções atuais do agente
+sem transformar o produto em previsão de futuro, recomendação financeira ou
+promessa de resultado.
+
+### Diretriz
+
+O PetroAgent não deve "prever o futuro". Ele pode interpretar dados históricos,
+snapshots de mercado, eventos recentes, relatórios do agente e contexto atual
+para produzir cenários possíveis, riscos, pontos de atenção e grau de confiança.
+
+Linguagem correta:
+
+```text
+Com base nos dados históricos e no contexto atual, o cenário de curto prazo
+sugere viés neutro/positivo, com confiança moderada.
+```
+
+Linguagem proibida:
+
+```text
+PETR4 vai subir amanhã.
+```
+
+### Regra obrigatória da Fase 12
+
+1. Cenários devem ser apresentados como leitura informativa, não como previsão
+   determinística.
+2. Nenhum cenário pode recomendar compra, venda ou manutenção de ativos.
+3. Todo cenário exibido no painel deve vir do banco no schema `petroagent` ou de
+   estado vazio explícito.
+4. Todo cenário salvo no banco deve ser produzido pelo agente via contrato MCP.
+5. O app Next.js não chama IA nem MCP para renderizar a página; ele lê
+   banco/cache.
+6. O agente deve consultar contexto por MCP antes de gerar cenários.
+7. O agente deve persistir cenários por tool MCP ou camada compartilhada
+   adotada oficialmente pelo MCP.
+8. Falha de IA, ausência de chave, ausência de contexto mínimo ou erro de
+   validação não pode persistir fallback como cenário real.
+9. Cada entrega deve atualizar matriz painel-banco-MCP, testes e versionamento
+   quando aplicável.
+
+### O que a IA pode analisar
+
+- Tendência provável em linguagem qualitativa.
+- Cenários de curto, médio e longo prazo.
+- Riscos relevantes.
+- Pontos de atenção.
+- Leitura de preço, volume e volatilidade.
+- Impacto de notícias, dividendos, petróleo, câmbio e política.
+- Probabilidade qualitativa: baixa, média ou alta.
+- Confiança da análise: baixa, média ou alta.
+
+### Estrutura mínima do cenário
+
+```text
+scenario_analysis
+  -> ticker
+  -> generated_at
+  -> short_term
+  -> medium_term
+  -> long_term
+  -> trend
+  -> qualitative_probability
+  -> confidence
+  -> risks
+  -> attention_points
+  -> considered_factors
+  -> disclaimer
+  -> source_count
+  -> model_used
+  -> execution_id/log reference
+```
+
+Horizontes sugeridos:
+
+- Curto prazo: próximos dias úteis ou próxima semana.
+- Médio prazo: próximas semanas.
+- Longo prazo: próximos meses.
+
+Esses horizontes são qualitativos e devem ser documentados no prompt e no
+payload persistido. A UI não deve sugerir precisão diária ou preço-alvo.
+
+### Contrato MCP esperado
+
+Tools planejadas:
+
+- `generate_probability_scenarios`
+- `save_scenario_analysis`
+- `get_latest_scenario_analysis`
+- `list_scenario_analyses` quando houver histórico suficiente
+
+Fluxo:
+
+```text
+Agente interno ou externo
+  -> get_market_snapshot / list_market_events / get_latest_report / search_agent_memory
+  -> generate_probability_scenarios
+  -> save_scenario_analysis
+  -> Supabase schema petroagent
+  -> app Next.js lê banco/cache
+  -> painel /petrobras exibe cenários ou estado vazio
+```
+
+### Issues sugeridas
+
+#### Issue 12.0 — #128 — Mapear contrato MCP para cenários probabilísticos
+
+**Descrição:**
+Mapear a nova capacidade de cenários probabilísticos no contrato
+painel-banco-MCP antes de implementar banco, tools ou UI.
+
+**Critérios de aceite:**
+
+- `database/panel-bank-mcp-matrix.md` inclui cenários probabilísticos.
+- `AGENTES.md` documenta guardrails de linguagem e fluxo MCP-first.
+- Nenhuma UI nova é implementada antes do contrato.
+
+---
+
+#### Issue 12.1 — #129 — Modelar persistência de cenários interpretativos
+
+**Descrição:**
+Criar a estrutura de banco para armazenar cenários probabilísticos gerados pelo
+agente no schema `petroagent`.
+
+**Critérios de aceite:**
+
+- Migration criada.
+- Campos cobrem horizontes, tendência, probabilidade qualitativa, confiança,
+  riscos, pontos de atenção, fatores considerados e rastreabilidade.
+- Matriz painel-banco-MCP atualizada.
+- Testes de integração/camada de dados planejados ou implementados.
+
+---
+
+#### Issue 12.2 — #130 — Criar prompt seguro para cenários PETR4
+
+**Descrição:**
+Criar prompt versionado para o agente gerar cenários probabilísticos sem
+promessa de previsão ou recomendação financeira.
+
+**Critérios de aceite:**
+
+- Prompt versionado em `prompts/`.
+- Guardrails explícitos.
+- Exemplo de payload esperado.
+- Teste ou fixture planejado para validar parse/contrato.
+
+---
+
+#### Issue 12.3 — #131 — Criar tools MCP para cenários probabilísticos
+
+**Descrição:**
+Adicionar capacidades MCP para gerar, persistir e consultar cenários
+probabilísticos.
+
+**Critérios de aceite:**
+
+- Tools registradas no MCP server.
+- Tools validam payloads.
+- Escritas usam schema `petroagent`.
+- `verify:mcp` passa.
+
+---
+
+#### Issue 12.4 — #132 — Integrar executor do agente aos cenários MCP-first
+
+**Descrição:**
+Fazer o executor operacional acionar cenários probabilísticos usando apenas
+contrato MCP/camada compartilhada oficial.
+
+**Critérios de aceite:**
+
+- Executor consulta contexto via MCP.
+- Executor gera e persiste cenários via MCP.
+- Logs de execução registram sucesso/falha.
+- Ausência de Gemini ou contexto mínimo não gera cenário falso no painel.
+
+---
+
+#### Issue 12.5 — #133 — Exibir cenários no painel Petrobras
+
+**Descrição:**
+Adicionar ao painel Petrobras uma seção de cenários interpretativos gerados pelo
+agente.
+
+**Critérios de aceite:**
+
+- Painel lê banco/cache, não chama MCP/IA no render.
+- Exibe curto, médio e longo prazo.
+- Exibe tendência, probabilidade qualitativa, confiança, riscos e pontos de
+  atenção.
+- Usa aviso curto de que não é previsão, promessa ou recomendação.
+- Testes de contexto e smoke cobrem presença e ausência de cenário.
+
+---
+
+#### Issue 12.6 — #134 — Atualizar landing com cenários probabilísticos
+
+**Descrição:**
+Atualizar a landing para comunicar a nova capacidade sem prometer previsão de
+futuro.
+
+**Critérios de aceite:**
+
+- Copy usa cenários, viés, riscos, pontos de atenção e confiança.
+- Não há linguagem determinística de previsão.
+- Roadmap e testes são atualizados quando aplicável.
+
+---
+
+#### Issue 12.7 — #135 — Cobrir cenários probabilísticos com testes
+
+**Descrição:**
+Garantir qualidade da nova capacidade em todos os níveis relevantes.
+
+**Critérios de aceite:**
+
+- Unit tests para parse/normalização/guardrails.
+- Unit tests para MCP tools.
+- Integração para persistência/cache.
+- Context tests para painel e landing.
+- Smoke visual para rotas públicas.
+- `verify:local` e `verify:ci` passam.
+
+---
+
 # Scripts operacionais para o Codex
 
 ## Script 1 — Criar o repositório base
@@ -1632,21 +1864,41 @@ Decisão de versionamento:
   duplicado em componentes.
 - Quando `package.json` mudar, manter `package-lock.json` em consonância.
 
+Decisão da Fase 12:
+
+- O agente passa a acumular a capacidade futura de gerar cenários
+  probabilísticos e projeções interpretativas, sem substituir relatórios,
+  snapshots, eventos ou sentimento já existentes.
+- "Projeção" no PetroAgent significa cenário qualitativo com incerteza,
+  probabilidade e confiança, nunca previsão determinística.
+- O fluxo continua obrigatório: agente -> MCP -> banco `petroagent` -> painel.
+- O painel `/petrobras` poderá exibir cenários somente quando houver registro
+  persistido gerado pelo agente via MCP; na ausência de dado, deve mostrar
+  estado vazio explícito.
+- A landing pode comunicar a capacidade de cenários, mas sem prometer acerto,
+  preço-alvo, recomendação ou previsão de alta/queda.
+- Toda implementação da Fase 12 deve atualizar a matriz painel-banco-MCP e
+  incluir testes adequados: unitários, MCP, integração/cache, contexto e smoke
+  conforme o risco da mudança.
+
 ---
 
 # Prioridade atual
 
-A prioridade atual é validar o fluxo operacional completo antes de ativar
-automação recorrente.
+A prioridade atual é preparar a Fase 12 de cenários probabilísticos sem quebrar
+o contrato MCP-first já estabelecido.
 
 Sequência recomendada:
 
-1. Manter a matriz painel-banco-MCP atualizada a cada novo dado exibido.
-2. Validar o fluxo `agente -> MCP -> banco -> painel` em preview e produção.
-3. Monitorar a primeira execução diária da cron e confirmar logs, fonte,
-   snapshot, evento, relatório e painel atualizado.
-4. Próximas coletas externas devem definir fonte, prompt, payload, validação e
-   tool MCP antes da escrita no banco.
+1. Executar #128 para mapear contrato painel-banco-MCP dos cenários antes de
+   qualquer UI ou migration.
+2. Executar #129 e #130 para definir persistência e prompt seguro.
+3. Executar #131 para criar tools MCP de geração, escrita e consulta.
+4. Executar #132 para ligar o executor ao fluxo MCP-first.
+5. Executar #133 e #134 para painel e landing somente depois do contrato e da
+   persistência estarem definidos.
+6. Manter #135 como guarda-chuva de testes da fase, garantindo `verify:local` e
+   `verify:ci`.
 
 Cada issue deve ter branch própria, PR, preview validado e merge para `main` somente após aprovação.
 
