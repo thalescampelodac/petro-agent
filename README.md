@@ -182,7 +182,8 @@ Requisitos:
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `PETROAGENT_AGENT_RUN_TOKEN` para o gatilho HTTP manual
 - `CRON_SECRET` para o gatilho via Vercel Cron
-- `GEMINI_API_KEY`, `GEMINI_API_VERSION` e `GEMINI_MODEL` para IA real via Gemini free tier
+- `GEMINI_API_KEY`, `GEMINI_API_VERSION`, `GEMINI_MODEL` e
+  `GEMINI_FALLBACK_MODELS` para IA real via Gemini free tier
 - opcionalmente `OPENAI_API_KEY` para IA real
 
 Sem chave de IA, o executor real não persiste fallback como dado operacional do
@@ -196,7 +197,14 @@ Configuração recomendada para Gemini:
 GEMINI_API_KEY=
 GEMINI_API_VERSION=v1beta
 GEMINI_MODEL=gemini-2.5-flash
+GEMINI_FALLBACK_MODELS=gemini-2.0-flash,gemini-2.0-flash-lite
 ```
+
+O executor tenta o modelo principal e, em erro transitório do provedor, como
+alta demanda, indisponibilidade temporária ou limite momentâneo, tenta novamente
+e então usa os modelos alternativos configurados em `GEMINI_FALLBACK_MODELS`.
+Se todos falharem, a execução é registrada como falha e nenhum fallback é salvo
+como dado real no painel.
 
 ### Gatilho protegido
 
@@ -256,6 +264,8 @@ Antes de manter ativo:
 3. Confirmar que a execução real gera log, fonte, snapshot, evento e relatório.
 4. Ter plano de rollback removendo o bloco `crons` do `vercel.json` ou zerando
    `CRON_SECRET`.
+5. Em caso de erro `high demand` do Gemini, confirmar se
+   `GEMINI_FALLBACK_MODELS` está configurado em produção.
 
 ## Status da landing
 

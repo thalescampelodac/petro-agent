@@ -43,9 +43,19 @@ async function runAgent(origin: string) {
     const result = await executeManualPetroAgent({ origin });
     const status = result.status === "disabled" ? 503 : 200;
 
+    console.info("PetroAgent agent run finished", {
+      origin,
+      status: result.status,
+    });
+
     return Response.json(result, { status });
   } catch (error) {
     const message = error instanceof Error ? error.message : "unknown_error";
+
+    console.error("PetroAgent agent run failed", {
+      message,
+      origin,
+    });
 
     return Response.json(
       {
