@@ -58,6 +58,7 @@ Sempre que trabalhar neste projeto:
 
 - Gemini API em tier gratuito como provedor preferencial inicial
 - Usar `GEMINI_API_KEY`, `GEMINI_API_VERSION` e `GEMINI_MODEL` quando IA real estiver habilitada
+- Usar `GEMINI_FALLBACK_MODELS` para modelos alternativos separados por vírgula quando houver erro transitório do provedor
 - Valor padrão de `GEMINI_API_VERSION`: `v1beta`
 - OpenAI fica apenas como alternativa configurável por variável de ambiente
 - Chamadas pontuais e com cache
@@ -1745,6 +1746,9 @@ Decisão da #86:
 - `GEMINI_MODEL` deve apontar para um modelo disponível no free tier, conferido na documentação oficial no momento da configuração.
 - Não ativar billing, pay-as-you-go ou qualquer recurso pago do Google/Gemini sem aprovação explícita.
 - No executor operacional real, falta de chave, erro, limite excedido ou indisponibilidade do provedor deve virar execução desabilitada/falha registrada, nunca dado operacional persistido no painel.
+- Erros transitórios do Gemini, como alta demanda, indisponibilidade temporária
+  ou limite momentâneo, devem tentar retry curto e modelos alternativos do tier
+  gratuito antes de registrar falha definitiva.
 - Referências oficiais: `https://ai.google.dev/gemini-api/docs/pricing` e `https://ai.google.dev/gemini-api/docs/billing`.
 
 Decisão da #92:
