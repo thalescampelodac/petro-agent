@@ -262,6 +262,7 @@ describe("manual PetroAgent executor", () => {
     const restoreGeminiKey = setEnv("GEMINI_API_KEY", "gemini-test-key");
     const restoreGeminiVersion = setEnv("GEMINI_API_VERSION", "v1beta");
     const restoreGeminiModel = setEnv("GEMINI_MODEL", "gemini-2.5-flash");
+    const restoreGeminiFallbackModels = setEnv("GEMINI_FALLBACK_MODELS", undefined);
     const { client, calls } = createSupabaseFixtureClient({
       agent_reports: [
         { data: context.previousReports[0], error: null },
@@ -350,7 +351,7 @@ describe("manual PetroAgent executor", () => {
         origin: "unit-test",
       }),
     ).resolves.toEqual({
-      engine: "gemini-grounded-search",
+      engine: "gemini-grounded-search:gemini-2.5-flash",
       logId: 202,
       reportId: 503,
       sourceCount: 1,
@@ -372,7 +373,7 @@ describe("manual PetroAgent executor", () => {
       ]),
     );
     expect(logFinish).toHaveBeenCalledWith(client, 202, {
-      engine: "gemini-grounded-search",
+      engine: "gemini-grounded-search:gemini-2.5-flash",
       reportId: 503,
       sourceCount: 1,
       status: "saved",
@@ -381,6 +382,163 @@ describe("manual PetroAgent executor", () => {
     restoreGeminiKey();
     restoreGeminiVersion();
     restoreGeminiModel();
+    restoreGeminiFallbackModels();
+  });
+
+  it("tenta modelo alternativo quando Gemini informa alta demanda", async () => {
+    const restoreGeminiKey = setEnv("GEMINI_API_KEY", "gemini-test-key");
+    const restoreGeminiVersion = setEnv("GEMINI_API_VERSION", "v1beta");
+    const restoreGeminiModel = setEnv("GEMINI_MODEL", "gemini-2.5-flash");
+    const restoreGeminiFallbackModels = setEnv("GEMINI_FALLBACK_MODELS", "gemini-2.0-flash");
+    const { client } = createSupabaseFixtureClient({
+      agent_reports: [
+        { data: context.previousReports[0], error: null },
+        { data: { id: 504 }, error: null },
+      ],
+      market_events: [
+        { data: context.events, error: null },
+        { data: { id: 302 }, error: null },
+      ],
+      market_snapshots: [
+        { data: context.snapshot, error: null },
+        { data: null, error: null },
+        { data: { id: 403 }, error: null },
+      ],
+      sources: [
+        { data: context.sources, error: null },
+        { data: null, error: null },
+        { data: { id: 205 }, error: null },
+      ],
+    });
+    const logStart = vi.fn(async () => ({ id: 203 }));
+    const logFinish = vi.fn(async () => undefined);
+    const successBody = {
+      candidates: [
+        {
+          content: {
+            parts: [
+              {
+                text: JSON.stringify({
+                  event: {
+                    event_date: "2026-05-27T17:00:00-03:00",
+                    event_type: "Notícia",
+                    relevance_score: 80,
+                    source: {
+                      name: "InfoMoney",
+                      url: "https://www.infomoney.com.br/petrobras-fallback",
+                    },
+                    summary: "Petrobras teve evento acompanhado pelo agente.",
+                    title: "Radar Petrobras",
+                  },
+                  report: {
+                    attention_points: ["Acompanhar volume e notícias"],
+                    sentiment: "Neutro",
+                    sentiment_basis: "Contexto sem viés direcional forte.",
+                    sentiment_confidence: "media",
+                    sentiment_score: 52,
+                    summary: "PETR4 segue com leitura neutra no radar.",
+                    title: "Radar PETR4",
+                  },
+                  snapshot: {
+                    price: 42.46,
+                    snapshot_time: "2026-05-28T19:08:00-03:00",
+                    source: {
+                      name: "Investidor10",
+                      url: "https://investidor10.com.br/acoes/petr4/",
+                    },
+                    ticker: "PETR4",
+                    variation: -0.84,
+                    volume: 1000000,
+                  },
+                }),
+              },
+            ],
+          },
+        },
+      ],
+    };
+
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(
+          new Response(
+            JSON.stringify({
+              error: {
+                message:
+                  "This model is currently experiencing high demand. Please try again later.",
+              },
+            }),
+            {
+              headers: { "Content-Type": "application/json" },
+              status: 503,
+            },
+          ),
+        )
+        .mockResolvedValueOnce(
+          new Response(
+            JSON.stringify({
+              error: {
+                message:
+                  "This model is currently experiencing high demand. Please try again later.",
+              },
+            }),
+            {
+              headers: { "Content-Type": "application/json" },
+              status: 503,
+            },
+          ),
+        )
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify(successBody), {
+            headers: { "Content-Type": "application/json" },
+            status: 200,
+          }),
+        ),
+    );
+
+    await expect(
+      executeManualPetroAgent({
+        client: client as never,
+        logFinish,
+        logStart,
+        origin: "unit-test",
+      }),
+    ).resolves.toEqual({
+      engine: "gemini-grounded-search:gemini-2.0-flash",
+      logId: 203,
+      reportId: 504,
+      sourceCount: 1,
+      status: "saved",
+      summary: "PETR4 segue com leitura neutra no radar.",
+    });
+    expect(fetch).toHaveBeenNthCalledWith(
+      1,
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+      expect.any(Object),
+    );
+    expect(fetch).toHaveBeenNthCalledWith(
+      2,
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+      expect.any(Object),
+    );
+    expect(fetch).toHaveBeenNthCalledWith(
+      3,
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+      expect.any(Object),
+    );
+    expect(logFinish).toHaveBeenCalledWith(client, 203, {
+      engine: "gemini-grounded-search:gemini-2.0-flash",
+      reportId: 504,
+      sourceCount: 1,
+      status: "saved",
+    });
+
+    restoreGeminiKey();
+    restoreGeminiVersion();
+    restoreGeminiModel();
+    restoreGeminiFallbackModels();
   });
 
   it("registra falha quando a geração do relatório quebra", async () => {

@@ -41,6 +41,12 @@ Fluxo atual:
 O executor é o orquestrador. Ele não deve voltar a consultar ou persistir dados
 operacionais por um caminho paralelo ao contrato MCP.
 
+Quando o Gemini retornar erro transitório, como alta demanda ou indisponibilidade
+temporária, o executor pode tentar novamente e usar modelos alternativos
+configurados em `GEMINI_FALLBACK_MODELS`. Se todos os modelos falharem, a
+execução deve ficar como falha operacional e não pode persistir fallback como
+dado real do painel.
+
 ## Gatilho protegido
 
 O endpoint `/api/agent/run` permite disparo operacional controlado:

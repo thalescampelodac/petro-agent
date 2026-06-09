@@ -6,6 +6,7 @@ import type { ManualAgentContext } from "./agent-executor";
 
 const DEFAULT_GEMINI_API_VERSION = "v1beta";
 const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash";
+const DEFAULT_GEMINI_FALLBACK_MODELS = ["gemini-2.0-flash", "gemini-2.0-flash-lite"];
 
 type GeminiGenerateContentResponse = {
   candidates?: Array<{
@@ -60,7 +61,7 @@ type GroundedAgentPackage = {
 };
 
 export type GeminiGroundedExecutionResult = {
-  engine: "gemini-grounded-search";
+  engine: string;
   eventId: number;
   reportId: number;
   snapshotId: number;
@@ -76,10 +77,17 @@ function getGeminiConfig() {
     return null;
   }
 
+  const primaryModel = process.env.GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL;
+  const fallbackModels = (
+    process.env.GEMINI_FALLBACK_MODELS?.split(",") ?? DEFAULT_GEMINI_FALLBACK_MODELS
+  )
+    .map((model) => model.trim())
+    .filter(Boolean);
+
   return {
     apiKey,
     apiVersion: process.env.GEMINI_API_VERSION?.trim() || DEFAULT_GEMINI_API_VERSION,
-    model: process.env.GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL,
+    models: [...new Set([primaryModel, ...fallbackModels])],
   };
 }
 
@@ -91,7 +99,9 @@ export async function runGeminiGroundedPetroAgent(
   mcpAdapter: PetroAgentMcpAdapter,
   context: ManualAgentContext,
 ): Promise<GeminiGroundedExecutionResult> {
-  const parsed = await callGeminiGroundedSearch(buildGroundedAgentPrompt(context));
+  const generated = await callGeminiGroundedSearch(buildGroundedAgentPrompt(context));
+  const parsed = generated.payload;
+  const engine = `gemini-grounded-search:${generated.model}`;
   const source = chooseSource(parsed);
 
   if (!source.url) {
@@ -127,7 +137,7 @@ export async function runGeminiGroundedPetroAgent(
   });
   const reportPayload: AgentReportPayload = {
     attention_points: parsed.report.attention_points,
-    model_used: "gemini-grounded-search",
+    model_used: engine,
     sentiment: parsed.report.sentiment,
     sentiment_basis: parsed.report.sentiment_basis,
     sentiment_confidence: parsed.report.sentiment_confidence,
@@ -139,7 +149,7 @@ export async function runGeminiGroundedPetroAgent(
   const report = await mcpAdapter.saveAgentReport(reportPayload);
 
   return {
-    engine: "gemini-grounded-search",
+    engine,
     eventId: event.structuredContent.id,
     reportId: report.structuredContent.id,
     snapshotId: snapshot.structuredContent.id,
@@ -221,11 +231,45 @@ async function callGeminiGroundedSearch(prompt: string) {
     throw new Error("missing_gemini_config");
   }
 
+  const errors: string[] = [];
+
+  for (const model of config.models) {
+    for (let attempt = 1; attempt <= 2; attempt += 1) {
+      try {
+        return {
+          model,
+          payload: await requestGeminiGroundedPackage({
+            apiKey: config.apiKey,
+            apiVersion: config.apiVersion,
+            model,
+            prompt,
+          }),
+        };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "unknown_error";
+        errors.push(`${model}: ${message}`);
+
+        if (!isTransientGeminiError(message)) {
+          break;
+        }
+      }
+    }
+  }
+
+  throw new Error(`gemini_all_models_failed: ${errors.join(" | ")}`);
+}
+
+async function requestGeminiGroundedPackage(input: {
+  apiKey: string;
+  apiVersion: string;
+  model: string;
+  prompt: string;
+}) {
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/${config.apiVersion}/models/${config.model}:generateContent`,
+    `https://generativelanguage.googleapis.com/${input.apiVersion}/models/${input.model}:generateContent`,
     {
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
+        contents: [{ parts: [{ text: input.prompt }] }],
         generationConfig: {
           temperature: 0.1,
         },
@@ -233,7 +277,7 @@ async function callGeminiGroundedSearch(prompt: string) {
       }),
       headers: {
         "Content-Type": "application/json",
-        "x-goog-api-key": config.apiKey,
+        "x-goog-api-key": input.apiKey,
       },
       method: "POST",
     },
@@ -254,6 +298,23 @@ async function callGeminiGroundedSearch(prompt: string) {
   }
 
   return normalizeGroundedPackage(parseJsonResponse(text));
+}
+
+function isTransientGeminiError(message: string) {
+  const normalized = message.toLowerCase();
+
+  return (
+    normalized.includes("high demand") ||
+    normalized.includes("try again later") ||
+    normalized.includes("temporarily unavailable") ||
+    normalized.includes("overloaded") ||
+    normalized.includes("rate limit") ||
+    normalized.includes("429") ||
+    normalized.includes("500") ||
+    normalized.includes("502") ||
+    normalized.includes("503") ||
+    normalized.includes("504")
+  );
 }
 
 function parseJsonResponse(text: string) {
