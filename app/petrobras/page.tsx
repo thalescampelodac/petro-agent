@@ -1,8 +1,8 @@
 import {
   ArrowLeft,
   BarChart3,
-  Radar,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import type { ComponentType } from "react";
 
@@ -73,8 +73,15 @@ export default async function PetrobrasPage() {
           <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-end">
             <div className="space-y-5">
               <div className="flex items-center gap-3">
-                <div className="flex size-11 items-center justify-center rounded-lg border border-emerald-300/30 bg-emerald-300/15">
-                  <Radar className="size-5 text-emerald-200" />
+                <div className="flex size-11 items-center justify-center overflow-hidden rounded-lg border border-emerald-300/25 bg-emerald-300/10 shadow-lg shadow-emerald-950/20">
+                  <Image
+                    alt=""
+                    aria-hidden="true"
+                    className="size-10 object-cover"
+                    height={80}
+                    src="/images/logo-mark.png"
+                    width={80}
+                  />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-emerald-100">
