@@ -459,7 +459,7 @@ function PixSupport() {
               considere apoiar o desenvolvimento com qualquer valor via Pix.
             </p>
           </div>
-          <div className="space-y-1">
+          {/* <div className="space-y-1">
             <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
               Chave Pix
             </p>
@@ -469,7 +469,7 @@ function PixSupport() {
             <p className="text-xs leading-5 text-slate-500">
               Recebedor: {staticPix.name} · {staticPix.city}
             </p>
-          </div>
+          </div> */}
           <PixCopyButton pixKey={staticPix.key} />
         </div>
       </div>
