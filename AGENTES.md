@@ -664,13 +664,21 @@ Criar seção explicando que o projeto é experimental, gratuito e pode ser apoi
 #### Issue 7.2 — Adicionar QRCode PIX
 
 **Descrição:**
-Adicionar área para QRCode de doação PIX.
+Adicionar área para QRCode de doação PIX. A decisão atual para a issue #141 é
+usar PIX estático associado ao Asaas, sem backend e sem criação de cobranças
+dinâmicas.
 
 **Critérios de aceite:**
 
 - Exibe imagem do QRCode quando disponível.
 - Exibe chave PIX textual opcional.
 - Permite fallback se QRCode ainda não estiver configurado.
+- Não chama API do Asaas no cliente ou no servidor.
+- Não cria cobranças, links de pagamento dinâmicos, webhooks ou registros de
+  pagamento no banco nesta etapa.
+- Valor da contribuição é livre e opcional.
+- Botão de copiar chave PIX deve ter feedback visual acessível.
+- Texto deve manter a regra de não prometer benefício financeiro.
 
 ---
 
@@ -1884,6 +1892,27 @@ Decisão da Fase 12:
 - Toda implementação da Fase 12 deve atualizar a matriz painel-banco-MCP e
   incluir testes adequados: unitários, MCP, integração/cache, contexto e smoke
   conforme o risco da mudança.
+
+Decisão da #141 — Apoio PIX estático:
+
+- A área de apoio da landing deve usar PIX estático como primeira implementação
+  funcional.
+- A issue #141 é a fonte oficial da especificação de payload PIX, recebedor,
+  cidade, transaction id e critérios visuais.
+- A implementação não deve usar backend, API do Asaas, cobrança dinâmica,
+  webhook, link de pagamento dinâmico ou persistência de pagamentos.
+- A chave PIX, nome do recebedor e cidade são dados públicos para pagamento e
+  só devem aparecer onde forem necessários para o QR Code, copia e cola ou
+  documentação da própria feature.
+- `ASAAS_API_KEY` e demais segredos de servidor não devem ser usados nem
+  expostos nessa entrega.
+- O QR Code pode ser gerado por script local versionado quando isso ajudar a
+  rastreabilidade, mas a execução em produção deve depender apenas de asset
+  estático em `public/`.
+- A UI deve manter identidade visual atual, responsividade, acessibilidade e
+  feedback claro para copiar a chave PIX.
+- O texto da seção deve reforçar apoio opcional, projeto independente e ausência
+  de promessa de benefício financeiro.
 
 ---
 
