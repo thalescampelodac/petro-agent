@@ -64,10 +64,25 @@ Stack inicial:
 
 ### MVP 2 - Infraestrutura MCP do agente
 
+Status: concluído.
+
 1. Fase 8: servidor MCP e tools estruturadas de leitura.
 2. Fase 9: ferramentas inteligentes como busca textual, comparacao temporal e
    sumarizacao contextual com dados persistidos.
 3. Fase 10: arquitetura multiagente para outras empresas ou ativos.
+4. Fase 11: agente operacional MCP-first com persistência, cron diário e painel
+   Petrobras alimentado por dados do banco.
+
+### MVP 3 - Cenários probabilísticos
+
+Status: próxima etapa.
+
+1. Fase 12: cenários probabilísticos e projeções interpretativas para PETR4.
+2. O agente deve gerar leituras qualitativas de tendência, riscos, pontos de
+   atenção e confiança, sem previsão determinística e sem recomendação
+   financeira.
+3. O contrato MCP continua sendo obrigatório: dados exibidos no painel vêm do
+   banco, e dados do banco vêm do agente via tools/camada MCP oficial.
 
 ## MCP Server
 

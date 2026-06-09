@@ -30,8 +30,8 @@ describe("Home", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /como funciona/i })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /roadmap do projeto/i })).toBeInTheDocument();
-    expect(screen.getByText("Concluído")).toBeInTheDocument();
-    expect(screen.getByText("Em execução")).toBeInTheDocument();
+    expect(screen.getAllByText("Concluído").length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText("Próxima etapa")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /um projeto aberto/i })).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /ver painel petrobras/i }),

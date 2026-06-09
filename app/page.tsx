@@ -30,7 +30,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { APP_VERSION_BADGE } from "@/lib/app-version";
+import { APP_VERSION, APP_VERSION_BADGE } from "@/lib/app-version";
 import { getPetrobrasDashboardData } from "@/lib/petrobras";
 import { cn } from "@/lib/utils";
 
@@ -106,10 +106,17 @@ const roadmap = [
   },
   {
     title: "MVP 2",
-    status: "Em execução",
+    status: "Concluído",
     description:
       "Camada operacional MCP-first com agente, consultas persistidas, cron diário e painel Petrobras alimentado por dados do banco.",
     items: ["Tools MCP", "Agente Gemini", "Painel com dados persistidos"],
+  },
+  {
+    title: "MVP 3",
+    status: "Próxima etapa",
+    description:
+      "Cenários probabilísticos e projeções interpretativas, sem promessa de previsão ou recomendação financeira.",
+    items: ["Cenários qualitativos", "Riscos e pontos de atenção", "Confiança da análise"],
   },
 ];
 
@@ -213,9 +220,9 @@ export default async function Home() {
 
             <div className="grid max-w-2xl gap-3 sm:grid-cols-3">
               {[
-                ["MVP 2", "fase atual"],
+                ["MVP 3", "próxima evolução"],
                 ["0", "recomendações financeiras"],
-                [APP_VERSION_BADGE.replace("MVP 2 • ", ""), "versão do app"],
+                [`v${APP_VERSION}`, "versão do app"],
               ].map(([value, label]) => (
                 <div
                   className="rounded-lg border border-white/10 bg-white/[0.04] p-3"

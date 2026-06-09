@@ -72,7 +72,7 @@ Sempre que trabalhar neste projeto:
 
 ## 4. Estratégia de produto
 
-O projeto será dividido em dois grandes blocos:
+O projeto será dividido em três grandes blocos:
 
 ## MVP 1 — Portal público inteligente
 
@@ -81,6 +81,10 @@ Objetivo: validar interesse, apresentar o PetroAgent, criar presença pública, 
 ## MVP 2 — Infraestrutura MCP do agente
 
 Objetivo: permitir que agentes de IA acessem ferramentas estruturadas do PetroAgent, consultem memória, eventos, relatórios e fontes processadas.
+
+## MVP 3 — Cenários probabilísticos
+
+Objetivo: adicionar projeções interpretativas e cenários qualitativos, sem promessa de previsão, preço-alvo ou recomendação financeira.
 
 ---
 
@@ -1246,6 +1250,10 @@ persiste resultado e o painel reflete o dado salvo.
 - Relatório e log são gravados.
 - Painel `/petrobras` reflete relatório/snapshot/eventos salvos.
 - Runbook documenta como testar localmente e em preview.
+
+---
+
+# MVP 3 — Cenários probabilísticos
 
 ---
 
