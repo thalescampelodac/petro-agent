@@ -42,6 +42,7 @@ usados para substituir dados operacionais ausentes.
 | Sinais monitorados | Dividendos, fatos relevantes, notícias, sentimento | Derivado de `market_events` e `agent_reports`; estado vazio quando ausente | Alinhado ao banco |
 | Pulso do mercado | Barras do gráfico | Derivado de `market_events.relevance_score`; estado vazio quando ausente | Alinhado ao banco |
 | Eventos recentes | Eventos, datas, tipo, resumo, relevância | `market_events` quando existe; estado vazio quando ausente | Alinhado ao banco |
+| Cenários probabilísticos | Curto, médio e longo prazo; tendência; probabilidade; confiança; riscos; pontos de atenção | A definir na Fase 12; estado vazio obrigatório até existir persistência | Bloqueado por #128 e #129 |
 
 ## Matriz alvo
 
@@ -66,6 +67,14 @@ usados para substituir dados operacionais ausentes.
 | Relevância do evento | `market_events.relevance_score` | `register_market_event` | `list_market_events` | Classificação do agente | Unit MCP |
 | Sinais monitorados | Derivado de `market_events` e `agent_reports` | `register_market_event` e `save_agent_report` | `list_market_events` e `get_latest_report` | Análise do agente por categoria | Contexto painel |
 | Pulso do painel | Derivado de `market_events.relevance_score` | `register_market_event` | `list_market_events` | Série gerada pelo agente a partir de eventos | Unit + smoke visual |
+| Cenários de curto prazo | Nova tabela planejada `scenario_analyses.short_term` ou estrutura equivalente | `generate_probability_scenarios` + `save_scenario_analysis` | `get_latest_scenario_analysis` | Snapshot, eventos, relatórios, memória e contexto externo aprovado | Unit MCP + contexto painel |
+| Cenários de médio prazo | Nova tabela planejada `scenario_analyses.medium_term` ou estrutura equivalente | `generate_probability_scenarios` + `save_scenario_analysis` | `get_latest_scenario_analysis` | Snapshot, eventos, relatórios, memória e contexto externo aprovado | Unit MCP + contexto painel |
+| Cenários de longo prazo | Nova tabela planejada `scenario_analyses.long_term` ou estrutura equivalente | `generate_probability_scenarios` + `save_scenario_analysis` | `get_latest_scenario_analysis` | Snapshot, eventos, relatórios, memória e contexto externo aprovado | Unit MCP + contexto painel |
+| Tendência qualitativa | Nova tabela planejada `scenario_analyses.trend` ou estrutura equivalente | `save_scenario_analysis` | `get_latest_scenario_analysis` | Análise do agente; valores controlados como negativa, neutra ou positiva | Unit schema + contexto painel |
+| Probabilidade qualitativa | Nova tabela planejada `scenario_analyses.qualitative_probability` ou estrutura equivalente | `save_scenario_analysis` | `get_latest_scenario_analysis` | Análise do agente; valores baixa, média ou alta | Unit schema + contexto painel |
+| Confiança do cenário | Nova tabela planejada `scenario_analyses.confidence` ou estrutura equivalente | `save_scenario_analysis` | `get_latest_scenario_analysis` | Análise do agente; valores baixa, média ou alta | Unit schema + contexto painel |
+| Riscos e pontos de atenção | Nova tabela planejada `scenario_analyses.risks`, `attention_points` ou estrutura equivalente | `save_scenario_analysis` | `get_latest_scenario_analysis` | Análise do agente baseada em fontes/eventos persistidos | Unit MCP + contexto painel |
+| Fatores considerados | Nova tabela planejada `scenario_analyses.considered_factors` ou estrutura equivalente | `save_scenario_analysis` | `get_latest_scenario_analysis` | Preço, volume, volatilidade, notícias, dividendos, petróleo, câmbio e política quando disponíveis | Unit MCP + contexto painel |
 
 ## Dados que o agente consegue buscar sozinho
 
@@ -81,11 +90,16 @@ a coleta ainda não existe, o painel mostra estado vazio explícito.
 | Dividendos/proventos | Parcial | Definir fonte pública inicial |
 | Sentimento/escala/confiança | Sim, a partir dos dados persistidos | Persistido em `agent_reports` via MCP |
 | Relatórios do agente | Sim | Persistência via `generate_informative_analysis` e `save_agent_report` |
+| Cenários probabilísticos | Sim, quando houver contexto mínimo persistido | Fase 12 deve definir prompt, tabela, tools MCP, guardrails e testes antes da UI |
 
 ## Bloqueadores criados pela matriz
 
 1. Tratar o agente como autônomo para dados externos sem validação do JSON
    retornado pelo prompt (#104).
+2. Exibir cenários probabilísticos no painel antes de existir contrato MCP,
+   persistência e teste de ausência/presença (#128, #129, #131, #133).
+3. Usar linguagem determinística de previsão ou recomendação financeira nos
+   cenários (#130, #135).
 
 ## Sequência recomendada após esta matriz
 
@@ -95,3 +109,5 @@ a coleta ainda não existe, o painel mostra estado vazio explícito.
    produção.
 3. Para novas coletas externas, abrir issue específica com fonte, prompt,
    payload, validação, tool MCP de escrita e teste de regressão.
+4. Para Fase 12, seguir a ordem #128 -> #129/#130 -> #131 -> #132 -> #133/#134,
+   mantendo #135 como guarda-chuva de testes.
