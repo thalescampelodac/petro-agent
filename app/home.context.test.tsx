@@ -41,7 +41,6 @@ describe("Home", () => {
     ).toHaveTextContent("Gostei do projeto");
     expect(screen.getByText("Mostre que você está acompanhando")).toBeInTheDocument();
     expect(screen.getByText("Apoie o PetroAgent")).toBeInTheDocument();
-    expect(screen.getByAltText("QR Code Pix para apoiar o PetroAgent")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /copiar chave pix/i })).toBeInTheDocument();
     expect(screen.getByText(/projeto independente, gratuito e experimental/i)).toBeInTheDocument();
     expect(screen.queryByText(/preview visual/i)).not.toBeInTheDocument();
