@@ -459,17 +459,6 @@ function PixSupport() {
               considere apoiar o desenvolvimento com qualquer valor via Pix.
             </p>
           </div>
-          {/* <div className="space-y-1">
-            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-              Chave Pix
-            </p>
-            <p className="break-all rounded-md border border-white/10 bg-black/20 px-3 py-2 font-mono text-xs text-emerald-100">
-              {staticPix.key}
-            </p>
-            <p className="text-xs leading-5 text-slate-500">
-              Recebedor: {staticPix.name} · {staticPix.city}
-            </p>
-          </div> */}
           <PixCopyButton pixKey={staticPix.key} />
         </div>
       </div>
