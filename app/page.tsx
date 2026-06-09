@@ -407,6 +407,7 @@ export default async function Home() {
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-3 sm:grid-cols-2">
+              <PixSupport />
               <CreatorLink
                 href="https://github.com/thalescampelodac"
                 icon={Globe}
@@ -419,7 +420,6 @@ export default async function Home() {
               />
               <CreatorLink href="https://thalescampelo.vercel.app/" icon={Globe} label="Landing profissional" />
               <CreatorLink href="https://wa.me/5532991594895?text=Olá%20vim%20pelo%20PetroAgent" icon={MessageCircle} label="WhatsApp"/>
-              <PixSupport />
             </CardContent>
           </Card>
         </div>
@@ -439,17 +439,7 @@ function PixSupport() {
   return (
     <div className="rounded-lg border border-dashed border-emerald-300/25 bg-emerald-300/5 p-4 sm:col-span-2">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <div className="flex size-28 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-white p-2">
-          <Image
-            alt="QR Code Pix para apoiar o PetroAgent"
-            className="size-full object-contain"
-            height={600}
-            loading="lazy"
-            src={staticPix.qrCodeImage}
-            width={600}
-          />
-        </div>
-
+        
         <div className="min-w-0 space-y-3">
           <div>
             <p className="text-sm font-medium text-white">Apoie o PetroAgent</p>
