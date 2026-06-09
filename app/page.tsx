@@ -8,7 +8,6 @@ import {
   HeartHandshake,
   Link,
   Newspaper,
-  QrCode,
   Radar,
   RadioTower,
   ScanSearch,
@@ -21,6 +20,7 @@ import Image from "next/image";
 import type { ComponentType } from "react";
 
 import { LikeButton } from "@/components/landing/like-button";
+import { PixCopyButton } from "@/components/landing/pix-copy-button";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -113,9 +113,12 @@ const roadmap = [
   },
 ];
 
-const asaasPixQrCodeImage = process.env.NEXT_PUBLIC_ASAAS_PIX_QRCODE_IMAGE?.trim();
-const asaasPixCopyPaste = process.env.NEXT_PUBLIC_ASAAS_PIX_COPY_PASTE?.trim();
-const asaasPaymentUrl = process.env.NEXT_PUBLIC_ASAAS_PAYMENT_URL?.trim();
+const staticPix = {
+  city: "Juiz de Fora",
+  key: "2d8597cb-c2ba-41e5-9eb4-7221e7e1c4e8",
+  name: "Thales Campelo da Conceição",
+  qrCodeImage: "/pix-qrcode.png",
+};
 
 export const revalidate = 60;
 
@@ -404,6 +407,7 @@ export default async function Home() {
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-3 sm:grid-cols-2">
+              <PixSupport />
               <CreatorLink
                 href="https://github.com/thalescampelodac"
                 icon={Globe}
@@ -416,7 +420,6 @@ export default async function Home() {
               />
               <CreatorLink href="https://thalescampelo.vercel.app/" icon={Globe} label="Landing profissional" />
               <CreatorLink href="https://wa.me/5532991594895?text=Olá%20vim%20pelo%20PetroAgent" icon={MessageCircle} label="WhatsApp"/>
-              <PixSupport />
             </CardContent>
           </Card>
         </div>
@@ -433,57 +436,20 @@ export default async function Home() {
 }
 
 function PixSupport() {
-  const hasAsaasPixCharge = Boolean(
-    asaasPixQrCodeImage || asaasPixCopyPaste || asaasPaymentUrl,
-  );
-
   return (
     <div className="rounded-lg border border-dashed border-emerald-300/25 bg-emerald-300/5 p-4 sm:col-span-2">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <div className="flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-black/20">
-          {asaasPixQrCodeImage ? (
-            <img
-              alt="QRCode da cobrança PIX Asaas para apoiar o PetroAgent"
-              className="size-full object-cover"
-              loading="lazy"
-              src={asaasPixQrCodeImage}
-            />
-          ) : (
-            <QrCode className="size-10 text-emerald-200/70" aria-hidden="true" />
-          )}
-        </div>
-
-        <div className="min-w-0">
-          <p className="text-sm font-medium text-white">Apoio opcional via Asaas PIX</p>
-          {hasAsaasPixCharge ? (
-            <div className="mt-1 space-y-2">
-              <p className="text-sm leading-6 text-slate-400">
-                Quem quiser acompanhar e apoiar a evolução do PetroAgent pode
-                usar a cobrança PIX gerada pelo Asaas.
-              </p>
-              {asaasPixCopyPaste ? (
-                <p className="break-all rounded-md border border-white/10 bg-black/20 px-3 py-2 font-mono text-xs text-emerald-100">
-                  {asaasPixCopyPaste}
-                </p>
-              ) : null}
-              {asaasPaymentUrl ? (
-                <a
-                  className="inline-flex text-sm font-medium text-emerald-100 transition hover:text-white"
-                  href={asaasPaymentUrl}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  Abrir cobrança Asaas
-                </a>
-              ) : null}
-            </div>
-          ) : (
+        
+        <div className="min-w-0 space-y-3">
+          <div>
+            <p className="text-sm font-medium text-white">Apoie o PetroAgent</p>
             <p className="mt-1 text-sm leading-6 text-slate-400">
-              Espaço reservado para apoio opcional, sem paywall e sem promessa
-              de benefício financeiro. A cobrança PIX dinâmica do Asaas será
-              exibida quando estiver configurada.
+              PetroAgent é um projeto independente, gratuito e experimental. Se
+              os sinais, indicadores e relatórios forem úteis para você,
+              considere apoiar o desenvolvimento com qualquer valor via Pix.
             </p>
-          )}
+          </div>
+          <PixCopyButton pixKey={staticPix.key} />
         </div>
       </div>
     </div>

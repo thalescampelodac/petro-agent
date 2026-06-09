@@ -40,10 +40,9 @@ describe("Home", () => {
       screen.getByRole("button", { name: /gostei do projeto/i }),
     ).toHaveTextContent("Gostei do projeto");
     expect(screen.getByText("Mostre que você está acompanhando")).toBeInTheDocument();
-    expect(screen.getByText("Apoio opcional via Asaas PIX")).toBeInTheDocument();
-    expect(
-      screen.getByText(/a cobrança PIX dinâmica do Asaas será exibida/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Apoie o PetroAgent")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /copiar chave pix/i })).toBeInTheDocument();
+    expect(screen.getByText(/projeto independente, gratuito e experimental/i)).toBeInTheDocument();
     expect(screen.queryByText(/preview visual/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/mock/i)).not.toBeInTheDocument();
     expect(screen.getAllByText(/não constitui recomendação/i).length).toBeGreaterThan(0);

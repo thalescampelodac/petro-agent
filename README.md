@@ -269,41 +269,38 @@ Antes de manter ativo:
 
 ## Status da landing
 
-A home atual e uma landing page estatica e responsiva para validar UX,
-branding e percepcao de produto. Ela usa dados mockados/simulados e ainda nao
-executa backend complexo, coleta real ou IA em producao.
+A home atual e uma landing page responsiva para apresentar o PetroAgent, exibir
+um resumo público do painel e permitir apoio opcional ao projeto.
 
 As variaveis esperadas para Supabase sao:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-- `NEXT_PUBLIC_ASAAS_PIX_QRCODE_IMAGE`
-- `NEXT_PUBLIC_ASAAS_PIX_COPY_PASTE`
-- `NEXT_PUBLIC_ASAAS_PAYMENT_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `PETROAGENT_COLLECTOR_TOKEN`
 - `PETROAGENT_AGENT_RUN_TOKEN`
 - `CRON_SECRET`
-- `ASAAS_API_KEY`
-- `ASAAS_API_BASE_URL`
-- `ASAAS_PIX_CUSTOMER_ID`
-- `ASAAS_PIX_SUPPORT_VALUE`
-
-`NEXT_PUBLIC_ASAAS_PIX_QRCODE_IMAGE`, `NEXT_PUBLIC_ASAAS_PIX_COPY_PASTE` e
-`NEXT_PUBLIC_ASAAS_PAYMENT_URL` são opcionais e alimentam a área pública de
-apoio via cobrança PIX do Asaas na landing. Se não forem preenchidas, a
-interface exibe um fallback sem QRCode.
-
-`ASAAS_API_KEY`, `ASAAS_API_BASE_URL`, `ASAAS_PIX_CUSTOMER_ID` e
-`ASAAS_PIX_SUPPORT_VALUE` deixam o projeto preparado para uma próxima etapa de
-integração server-side com cobranças PIX dinâmicas do Asaas. A criação de
-cobrança deve usar `billingType: PIX` e a recuperação do QRCode deve ficar em
-endpoint protegido no servidor, nunca no client.
 
 `SUPABASE_SERVICE_ROLE_KEY`, `PETROAGENT_COLLECTOR_TOKEN`,
-`PETROAGENT_AGENT_RUN_TOKEN`, `CRON_SECRET`, `ASAAS_API_KEY`, `GEMINI_API_KEY` e
-`OPENAI_API_KEY` são variáveis somente de servidor. Não exponha chaves privadas
-com prefixo `NEXT_PUBLIC_`.
+`PETROAGENT_AGENT_RUN_TOKEN`, `CRON_SECRET`, `GEMINI_API_KEY` e `OPENAI_API_KEY`
+são variáveis somente de servidor. Não exponha chaves privadas com prefixo
+`NEXT_PUBLIC_`.
+
+### Apoio PIX estático
+
+A área de apoio da landing usa PIX estático, sem backend, sem API do Asaas, sem
+cobrança dinâmica e sem persistência de pagamentos. O QR Code versionado fica em
+`public/pix-qrcode.png`.
+
+Para regenerar o asset:
+
+```bash
+npm run pix:generate
+```
+
+O script imprime o payload copia e cola no terminal e atualiza a imagem do QR
+Code. Os dados públicos de pagamento seguem a especificação oficial da issue
+#141.
 
 ## Deploy na Vercel
 
