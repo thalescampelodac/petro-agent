@@ -34,6 +34,8 @@ export const metadata = {
     "Painel operacional do PetroAgent para acompanhamento informativo de Petrobras/PETR4.",
 };
 
+export const revalidate = 60;
+
 export default async function PetrobrasPage() {
   const {
     basicData,
