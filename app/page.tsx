@@ -117,6 +117,8 @@ const asaasPixQrCodeImage = process.env.NEXT_PUBLIC_ASAAS_PIX_QRCODE_IMAGE?.trim
 const asaasPixCopyPaste = process.env.NEXT_PUBLIC_ASAAS_PIX_COPY_PASTE?.trim();
 const asaasPaymentUrl = process.env.NEXT_PUBLIC_ASAAS_PAYMENT_URL?.trim();
 
+export const revalidate = 60;
+
 export default async function Home() {
   const { basicData, latestAgentUpdate, sentiment } =
     await getPetrobrasDashboardData();
